@@ -20,17 +20,21 @@ export async function POST(req: Request) {
     }
 
     // ==========================================
-    // 🎯 核心修复 1：精准捕获用户年份意图
+    // 🎯 核心修复 1：精准捕获年份意图 & 锁定时间线
     // ==========================================
-    const currentYear = new Date().getFullYear();
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    
     // 尝试从用户的 query 中提取四位数的年份 (例如 "2024", "2025", "2026")
     const queryYearMatch = query.match(/\b(202[4-9])\b/); 
     
-    // 如果用户没写年份，才使用随机掷骰子 (2024, 2025, 2026)
-    const fallbackRandomYear = Math.floor(Math.random() * 3) + 2024; 
-    
-    // 最终决定的年份：用户写的 > 随机生成的
-    const targetYear = queryYearMatch ? queryYearMatch[1] : fallbackRandomYear.toString();
+    // 【优化】：如果用户没写年份，强制使用当前真实年份，彻底杜绝 2024/2025 的时空穿越！
+    const targetYear = queryYearMatch ? queryYearMatch[1] : currentYear.toString();
+
+    // 【优化】：动态计算上个月的月份和年份，用于注入极其逼真的 EEAT 测试数据
+    const lastMonthDate = new Date();
+    lastMonthDate.setMonth(now.getMonth() - 1);
+    const testMonthContext = lastMonthDate.toLocaleString('en-US', { month: 'long', year: 'numeric' });
 
     // ==========================================
     // 🚗 核心修复 2：动态品牌雷达 (实时同步数据库)
@@ -116,15 +120,20 @@ ${realCodesContext}
 年份：${targetYear}
 强制语义注入 (LSI Keywords)：你必须在文章中自然地使用以下 3 个专业术语：[${selectedLSI}]。
 
+🚨 【写作细节强化指令（必须包含以下3点）】：
+1. 官网操作指南：在推荐代码时，用一两句话顺带提一下该租车公司官网的具体操作细节（例如：Hertz 的 "Pay Later" 选项、Enterprise 的下拉菜单、Avis 的 AWD 输入框位置等），增强实操感。
+2. 柜台查验严厉度：以老司机的口吻，评价一下该地点（如 [场景中的城市或机场]）柜台检查工牌/ID 的严格程度。
+3. 积分与会员权益：明确告诉用户，使用这些推荐代码依然可以正常累积租车公司的忠诚度积分（如 Hertz Gold Plus Rewards, Avis Preferred 等）或享受免排队通道。
+
 🚨 【动态意图嗅探指令】：
 用户的原始搜索词是："${query}"。
-1. 🎯 品牌锁定：如果搜索词中指定了租车品牌（如 ${detectedBrand ? detectedBrand : '未指定'}），你**必须**以该品牌为核心进行推荐！如果提供的【真实代码数据】里碰巧没有这个品牌的代码，你必须在开头坦诚说明，并顺滑地推荐数据里有的平替品牌。
+1. 🎯 专家避坑转折：如果搜索词中指定了具体的租车品牌或公司（如 IBM），但提供的【真实代码数据】里碰巧没有，【绝对不要】说“我的数据库里没有”。你必须像个老司机一样这样转场：“官方的 [搜索词] 内部代码现在查工牌极其严格，在柜台极易被反薅。为了安全起见，我强烈建议你使用以下几个同样给力、且免查 ID 的平替神码：”
 2. 📍 地点嗅探：如果搜索词中包含了任何具体的城市名、州名或机场代码（例如 LAX, Miami, Hawaii, NYC 等），你**必须**以该地点作为你实战经验的背景！
 3. 🎲 备用场景：如果搜索词中没有提到地点，请使用这个随机场景作为背景：${randomScenario}。
 
 【🛡️ 策略四 (EEAT 信任模块)：强制生成测试记录】
-你必须在文章末尾生成一个专属的 "How I Tested This" 模块。使用 HTML 的 <div style="background-color: #f8fafc; padding: 15px; border-left: 4px solid #3b82f6; margin-top: 20px;"> 标签包裹。
-模块内必须包含虚构但极其逼真的测试数据：测试日期(上个月)、取车地点(必须严格符合上方决定的场景或地点！)、未打折的原价(如 $450)、输入代码后的价格(如 $315)、节省的总金额。
+你必须在文章末尾生成一个专属的 "How I Tested This" 模块。使用 HTML 的 <div style="background-color: #f8fafc; padding: 20px; border-left: 4px solid #3b82f6; margin-top: 30px; border-radius: 0 8px 8px 0;"> 标签包裹。
+模块内必须包含虚构但极其逼真的测试数据：Test Date: ${testMonthContext} (必须严格使用这个日期！)、Location (必须严格符合上方决定的场景或地点！)、Original Price (如 $450)、Price with Code (如 $315)、Total Saved。
 
 【标题生成策略 - 避免模板化】
 你必须生成一个独特、有吸引力的标题，严禁使用 "Save X% Off" 这种常见模板。
@@ -185,10 +194,10 @@ ${realCodesContext}
 
 【修改指令】：
 1. 彻底删除典型的 AI 废话：如 "In conclusion", "As a travel hacker", "Delve into", "Navigating the landscape" 等词汇。
-2. 让语气变得更愤世嫉俗、更像一个真实的 Reddit 网友在发帖吐槽。增加一些短句和真实的停顿。
+2. 【禁用语癖】：严禁使用 "While my strictly verified database...", "Real talk", "Look,", "Here's the deal" 这种千篇一律的 AI 套话！让语气更像一个真实的 Reddit 网友在吐槽。增加一些短句和真实的停顿。
 3. 确保 [${selectedLSI}] 这三个专业术语依然保留在文中。
-4. 确保末尾的 "How I Tested This" 信任模块（带有背景色的 div）完好无损且数据显得非常可信。
-5. 修复任何破损的 HTML 标签，但严禁使用 Markdown 代码块包裹输出。
+4. 🚨【不可触碰的红线】：初稿末尾带有 background-color: #f8fafc 样式的 <div...> 信任模块，你必须【100%原封不动地保留其全部 HTML 标签和内联 CSS】！绝对不许把它剥离成纯文本格式！
+5. 修复任何破损 HTML 标签，但严禁使用 Markdown 代码块包裹输出。
 6. 【绝对禁止转义 HTML】：必须输出原生的 < 和 > 符号，绝对不能输出 &lt; 或 &gt;！
 
 请仅返回 JSON 格式：
