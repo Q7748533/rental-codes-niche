@@ -1,6 +1,9 @@
 import { MetadataRoute } from 'next';
 import { prisma } from '@/lib/db';
 
+// 强制动态渲染，避免构建时查询数据库
+export const dynamic = 'force-dynamic';
+
 const BASE_URL = 'https://carcorporatecodes.com';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {

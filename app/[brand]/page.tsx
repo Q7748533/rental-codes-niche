@@ -4,6 +4,9 @@ import Link from 'next/link';
 import Script from 'next/script';
 import type { Metadata } from 'next';
 
+// 强制动态渲染，避免构建时查询数据库
+export const dynamic = 'force-dynamic';
+
 // 动态生成 SEO 元数据
 export async function generateMetadata({ params }: { params: Promise<{ brand: string }> }): Promise<Metadata> {
   const { brand: slug } = await params;
