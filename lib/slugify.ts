@@ -24,8 +24,13 @@ const STOP_WORDS = new Set([
  * @returns 清理后的 slug
  */
 export function generateSeoSlug(title: string, maxLength: number = 60): string {
+  // 0. 预处理：替换特殊字符（包括 / 和 \）为空格，避免它们进入 URL
+  const sanitizedTitle = title
+    .replace(/[\/\\]+/g, ' ')  // 替换 / 和 \ 为空格
+    .replace(/[^\w\s-]/g, '');  // 移除其他特殊标点
+  
   // 1. 转小写并按照非字母数字字符分割成单词数组
-  const words = title.toLowerCase().split(/[^a-z0-9]+/);
+  const words = sanitizedTitle.toLowerCase().split(/[^a-z0-9]+/);
 
   // 2. 过滤掉停用词和空字符串
   const filteredWords = words.filter(word => {
