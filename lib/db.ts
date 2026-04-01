@@ -6,8 +6,8 @@ declare global {
   var prisma: PrismaClient | undefined;
 }
 
-// 检查是否使用 Turso（Vercel 环境或设置了 TURSO_DATABASE_URL）
-const useTurso = process.env.VERCEL === '1' || process.env.TURSO_DATABASE_URL;
+// 检查是否使用 Turso（Vercel 环境）
+const useTurso = process.env.VERCEL === '1';
 
 function createPrismaClient(): PrismaClient {
   if (useTurso && process.env.TURSO_DATABASE_URL && process.env.TURSO_AUTH_TOKEN) {
@@ -19,7 +19,7 @@ function createPrismaClient(): PrismaClient {
     return new PrismaClient({ adapter });
   }
   
-  // 使用本地 SQLite 数据库
+  // 使用本地 SQLite 数据库（通过 DATABASE_URL）
   return new PrismaClient();
 }
 
