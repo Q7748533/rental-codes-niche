@@ -4,8 +4,8 @@ import Script from 'next/script';
 import AskAiWidget from '@/components/AskAiWidget';
 import type { Metadata } from 'next';
 
-// ISR: 每小时重新生成页面
-export const revalidate = 3600;
+// 强制动态渲染，避免构建时查询数据库
+export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: 'Car Rental Corporate Codes 2026 | Hertz, Enterprise, Avis Discounts',
