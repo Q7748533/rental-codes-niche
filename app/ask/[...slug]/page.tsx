@@ -53,7 +53,8 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     return { title: 'Not Found' };
   }
 
-  const canonicalUrl = `https://carcorporatecodes.com/ask/${aiQuery.slug}`;
+  const cleanSlug = aiQuery.slug.replace(/\.html$/, '');
+  const canonicalUrl = `https://carcorporatecodes.com/ask/${cleanSlug}.html`;
 
   // 动态生成关键词 - 扩展到 8-10 个
   const generateKeywords = (title: string, prompt: string): string[] => {
@@ -178,7 +179,8 @@ export default async function AiGuidePage({ params }: { params: Promise<{ slug: 
     },
   });
 
-  const canonicalUrl = `https://carcorporatecodes.com/ask/${aiQuery.slug}`;
+  const cleanSlug = aiQuery.slug.replace(/\.html$/, '');
+  const canonicalUrl = `https://carcorporatecodes.com/ask/${cleanSlug}.html`;
   
   // 提取实体用于动态 FAQ
   const { detectedBrand, detectedLocation } = extractEntities(aiQuery.userPrompt, aiQuery.seoTitle);
@@ -416,7 +418,7 @@ export default async function AiGuidePage({ params }: { params: Promise<{ slug: 
               {relatedArticles.map((article) => (
                 <Link
                   key={article.slug}
-                  href={`/ask/${article.slug}`}
+                  href={`/ask/${article.slug.replace(/\.html$/, '')}.html`}
                   className="block p-4 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors group flex flex-col justify-between h-full"
                 >
                   <div>
