@@ -41,16 +41,7 @@ export async function POST(req: Request) {
   "isValid": true,
   "summary": "给用户的简短回复（2句话）。直接给出一个最高效的代码，并像个老朋友一样提醒一句查 ID 的风险。",
   "seoTitle": "吸引人的 SEO 标题，必须包含：[品牌名] + Corporate/Discount Codes + ${randomYear} + 具体的折扣力度（如 Save Up To 25%）",
-  "seoContent": "生成一篇 300-400 字的 HTML 格式内文，严禁使用机器人或百科全书口吻。
-  
-  【文章写作规范】：
-  1. 必须使用第一人称（I, my experience）来写，假装这是你亲身经历的实战经验或朋友的爆料。
-  2. 开头直接切入痛点（例如：'Renting a car at [地点] can be brutal, but I found a workaround...'）。
-  3. 提到具体的机场缩写（如 LAX, JFK, MIA）或市中心街道，增加局部真实感。
-  4. 给出 1 个利润最高的大厂商务码（Business Code），并分享这家租车公司在查工牌（ID Check）时有多严。
-  5. 给出 1 个绝对安全的通用码/休闲码（如 AAA, Alumni, 航司会员），作为 'Safest Bet' 推荐。
-  6. 结尾分享一个独家的 'Insider Tip'（比如避免附加费、如何积累积分等）。
-  7. 使用 <h2>, <p>, <strong>, <ul> 等基础 HTML 标签排版，不要写复杂的样式。"
+  "seoContent": "生成一篇 300-400 字的 HTML 格式内文，必须使用 HTML 标签（<h2>, <p>, <strong>, <ul>, <li>）进行排版。严禁使用纯文本或 Markdown 格式。\n  \n  【HTML 格式要求】：\n  - 使用 <h2> 作为小标题（如 <h2>My Experience with IBM Code</h2>）\n  - 使用 <p> 包裹段落\n  - 使用 <strong> 高亮重要信息（如代码数字、折扣百分比）\n  - 使用 <ul> 和 <li> 列出要点\n  \n  【文章写作规范】：\n  1. 必须使用第一人称（I, my experience）来写，假装这是你亲身经历的实战经验或朋友的爆料。\n  2. 开头直接切入痛点（例如：'Renting a car at [地点] can be brutal, but I found a workaround...'）。\n  3. 提到具体的机场缩写（如 LAX, JFK, MIA）或市中心街道，增加局部真实感。\n  4. 给出 1 个利润最高的大厂商务码（Business Code），并分享这家租车公司在查工牌（ID Check）时有多严。\n  5. 给出 1 个绝对安全的通用码/休闲码（如 AAA, Alumni, 航司会员），作为 'Safest Bet' 推荐。\n  6. 结尾分享一个独家的 'Insider Tip'（比如避免附加费、如何积累积分等）。\n  \n  【重要】：seoContent 字段必须包含有效的 HTML 标签，例如：<h2>...</h2><p>...</p>，不能是纯文本。"
 }
 `;
 
