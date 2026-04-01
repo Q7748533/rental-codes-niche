@@ -78,7 +78,8 @@ export default async function Home() {
 
   const totalCodes = brands.reduce((sum, b) => sum + b._count.codes, 0);
 
-  // JSON-LD 缁撴瀯鍖栨暟鎹?  const jsonLd = {
+  // JSON-LD 结构化数据
+  const jsonLd = {
     '@context': 'https://schema.org',
     '@graph': [
       // Organization
