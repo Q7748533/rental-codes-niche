@@ -137,28 +137,21 @@ export async function POST(request: NextRequest) {
         });
 
         if (existingCode) {
-          // 更新现有代码
-          await prisma.code.update({
-            where: { id: existingCode.id },
-            data: {
-              description,
-              codeType,
-              source,
-            },
-          });
-        } else {
-          // 创建新代码
-          await prisma.code.create({
-            data: {
-              codeValue,
-              description,
-              codeType,
-              source,
-              brandId: brand.id,
-              companyId: company.id,
-            },
-          });
+          // 代码已存在，跳过不入库
+          throw new Error('代码已存在，跳过');
         }
+
+        // 创建新代码
+        await prisma.code.create({
+          data: {
+            codeValue,
+            description,
+            codeType,
+            source,
+            brandId: brand.id,
+            companyId: company.id,
+          },
+        });
 
         detail.status = 'success';
         result.success++;
