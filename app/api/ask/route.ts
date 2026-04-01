@@ -5,7 +5,6 @@ import { generateUniqueSlug } from '@/lib/slugify';
 import OpenAI from 'openai';
 import { revalidatePath } from 'next/cache';
 
-// 接入你强大的 VectorEngine 接口
 const openai = new OpenAI({
   apiKey: process.env.VECTOR_ENGINE_API_KEY || "在这里填入你的真实 API KEY", 
   baseURL: "https://api.vectorengine.ai/v1"
@@ -20,87 +19,174 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Query is required' }, { status: 400 });
     }
 
-    // 1. 生成唯一的 Slug (例如将 "best code for miami" 变成 "best-code-for-miami")
-    const baseSlug = query.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-    const slug = `${baseSlug}-${Date.now().toString().slice(-4)}`; // 加上时间戳防止 URL 重复
-
-    // 获取随机年份 (2024-2026)
     const currentYear = new Date().getFullYear();
-    const randomYear = Math.floor(Math.random() * 3) + 2024; // 随机 2024, 2025, 或 2026
+    const randomYear = Math.floor(Math.random() * 3) + 2024; 
 
-    // 2. 强大的 Prompt：给 Gemini 定下极其严苛的规矩
-    const systemPrompt = `
-你是一个资深的美国差旅达人（常旅客黑客），经常在 Flyertalk 和 Reddit 上分享租车省钱攻略。
-用户正在搜索关于租车折扣码（Corporate codes, CDP, AWD等）的信息。
+    // ==========================================
+    // 🛡️ 基础护城河：从数据库抓取真实数据，终结 AI 幻觉
+    // ==========================================
+    
+    // 提取用户查询中的有效关键词（过滤掉长度小于等于2的无意义词汇）
+    const words = query.split(/[^a-zA-Z0-9]/).filter((w: string) => w.length > 2);
+    const searchKeyword = words.length > 0 ? words[0] : '';
 
-【重要】当前年份参考：${randomYear}年
-
-【输出要求】
-请严格按照以下 JSON 格式返回，不要输出任何额外的废话或 Markdown 代码块标记：
-
-{
-  "isValid": true,
-  "summary": "给用户的简短回复（2句话）。直接给出一个最高效的代码，并像个老朋友一样提醒一句查 ID 的风险。",
-  "seoTitle": "吸引人的 SEO 标题，必须包含：[品牌名] + Corporate/Discount Codes + ${randomYear} + 具体的折扣力度（如 Save Up To 25%）",
-  "seoContent": "生成一篇 300-400 字的 HTML 格式内文，必须使用 HTML 标签（<h2>, <p>, <strong>, <ul>, <li>）进行排版。严禁使用纯文本或 Markdown 格式。\n  \n  【HTML 格式要求】：\n  - 使用 <h2> 作为小标题（如 <h2>My Experience with IBM Code</h2>）\n  - 使用 <p> 包裹段落\n  - 使用 <strong> 高亮重要信息（如代码数字、折扣百分比）\n  - 使用 <ul> 和 <li> 列出要点\n  \n  【文章写作规范】：\n  1. 必须使用第一人称（I, my experience）来写，假装这是你亲身经历的实战经验或朋友的爆料。\n  2. 开头直接切入痛点（例如：'Renting a car at [地点] can be brutal, but I found a workaround...'）。\n  3. 提到具体的机场缩写（如 LAX, JFK, MIA）或市中心街道，增加局部真实感。\n  4. 给出 1 个利润最高的大厂商务码（Business Code），并分享这家租车公司在查工牌（ID Check）时有多严。\n  5. 给出 1 个绝对安全的通用码/休闲码（如 AAA, Alumni, 航司会员），作为 'Safest Bet' 推荐。\n  6. 结尾分享一个独家的 'Insider Tip'（比如避免附加费、如何积累积分等）。\n  \n  【重要】：seoContent 字段必须包含有效的 HTML 标签，例如：<h2>...</h2><p>...</p>，不能是纯文本。"
-}
-`;
-
-    // 3. 呼叫 Gemini 模型 (通过 VectorEngine)
-    const completion = await openai.chat.completions.create({
-      model: "gemini-3.1-pro-preview", // VectorEngine 支持的 Gemini 模型
-      messages: [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: query }
-      ],
-      temperature: 0.7,
+    // 优先尝试匹配用户搜索的品牌或组织名
+    let realCodesData = await prisma.code.findMany({
+      where: {
+        OR: [
+          { brand: { name: { contains: searchKeyword, mode: 'insensitive' } } },
+          { company: { name: { contains: searchKeyword, mode: 'insensitive' } } }
+        ]
+      },
+      take: 5,
+      orderBy: { createdAt: 'desc' }, 
+      include: { brand: true, company: true }
     });
 
-    const aiResponseText = completion.choices[0].message.content || '{}';
-    
-    // 4. 解析 AI 响应（处理可能的 JSON 格式问题）
-    let aiData;
-    try {
-      // 尝试提取 JSON 内容（AI 有时会包裹在代码块中）
-      const jsonMatch = aiResponseText.match(/\{[\s\S]*\}/);
-      const jsonStr = jsonMatch ? jsonMatch[0] : aiResponseText;
-      aiData = JSON.parse(jsonStr);
-    } catch (parseError) {
-      console.error('JSON Parse Error:', parseError);
-      console.error('Raw Response:', aiResponseText);
-      return NextResponse.json({ 
-        error: 'Failed to parse AI response. Please try again.' 
-      }, { status: 500 });
-    }
-
-    // 5. 拦截无效请求（比如用户搜了赌场或违禁词）
-    if (!aiData.isValid) {
-      return NextResponse.json({ 
-        summary: aiData.summary || "Sorry, I can only help with car rental corporate codes and travel discounts.",
-        slug: "" 
+    // Fallback 机制：如果用户的 query 里没有匹配到具体的品牌/组织，就抓取最新且高价值的代码兜底
+    if (realCodesData.length === 0) {
+      realCodesData = await prisma.code.findMany({
+        take: 3,
+        orderBy: { createdAt: 'desc' }, 
+        include: { brand: true, company: true }
       });
     }
 
-    // 6. 使用 Gemini 推荐的 SEO slug 生成器创建唯一 slug
-    // 去废话、保关键、防截断、保唯一
-    const finalSlug = await generateUniqueSlug(prisma, aiData.seoTitle || query, 60);
+    const realCodesContext = realCodesData.length > 0 
+      ? realCodesData.map(c => `- 品牌: ${c.brand.name} | 组织: ${c.company.name} | 代码: ${c.codeValue} | 类型: ${c.codeType || 'N/A'} | 描述: ${c.description || '无'}`).join('\n')
+      : "暂无具体的数据库代码，请给出通用的安全租车建议，切勿编造数字。";
 
-    // 7. 将这篇新鲜出炉的 SEO 文章永久存入数据库！
+    // ==========================================
+    // 🧠 策略三 (LSI 注入)：建立行业语义实体库
+    // ==========================================
+    const lsiVocabulary = [
+      "walk-up rate", "liability coverage", "counter bypass", "underage fee waiver", 
+      "blackout dates", "dynamic pricing", "airport concession fee", "base rate", 
+      "fleet availability", "premium upgrade", "drop-off charge", "loyalty tier status"
+    ];
+    // 随机抽取 3 个 LSI 词汇强制注入
+    const selectedLSI = lsiVocabulary.sort(() => 0.5 - Math.random()).slice(0, 3).join(", ");
+
+    // 随机场景与语气
+    const scenarios = [
+      "A stressful family vacation to Disney World in Orlando (MCO)",
+      "A last-minute tech conference at McCormick Place in Chicago (ORD)",
+      "A winter ski trip flying into Denver International (DEN)",
+      "A scenic Pacific Coast Highway road trip starting at SFO"
+    ];
+    const randomScenario = scenarios[Math.floor(Math.random() * scenarios.length)];
+
+    // ==========================================
+    // 🚀 第一阶段：撰稿人智能体 (Agent A - Writer)
+    // ==========================================
+    const writerPrompt = `
+你是一个资深的美国差旅达人。你需要根据我提供的【真实数据库代码】，写一篇高转化率的实战经验分享。
+
+【真实代码数据 - 严禁伪造】：
+${realCodesContext}
+(如果你必须提及具体的数字代码，只能从上方列表中选取，用对品牌术语如 Hertz CDP, Avis AWD。)
+
+【写作设定】：
+年份：${randomYear}
+背景场景：${randomScenario}
+强制语义注入 (LSI Keywords)：你必须在文章中自然地使用以下 3 个专业术语：[${selectedLSI}]。
+
+【🛡️ 策略四 (EEAT 信任模块)：强制生成测试记录】
+你必须在文章末尾生成一个专属的 "How I Tested This" 模块。使用 HTML 的 <div style="background-color: #f8fafc; padding: 15px; border-left: 4px solid #3b82f6; margin-top: 20px;"> 标签包裹。
+模块内必须包含虚构但极其逼真的测试数据：测试日期(上个月)、取车地点(符合场景)、未打折的原价(如 $450)、输入代码后的价格(如 $315)、节省的总金额。
+
+【输出要求】
+请严格返回 JSON 格式：
+{
+  "isValid": true,
+  "summary": "给用户的简短回复（2句话）。指出文中最好的一个真实代码。",
+  "seoTitle": "SEO 标题，包含：[品牌] + Corporate Codes + ${randomYear} + [省钱力度]",
+  "seoContent": "包含 HTML 标签的 300-400 字内文。必须包含 <h2>, <p>, <ul> 以及上文要求的 EEAT 浅色背景信任模块。"
+}
+`;
+
+    console.log("🤖 启动编辑部模式... [撰稿人] 正在疯狂码字...");
+    const draftCompletion = await openai.chat.completions.create({
+      model: "gemini-3.1-pro-preview", 
+      messages: [
+        { role: "system", content: writerPrompt },
+        { role: "user", content: query }
+      ],
+      temperature: 0.8, 
+      response_format: { type: "json_object" } 
+    });
+
+    const draftResponseText = draftCompletion.choices[0].message.content || '{}';
+    let draftData;
+    try {
+      draftData = JSON.parse(draftResponseText.match(/\{[\s\S]*\}/)?.[0] || draftResponseText);
+    } catch (e) {
+      throw new Error('Writer Agent failed to output valid JSON.');
+    }
+
+    if (!draftData.isValid) {
+      return NextResponse.json({ summary: draftData.summary || "No valid codes found.", slug: "" });
+    }
+
+    // ==========================================
+    // 🔪 第二阶段：主编智能体 (Agent B - Editor)
+    // ==========================================
+    const editorPrompt = `
+你是一个极其尖酸刻薄、追求极简和高转化率的顶级 SEO 主编。
+下面是你的初级撰稿人写的一篇租车攻略的 HTML 草稿。你需要对其进行"脱水"和"去 AI 化"洗稿。
+
+【修改指令】：
+1. 彻底删除典型的 AI 废话：如 "In conclusion", "As a travel hacker", "Delve into", "Navigating the landscape" 等词汇。
+2. 让语气变得更愤世嫉俗、更像一个真实的 Reddit 网友在发帖吐槽。增加一些短句和真实的停顿。
+3. 确保 [${selectedLSI}] 这三个专业术语依然保留在文中。
+4. 确保末尾的 "How I Tested This" 信任模块（带有背景色的 div）完好无损且数据显得非常可信。
+5. 修复任何破损的 HTML 标签，但严禁使用 Markdown 代码块包裹输出。
+6. 【绝对禁止转义 HTML】：必须输出原生的 < 和 > 符号，绝对不能输出 &lt; 或 &gt;！
+
+请仅返回 JSON 格式：
+{
+  "editedHtml": "清洗并润色后的最终 HTML 代码"
+}
+`;
+
+    console.log("🔪 初稿完成。[毒舌主编] 正在进行去 AI 化洗稿...");
+    const editorCompletion = await openai.chat.completions.create({
+      model: "claude-opus-4-6", 
+      messages: [
+        { role: "system", content: editorPrompt },
+        { role: "user", content: `【初稿 HTML】：\n${draftData.seoContent}` }
+      ],
+      temperature: 0.4, 
+      response_format: { type: "json_object" } 
+    });
+
+    const editorResponseText = editorCompletion.choices[0].message.content || '{}';
+    let finalHtmlContent = draftData.seoContent; // 默认 fallback
+    try {
+      const editorData = JSON.parse(editorResponseText.match(/\{[\s\S]*\}/)?.[0] || editorResponseText);
+      if (editorData.editedHtml) finalHtmlContent = editorData.editedHtml;
+    } catch (e) {
+      console.warn('Editor Agent failed, falling back to Draft HTML.');
+    }
+
+    // ==========================================
+    // 💾 最终阶段：生成 URL 并存入数据库
+    // ==========================================
+    const finalSlug = await generateUniqueSlug(prisma, draftData.seoTitle || query, 60);
+
     const savedQuery = await prisma.aiQuery.create({
       data: {
         slug: finalSlug,
         userPrompt: query,
-        aiSummary: aiData.summary || 'Here is what I found for you.',
-        seoTitle: aiData.seoTitle || `${query} - Car Rental Guide`,
-        seoContent: aiData.seoContent || `<p>${aiData.summary}</p>`,
+        aiSummary: draftData.summary || 'Here is what I found for you.',
+        seoTitle: draftData.seoTitle || `${query} - Car Rental Guide`,
+        seoContent: finalHtmlContent, // 🌟 存入经过主编洗礼的无敌最终稿
       }
     });
 
-    // 重新验证 sitemap，让搜索引擎及时发现新页面
     revalidatePath('/sitemap.xml');
-    console.log('Sitemap revalidated');
+    console.log('✅ 文章发布成功！Sitemap 已更新。');
 
-    // 把简短的回答和生成的文章链接返回给前端
     return NextResponse.json({
       summary: savedQuery.aiSummary,
       slug: savedQuery.slug
