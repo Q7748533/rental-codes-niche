@@ -1,21 +1,13 @@
 import { prisma } from '@/lib/db';
 import Link from 'next/link';
 import Script from 'next/script';
-import dynamicImport from 'next/dynamic';
 import MobileNav from '@/components/MobileNav';
+import AskAiWidget from '@/components/AskAiWidget';
 import { unstable_cache } from 'next/cache';
 import type { Metadata } from 'next';
 
 // 强制动态渲染，避免构建时查询数据库
 export const dynamic = 'force-dynamic';
-
-// 懒加载 AskAiWidget 组件
-const AskAiWidget = dynamicImport(() => import('@/components/AskAiWidget'), {
-  loading: () => (
-    <div className="h-14 w-full bg-gray-100 rounded-xl animate-pulse" />
-  ),
-  ssr: false, // 禁用服务端渲染，减少首屏 JS
-});
 
 // 缓存 brands 查询（1小时）
 const getCachedBrands = unstable_cache(
