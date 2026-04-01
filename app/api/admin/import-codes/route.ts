@@ -26,17 +26,11 @@ interface ImportResult {
 
 // 验证管理员权限
 async function verifyAdminAuth(request: NextRequest): Promise<boolean> {
-  const cookie = request.cookies.get('admin_session');
-  if (!cookie?.value) {
-    return false;
-  }
+  const sessionCookie = request.cookies.get('admin_session');
+  const loggedInCookie = request.cookies.get('admin_logged_in');
   
-  try {
-    const session = JSON.parse(Buffer.from(cookie.value, 'base64').toString());
-    return session.isAdmin === true && session.expires > Date.now();
-  } catch {
-    return false;
-  }
+  // 检查两个必要的 cookie 都存在
+  return !!(sessionCookie?.value && loggedInCookie?.value === 'true');
 }
 
 export async function POST(request: NextRequest) {
