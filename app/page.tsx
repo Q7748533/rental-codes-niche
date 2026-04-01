@@ -1,11 +1,43 @@
 import { prisma } from '@/lib/db';
 import Link from 'next/link';
 import Script from 'next/script';
-import AskAiWidget from '@/components/AskAiWidget';
+import dynamic from 'next/dynamic';
+import MobileNav from '@/components/MobileNav';
+import { unstable_cache } from 'next/cache';
 import type { Metadata } from 'next';
+
+// 懒加载 AskAiWidget 组件
+const AskAiWidget = dynamic(() => import('@/components/AskAiWidget'), {
+  loading: () => (
+    <div className="h-14 w-full bg-gray-100 rounded-xl animate-pulse" />
+  ),
+  ssr: false, // 禁用服务端渲染，减少首屏 JS
+});
 
 // 强制动态渲染，避免构建时查询数据库
 export const dynamic = 'force-dynamic';
+
+// 缓存 brands 查询（1小时）
+const getCachedBrands = unstable_cache(
+  async () => {
+    return prisma.brand.findMany({
+      include: { _count: { select: { codes: true } } },
+    });
+  },
+  ['brands-list'],
+  { revalidate: 3600, tags: ['brands'] }
+);
+
+// 缓存 companies 查询（1小时）
+const getCachedCompanies = unstable_cache(
+  async () => {
+    return prisma.company.findMany({
+      select: { name: true, slug: true },
+    });
+  },
+  ['companies-list'],
+  { revalidate: 3600, tags: ['companies'] }
+);
 
 export const metadata: Metadata = {
   title: 'Car Rental Corporate Codes 2026 | Hertz, Enterprise, Avis Discounts',
@@ -49,13 +81,9 @@ export const metadata: Metadata = {
 };
 
 export default async function Home() {
-  const brands = await prisma.brand.findMany({
-    include: { _count: { select: { codes: true } } },
-  });
-
-  const companies = await prisma.company.findMany({
-    select: { name: true, slug: true },
-  });
+  // 使用缓存查询 brands 和 companies
+  const brands = await getCachedBrands();
+  const companies = await getCachedCompanies();
 
   // 鑾峰彇鏈€鏂扮敓鎴愮殑 AI 鏂囩珷
   const latestArticles = await prisma.aiQuery.findMany({
@@ -199,12 +227,18 @@ export default async function Home() {
       />
       <header className="bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
-          <div className="text-xl md:text-2xl font-bold text-blue-700">Car Corporate Codes</div>
-          <nav className="flex items-center space-x-3 md:space-x-6 text-xs md:text-sm font-medium text-gray-600">
-            <Link href="#brands" className="hover:text-blue-600">Brands</Link>
-            <Link href="#guide" className="hover:text-blue-600 hidden sm:inline">How to Use</Link>
-            <Link href="#faq" className="hover:text-blue-600">FAQ</Link>
-          </nav>
+          <Link href="/" className="text-xl md:text-2xl font-bold text-blue-700">Car Corporate Codes</Link>
+          <div className="flex items-center">
+            {/* Desktop Nav */}
+            <nav className="hidden md:flex items-center space-x-6 text-sm font-medium text-gray-600">
+              <Link href="#brands" className="hover:text-blue-600 min-h-[44px] flex items-center px-2">Brands</Link>
+              <Link href="#guide" className="hover:text-blue-600 min-h-[44px] flex items-center px-2">How to Use</Link>
+              <Link href="#faq" className="hover:text-blue-600 min-h-[44px] flex items-center px-2">FAQ</Link>
+              <Link href="/ask" className="hover:text-blue-600 min-h-[44px] flex items-center px-2">Ask AI</Link>
+            </nav>
+            {/* Mobile Nav */}
+            <MobileNav />
+          </div>
         </div>
       </header>
 
