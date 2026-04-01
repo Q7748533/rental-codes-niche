@@ -6,6 +6,7 @@ import BatchDeleteForm from './components/BatchDeleteForm';
 import PublicDealsManager from './components/PublicDealsManager';
 import LogoutButton from './components/LogoutButton';
 import JsonImportForm from './components/JsonImportForm';
+import BrandManager from './components/BrandManager';
 
 // 强制动态渲染，避免构建时查询数据库
 export const dynamic = 'force-dynamic';
@@ -90,6 +91,22 @@ async function deletePublicDealAction(formData: FormData) {
   revalidatePath('/');
 }
 
+// 删除品牌（同时删除关联的代码）
+async function deleteBrandAction(formData: FormData) {
+  'use server';
+
+  const brandId = formData.get('brandId') as string;
+  
+  if (brandId) {
+    // 由于设置了 onDelete: Cascade，删除品牌会自动删除关联的代码
+    await prisma.brand.delete({
+      where: { id: brandId },
+    });
+    revalidatePath('/admin');
+    revalidatePath('/');
+  }
+}
+
 export default async function AdminDashboard() {
   // 验证管理员登录状态，未登录则重定向到登录页
   await requireAdminAuth();
@@ -111,6 +128,16 @@ export default async function AdminDashboard() {
 
   const publicDeals = await prisma.publicDeal.findMany({
     orderBy: { sortOrder: 'asc' },
+  });
+
+  // 获取所有品牌及其代码数量
+  const brands = await prisma.brand.findMany({
+    orderBy: { name: 'asc' },
+    include: {
+      _count: {
+        select: { codes: true },
+      },
+    },
   });
 
   return (
@@ -176,6 +203,20 @@ export default async function AdminDashboard() {
           </div>
           <div className="p-6">
             <JsonImportForm />
+          </div>
+        </div>
+
+        {/* 品牌管理 */}
+        <div className="bg-white shadow rounded-lg overflow-hidden border border-gray-200 mb-8">
+          <div className="px-6 py-5 border-b border-gray-200 bg-gray-50">
+            <h3 className="text-lg font-bold leading-6 text-gray-900">品牌管理</h3>
+            <p className="text-sm text-gray-500 mt-1">查看和管理所有品牌，删除品牌将同时删除其下的所有代码</p>
+          </div>
+          <div className="p-6">
+            <BrandManager 
+              brands={brands}
+              deleteAction={deleteBrandAction}
+            />
           </div>
         </div>
 

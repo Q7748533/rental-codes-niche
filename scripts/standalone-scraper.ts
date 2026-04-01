@@ -14,113 +14,157 @@ const openai = new OpenAI({
   baseURL: 'https://api.vectorengine.ai/v1',
 });
 
+/**
+ * 🌟 核心升级：使用工业级 pdfjs-dist 提取文字
+ */
+async function extractTextFromPdf(buffer: Buffer): Promise<string> {
+  const pdfjs = await import('pdfjs-dist/legacy/build/pdf.mjs');
+  const uint8Array = new Uint8Array(buffer);
+  const loadingTask = pdfjs.getDocument({ data: uint8Array });
+  const pdfDocument = await loadingTask.promise;
+  
+  let fullText = '';
+  console.log(`⏳ 正在解析 PDF (共 ${pdfDocument.numPages} 页)...`);
+  
+  for (let i = 1; i <= pdfDocument.numPages; i++) {
+    const page = await pdfDocument.getPage(i);
+    const textContent = await page.getTextContent();
+    const pageText = textContent.items
+      .map((item: any) => item.str)
+      .join(' ');
+    fullText += pageText + '\n';
+  }
+  
+  return fullText;
+}
+
 async function runScraper(targetUrl: string) {
-  console.log(`\n🚀 [独立爬虫] 开始抓取: ${targetUrl}`);
+  console.log(`\n🚀 [全能爬虫 V3.4 完美对齐版] 开始抓取: ${targetUrl}`);
 
-  // 使用真实浏览器模式以穿透防火墙
-  const browser = await chromium.launch({ 
-    headless: false,
-    channel: 'chrome', 
-    args: ['--disable-blink-features=AutomationControlled']
-  });
-  
-  const context = await browser.newContext({
-    userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36'
-  });
-  
-  await context.addInitScript("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})");
-  const page = await context.newPage();
+  let pageText = '';
+  let hiddenElements: any[] = [];
 
-  try {
-    console.log("⏳ 正在访问网页...");
-    await page.goto(targetUrl, { waitUntil: 'domcontentloaded', timeout: 60000 });
-    
-    console.log("🛡️ 遇到高防盾，强制等待 10 秒钟。如果弹出验证码，请迅速用鼠标点击...");
-    await page.waitForTimeout(10000); 
+  const isPdf = targetUrl.split('?')[0].toLowerCase().endsWith('.pdf');
 
-    const pageText = await page.evaluate(() => {
-      return document.body.innerText.replace(/\s+/g, ' ').trim();
+  if (isPdf) {
+    console.log("📄 检测到 PDF 文档！启动工业级提取引擎...");
+    try {
+      const response = await fetch(targetUrl);
+      if (!response.ok) throw new Error(`下载 PDF 失败: HTTP ${response.status}`);
+      
+      const arrayBuffer = await response.arrayBuffer();
+      const buffer = Buffer.from(arrayBuffer);
+      
+      pageText = await extractTextFromPdf(buffer);
+      
+      if (pageText.trim().length < 50) {
+         console.warn("⚠️ 警告：提取文字极少，该 PDF 可能是纯图片扫描件，需要 OCR。");
+      } else {
+         console.log(`✅ PDF 提取成功！共 ${pageText.length} 字。`);
+      }
+    } catch (err) {
+      console.error("❌ PDF 处理失败:", err);
+      return;
+    }
+  } else {
+    console.log("🌐 检测到普通网页，启动隐形浏览器...");
+    // 🌟 补回防 403 屏蔽参数
+    const browser = await chromium.launch({ 
+      headless: false, 
+      channel: 'chrome',
+      args: ['--disable-blink-features=AutomationControlled']
     });
-    
-    console.log(`✅ 文本提取成功！共 ${pageText.length} 字。正在呼叫 AI 进行深度特征提取...`);
-    const safeText = pageText.substring(0, 18000); 
+    const context = await browser.newContext({
+      userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36'
+    });
+    await context.addInitScript("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})");
+    const page = await context.newPage();
 
-    // 🌟 核心升级：强化的 AI 提取指令
+    try {
+      await page.goto(targetUrl, { waitUntil: 'domcontentloaded', timeout: 60000 });
+      await page.waitForTimeout(5000); 
+
+      const pageData = await page.evaluate(() => {
+        const text = document.body.innerText.replace(/\s+/g, ' ').trim();
+        const elements = Array.from(document.querySelectorAll('a, [data-code]'));
+        const hidden = elements.map(el => {
+          const href = el.getAttribute('href') || '';
+          const dataCode = el.getAttribute('data-code') || '';
+          if (href.includes('coupon') || dataCode) return { text: el.textContent, href, dataCode };
+          return null;
+        }).filter(Boolean);
+        return { bodyText: text, hiddenElements: hidden };
+      });
+      
+      pageText = pageData.bodyText;
+      hiddenElements = pageData.hiddenElements;
+      console.log(`✅ 网页提取成功！`);
+    } catch (err) {
+      console.error("❌ 网页处理失败:", err);
+      return;
+    } finally {
+      await browser.close();
+    }
+  }
+
+  // ==========================================
+  // 🤖 AI 特征提取 (完美适配前端 BrandPage)
+  // ==========================================
+  try {
+    console.log("🤖 正在呼叫 AI 进行深度清洗...");
+    
+    // 确保隐藏元素也被传递给 AI
+    const safeBodyText = pageText.substring(0, 18000); 
+    const safeHiddenElements = hiddenElements.length > 0 ? JSON.stringify(hiddenElements).substring(0, 5000) : "[]";
+
     const completion = await openai.chat.completions.create({
       model: "gemini-3.1-pro-preview",
       messages: [
         { 
           role: "system", 
-          content: `你是一个专业的租车行业数据分析师。请从提供的文本中提取租车折扣码，并严格按照以下 JSON 格式返回。
+          content: `你是一个专业的租车行业数据分析专家。请从提供的文本中提取租车折扣码，并严格按照我指定的格式输出，以适配我的前端展示逻辑。
 
-          数据结构要求：
-          [
-            {
-              "brand": "租车公司名称 (如 Hertz, Avis, Enterprise)",
-              "company": "提供折扣的组织名称 (如 IBM, AAA, Santa Clara University)",
-              "codeValue": "具体的 CDP 或 PC 代码内容",
-              "description": "折扣力度及适用条件的简短说明",
-              "codeType": "分类判断：如果是员工专用/需查工牌则填 'Business'；如果是校友/协会/普通大众可用则填 'Leisure'",
-              "source": "来源分类：填 'Employee', 'Public', 'Member' 或 'Association' 之一"
-            }
-          ]
+          【字段映射规则】：
+          1. brand: 租车品牌名（如 Hertz, Avis, Alamo）。
+          2. company: 提供该折扣的【组织名称】（如 "NFL Alumni Association", "Santa Clara University"）。严禁填入租车品牌名！
+          3. codeValue: 折扣码内容。
+          4. description: 具体的折扣说明（如 "20% OFF", "Free Upgrade"）。
+          5. codeType: 必须且只能从 ['business', 'leisure'] 中选一个！
+             - 如果是针对协会成员、校友、大众或提到 personal use，填 'leisure'。
+             - 如果是针对员工、商务差旅或提到 ID required，填 'business'。
+          6. source: 来源分类标签。请从 ['Association', 'Employee', 'Public', 'Member'] 中选一个最贴切的。
 
-          推理规则：
-          1. 如果提到 'Employee', 'Staff', 'Corporate rate'，codeType 选 'Business'。
-          2. 如果提到 'Alumni', 'Student', 'University personal use', 'Association member'，codeType 选 'Leisure'。
-          3. 如果描述中提到 'ID required' 或 'Verification needed'，请在 description 中注明。
-          
-          注意：仅返回 JSON 对象，不要包含任何解释文字。`
+          【特殊处理】：
+          如果代码隐藏在链接中，请务必从【底层隐藏元素】的 href 或 dataCode 中提取。
+
+          严格返回 JSON 数组格式，不要包含任何 Markdown 标签或解释文字。`
         },
-        { role: "user", content: safeText }
+        { 
+          role: "user", 
+          content: `【内容文本】：\n${safeBodyText}\n\n【底层隐藏元素】：\n${safeHiddenElements}` 
+        }
       ],
       response_format: { type: "json_object" } 
     });
 
     const aiResponse = completion.choices[0].message.content || '{"data":[]}';
-    let codes = [];
-    try {
-      const parsed = JSON.parse(aiResponse);
-      // 兼容多种可能的 JSON 包裹格式
-      codes = parsed.data || parsed.codes || (Array.isArray(parsed) ? parsed : Object.values(parsed)[0]);
-      if (!Array.isArray(codes)) codes = [parsed];
-    } catch (e) {
-      console.error("❌ AI 数据解析失败，原始返回内容：", aiResponse);
-      return;
-    }
+    const parsed = JSON.parse(aiResponse);
+    const codes = parsed.data || parsed.codes || (Array.isArray(parsed) ? parsed : Object.values(parsed)[0]);
 
-    console.log(`💡 AI 提取完毕，共找到 ${codes.length} 条带特征的代码！`);
-
-    const outputPath = 'output_codes.json';
-    fs.writeFileSync(outputPath, JSON.stringify(codes, null, 2), 'utf-8');
-    
-    console.log(`\n🎉 搞定！数据已保存至 ${outputPath}`);
-    console.log(`数据预览：第一个提取到的是 [${codes[0]?.company}] 的 ${codes[0]?.codeValue} (${codes[0]?.codeType})\n`);
+    console.log(`💡 AI 处理完毕，共解析 ${Array.isArray(codes) ? codes.length : 0} 条数据！`);
+    fs.writeFileSync('output_codes.json', JSON.stringify(codes, null, 2), 'utf-8');
+    console.log(`🎉 任务完成！结果已保存至 output_codes.json`);
 
   } catch (error) {
-    console.error(`❌ 抓取错误:`, error);
-  } finally {
-    await browser.close();
+    console.error(`❌ AI 处理失败:`, error);
   }
 }
 
 async function main() {
   const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
-  console.log("=========================================");
-  console.log("🤖 智能租车折扣码特征提取爬虫 (V2.0)");
-  console.log("=========================================");
-
-  const answer = await rl.question('\n🔗 请输入目标网址: ');
-  const targetUrl = answer.trim();
-
-  if (!targetUrl || !targetUrl.startsWith('http')) {
-    console.log('\n❌ 错误: 网址格式不正确\n');
-    rl.close();
-    process.exit(1);
-  }
-
+  const answer = await rl.question('\n🔗 请输入目标 URL: ');
   rl.close();
-  await runScraper(targetUrl);
+  await runScraper(answer.trim());
 }
 
 main();

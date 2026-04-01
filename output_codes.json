@@ -1,26 +1,26 @@
 [
   {
-    "brand": "Hertz",
-    "company": "US Military & Government",
-    "codeValue": "2306779",
-    "description": "Save up to 20% on base rents for active duty military, veterans, and government employees. Includes space-available upgrades and a complimentary Hertz Gold Plus Rewards membership.",
-    "codeType": "Business",
-    "source": "Employee"
+    "brand": "Avis",
+    "company": "Nebraska Alumni Association",
+    "codeValue": "H776900",
+    "description": "Up to 25% off",
+    "codeType": "leisure",
+    "source": "Association"
   },
   {
-    "brand": "Hertz",
-    "company": "50 Plus Car Rental Program",
-    "codeValue": "2007815",
-    "description": "Travelers aged 50 and over enjoy 20% off base rates on a wide range of vehicles.",
-    "codeType": "Leisure",
-    "source": "Public"
+    "brand": "Budget",
+    "company": "Nebraska Alumni Association",
+    "codeValue": "R334100",
+    "description": "Up to 20% off",
+    "codeType": "leisure",
+    "source": "Association"
   },
   {
-    "brand": "Hertz",
-    "company": "Hertz",
-    "codeValue": "211748",
-    "description": "Free, one-car-class upgrade when reserving a medium sedan or higher. Valid until June 30.",
-    "codeType": "Leisure",
-    "source": "Public"
+    "brand": "Auto Europe",
+    "company": "Nebraska Alumni Association",
+    "codeValue": "99006509",
+    "description": "Up to 25% discount",
+    "codeType": "leisure",
+    "source": "Association"
   }
 ]
