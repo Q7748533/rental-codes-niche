@@ -30,12 +30,13 @@ export async function POST(req: Request) {
     const words = query.split(/[^a-zA-Z0-9]/).filter((w: string) => w.length > 2);
     const searchKeyword = words.length > 0 ? words[0] : '';
 
-    // 优先尝试匹配用户搜索的品牌或组织名
+    // 优先尝试匹配用户搜索的品牌或组织名 (SQLite 不支持 mode: 'insensitive'，使用小写转换)
+    const lowerKeyword = searchKeyword.toLowerCase();
     let realCodesData = await prisma.code.findMany({
       where: {
         OR: [
-          { brand: { name: { contains: searchKeyword, mode: 'insensitive' } } },
-          { company: { name: { contains: searchKeyword, mode: 'insensitive' } } }
+          { brand: { name: { contains: lowerKeyword } } },
+          { company: { name: { contains: lowerKeyword } } }
         ]
       },
       take: 5,
