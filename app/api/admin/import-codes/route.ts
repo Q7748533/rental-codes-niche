@@ -87,18 +87,18 @@ export async function POST(request: NextRequest) {
           throw new Error('字段值不能为空');
         }
 
-        // 查找或创建品牌
+        // 生成品牌的 slug
+        const brandSlug = brandName
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, '-')
+          .replace(/^-|-$/g, '');
+
+        // 先按 slug 查找品牌（避免大小写不同导致的重复）
         let brand = await prisma.brand.findUnique({
-          where: { name: brandName },
+          where: { slug: brandSlug },
         });
 
         if (!brand) {
-          // 生成品牌的 slug
-          const brandSlug = brandName
-            .toLowerCase()
-            .replace(/[^a-z0-9]+/g, '-')
-            .replace(/^-|-$/g, '');
-
           brand = await prisma.brand.create({
             data: {
               name: brandName,
@@ -107,18 +107,18 @@ export async function POST(request: NextRequest) {
           });
         }
 
-        // 查找或创建公司
+        // 生成公司的 slug
+        const companySlug = companyName
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, '-')
+          .replace(/^-|-$/g, '');
+
+        // 先按 slug 查找公司（避免大小写不同导致的重复）
         let company = await prisma.company.findUnique({
-          where: { name: companyName },
+          where: { slug: companySlug },
         });
 
         if (!company) {
-          // 生成公司的 slug
-          const companySlug = companyName
-            .toLowerCase()
-            .replace(/[^a-z0-9]+/g, '-')
-            .replace(/^-|-$/g, '');
-
           company = await prisma.company.create({
             data: {
               name: companyName,
