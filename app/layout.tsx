@@ -1,0 +1,20 @@
+import type { Metadata } from "next";
+import "./globals.css";
+
+export const metadata: Metadata = {
+  title: "Car Rental Corporate Codes 2026 | Hertz, Enterprise, Avis Discounts",
+  description: "Verified car rental corporate codes for Hertz, Enterprise, Avis, Budget. Save 10-25% on business travel with CDP and PC codes. Updated daily.",
+  keywords: ["car rental corporate codes", "hertz cdp codes", "enterprise discount codes", "avis corporate codes", "rental car discounts"],
+};
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <html lang="en">
+      <body>{children}</body>
+    </html>
+  );
+}

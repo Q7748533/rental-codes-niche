@@ -1,0 +1,70 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Brand {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  slug        String   @unique 
+  defaultUrl  String?  
+  codes       Code[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt // 👈 补上这一行
+}
+
+model Company {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  slug        String   @unique 
+  industry    String?  
+  codes       Code[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt // 👈 补上这一行
+}
+
+model Code {
+  id           String   @id @default(cuid())
+  codeValue    String   
+  description  String?  
+  isValid      Boolean  @default(true) 
+  codeType     String   @default("Business") 
+  source       String?  
+  
+  brandId      String
+  brand        Brand    @relation(fields: [brandId], references: [id], onDelete: Cascade)
+  companyId    String
+  company      Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  @@unique([brandId, companyId, codeValue]) 
+}
+
+model AiQuery {
+  id          String   @id @default(cuid())
+  slug        String   @unique 
+  userPrompt  String   
+  aiSummary   String   
+  seoTitle    String   
+  seoContent  String   
+  viewCount   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt // 👈 补上这一行，SEO 文章也需要更新时间
+}
+
+model PublicDeal {
+  id          String   @id @default(cuid())
+  title       String   
+  description String   
+  linkUrl     String   
+  buttonText  String   
+  isActive    Boolean  @default(true) 
+  sortOrder   Int      @default(0)    
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
