@@ -1,2 +1,4 @@
 @import "tailwindcss";
-@import "@tailwindcss/typography";
+
+/* Typography plugin for prose classes */
+@plugin "@tailwindcss/typography";
