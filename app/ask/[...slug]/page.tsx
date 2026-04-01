@@ -52,14 +52,23 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
       type: 'article',
       publishedTime: aiQuery.createdAt.toISOString(),
       modifiedTime: aiQuery.createdAt.toISOString(),
-      authors: ['Car Corporate Codes AI'],
+      authors: ['Car Corporate Codes'],
       url: canonicalUrl,
       siteName: 'Car Corporate Codes',
+      images: [
+        {
+          url: 'https://carcorporatecodes.com/og-image.svg',
+          width: 1200,
+          height: 630,
+          alt: aiQuery.seoTitle,
+        },
+      ],
     },
     twitter: {
       card: 'summary_large_image',
       title: aiQuery.seoTitle,
       description: aiQuery.aiSummary,
+      images: ['https://carcorporatecodes.com/og-image.svg'],
     },
   };
 }
@@ -125,7 +134,7 @@ export default async function AiGuidePage({ params }: { params: Promise<{ slug: 
         dateModified: aiQuery.createdAt.toISOString(),
         author: {
           '@type': 'Organization',
-          name: 'Car Corporate Codes AI',
+          name: 'Car Corporate Codes',
           '@id': 'https://carcorporatecodes.com/#organization',
         },
         publisher: {
@@ -134,7 +143,7 @@ export default async function AiGuidePage({ params }: { params: Promise<{ slug: 
           '@id': 'https://carcorporatecodes.com/#organization',
           logo: {
             '@type': 'ImageObject',
-            url: 'https://carcorporatecodes.com/logo.png',
+            url: 'https://carcorporatecodes.com/og-image.svg',
           },
         },
         mainEntityOfPage: {
@@ -195,6 +204,38 @@ export default async function AiGuidePage({ params }: { params: Promise<{ slug: 
               text: aiQuery.aiSummary,
             },
           },
+          {
+            '@type': 'Question',
+            name: 'How much can I save with car rental corporate codes?',
+            acceptedAnswer: {
+              '@type': 'Answer',
+              text: 'Car rental corporate codes typically save you 10-25% off standard rates. Savings vary by rental company, location, vehicle type, and dates. Some corporate codes also include additional benefits like free upgrades, waived fees, or additional driver privileges.',
+            },
+          },
+          {
+            '@type': 'Question',
+            name: 'Do I need to prove eligibility for corporate codes?',
+            acceptedAnswer: {
+              '@type': 'Answer',
+              text: 'Most corporate codes require proof of eligibility at the rental counter, such as a company ID, business card, or pay stub. However, some codes marked as "Leisure" or "Public" may not require verification. Always check the specific requirements for each code before booking.',
+            },
+          },
+          {
+            '@type': 'Question',
+            name: 'Can I combine corporate codes with other discounts?',
+            acceptedAnswer: {
+              '@type': 'Answer',
+              text: 'Corporate codes generally cannot be combined with other promotional codes or coupons. However, you can often stack them with loyalty program benefits, credit card rewards, or cashback offers. Always compare the corporate rate with publicly available deals to ensure you\'re getting the best price.',
+            },
+          },
+          {
+            '@type': 'Question',
+            name: 'What is the difference between CDP and PC codes?',
+            acceptedAnswer: {
+              '@type': 'Answer',
+              text: 'CDP (Corporate Discount Program) codes are negotiated rates for employees of specific companies or members of organizations. PC (Promotion Code) codes are special promotional rates that may be available to the general public or specific groups. CDP codes typically offer deeper discounts but require eligibility verification.',
+            },
+          },
         ],
       },
     ],
@@ -225,7 +266,9 @@ export default async function AiGuidePage({ params }: { params: Promise<{ slug: 
           <ol className="flex items-center space-x-2 text-sm text-gray-500">
             <li><Link href="/" className="hover:text-blue-600">Home</Link></li>
             <li className="text-gray-400">/</li>
-            <li className="text-gray-900">Rental Codes</li>
+            <li><Link href="/ask" className="hover:text-blue-600">Guides</Link></li>
+            <li className="text-gray-400">/</li>
+            <li className="text-gray-900 truncate max-w-[200px]">{aiQuery.seoTitle}</li>
           </ol>
         </nav>
 
