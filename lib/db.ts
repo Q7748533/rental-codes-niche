@@ -1,6 +1,5 @@
 import { PrismaClient } from '@prisma/client';
 import { PrismaLibSql } from '@prisma/adapter-libsql';
-import { createClient } from '@libsql/client';
 
 // 全局缓存 Prisma 客户端（防止热重载时创建多个实例）
 declare global {
@@ -12,13 +11,11 @@ const useTurso = process.env.VERCEL === '1' || process.env.TURSO_DATABASE_URL;
 
 function createPrismaClient(): PrismaClient {
   if (useTurso && process.env.TURSO_DATABASE_URL && process.env.TURSO_AUTH_TOKEN) {
-    // 使用 Turso 云端数据库
-    const libsql = createClient({
+    // 使用 Turso 云端数据库 - PrismaLibSql 直接接收配置对象
+    const adapter = new PrismaLibSql({
       url: process.env.TURSO_DATABASE_URL,
       authToken: process.env.TURSO_AUTH_TOKEN,
     });
-    
-    const adapter = new PrismaLibSql(libsql);
     return new PrismaClient({ adapter });
   }
   
