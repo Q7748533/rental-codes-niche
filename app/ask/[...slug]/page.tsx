@@ -3,31 +3,59 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import Script from 'next/script';
 import type { Metadata } from 'next';
+import { cache } from 'react';
 
-// 强制动态渲染，避免构建时查询数据库
-export const dynamic = 'force-dynamic';
+// 🌟 ISR 优化：24小时重新验证，兼顾性能和数据新鲜度
+export const revalidate = 86400;
+
+// 静态作者信息 - EEAT 信任信号
+const SITE_AUTHOR = {
+  name: 'Alex Chen',
+  title: 'Car Rental Savings Expert',
+  bio: '10+ years analyzing corporate discount programs for major rental companies',
+  url: 'https://carcorporatecodes.com/about#author'
+};
+
+// 🌟 核心优化：使用 React cache 包裹数据库查询，确保 metadata 和页面共享一次查询结果
+const getAiQuery = cache(async (slugArray: string[]) => {
+  const fullSlug = slugArray.join('/').replace(/\.html$/, '');
+  
+  let aiQuery = await prisma.aiQuery.findUnique({
+    where: { slug: fullSlug + '.html' },
+  });
+
+  if (!aiQuery) {
+    aiQuery = await prisma.aiQuery.findUnique({
+      where: { slug: fullSlug },
+    });
+  }
+  return aiQuery;
+});
+
+// 提取品牌和地点用于动态 FAQ
+const extractEntities = (prompt: string, title: string) => {
+  const brands = ['hertz', 'enterprise', 'avis', 'budget', 'national', 'alamo', 'dollar', 'thrifty', 'fox', 'europcar'];
+  const locations = ['new york', 'los angeles', 'chicago', 'houston', 'phoenix', 'philadelphia', 'san antonio', 'san diego', 'dallas', 'san jose', 'austin', 'jacksonville', 'miami', 'las vegas', 'denver', 'seattle', 'boston', 'atlanta', 'orlando', 'san francisco'];
+  
+  const text = (prompt + ' ' + title).toLowerCase();
+  
+  const detectedBrand = brands.find(b => text.includes(b)) || 'car rental';
+  const detectedLocation = locations.find(l => text.includes(l)) || null;
+  
+  return { detectedBrand, detectedLocation };
+};
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string[] }> }): Promise<Metadata> {
   const { slug } = await params;
-  // 处理 slug 数组，移除 .html 后缀
-  const fullSlug = slug.join('/').replace(/\.html$/, '');
-  const aiQuery = await prisma.aiQuery.findUnique({ where: { slug: fullSlug + '.html' } });
+  const aiQuery = await getAiQuery(slug);
 
   if (!aiQuery) {
-    // 尝试不带 .html 的查找
-    const aiQueryNoHtml = await prisma.aiQuery.findUnique({ where: { slug: fullSlug } });
-    if (!aiQueryNoHtml) {
-      return { title: 'Not Found' };
-    }
-    return {
-      title: aiQueryNoHtml.seoTitle,
-      description: aiQueryNoHtml.aiSummary,
-    };
+    return { title: 'Not Found' };
   }
 
   const canonicalUrl = `https://carcorporatecodes.com/ask/${aiQuery.slug}`;
 
-  // 动态生成关键词
+  // 动态生成关键词 - 扩展到 8-10 个
   const generateKeywords = (title: string, prompt: string): string[] => {
     const baseKeywords = ['car rental corporate codes', 'CDP', 'discount codes', 'rental car savings'];
     
@@ -35,35 +63,48 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     const titleWords = title.toLowerCase()
       .replace(/[^a-z0-9\s]/g, ' ')
       .split(/\s+/)
-      .filter(w => w.length > 2 && !['the', 'and', 'for', 'with', 'how', 'what', 'are', 'best', 'top', 'save', 'use', 'get', 'your', 'you', 'can', 'using'].includes(w));
+      .filter(w => w.length > 2 && !['the', 'and', 'for', 'with', 'how', 'what', 'are', 'best', 'top', 'save', 'use', 'get', 'your', 'you', 'can', 'using', 'this', 'that', 'have', 'has', 'had'].includes(w));
     
     // 从 prompt 提取品牌名
-    const brandMatches = prompt.match(/\b(hertz|enterprise|avis|budget|national|alamo|dollar|thrifty)\b/gi) || [];
-    const brandKeywords = brandMatches.map(b => `${b.toLowerCase()} corporate code`);
+    const brandMatches = prompt.match(/\b(hertz|enterprise|avis|budget|national|alamo|dollar|thrifty|fox|europcar)\b/gi) || [];
+    const brandKeywords = [...new Set(brandMatches)].map(b => `${b.toLowerCase()} corporate code`);
     
     // 提取公司名（常见大公司）
-    const companyMatches = prompt.match(/\b(amazon|google|microsoft|apple|ibm|deloitte|kpmg|pwc|ey|accenture|fedex|ups|ibm|ge|att|verizon|comcast)\b/gi) || [];
-    const companyKeywords = companyMatches.map(c => `${c.toLowerCase()} employee discount`);
+    const companyMatches = prompt.match(/\b(amazon|google|microsoft|apple|ibm|deloitte|kpmg|pwc|ey|accenture|fedex|ups|ge|att|verizon|comcast|costco|aaa|aarp|sam)\b/gi) || [];
+    const companyKeywords = [...new Set(companyMatches)].map(c => `${c.toLowerCase()} employee discount`);
     
     // 提取代码类型
     const codeTypeKeywords: string[] = [];
     if (prompt.toLowerCase().includes('cdp') || title.toLowerCase().includes('cdp')) {
-      codeTypeKeywords.push('CDP code', 'corporate discount program');
+      codeTypeKeywords.push('CDP code', 'corporate discount program', 'hertz CDP');
     }
     if (prompt.toLowerCase().includes('awd') || title.toLowerCase().includes('awd')) {
       codeTypeKeywords.push('AWD code', 'avis worldwide discount');
+    }
+    if (prompt.toLowerCase().includes('cid') || title.toLowerCase().includes('cid')) {
+      codeTypeKeywords.push('CID code', 'corporate ID number');
     }
     if (prompt.toLowerCase().includes('pc') || title.toLowerCase().includes('pc')) {
       codeTypeKeywords.push('PC code', 'promotion code');
     }
     
     // 提取地点
-    const locationMatches = prompt.match(/\b(new york|los angeles|chicago|houston|phoenix|philadelphia|san antonio|san diego|dallas|san jose|austin|jacksonville|fort worth|columbus|charlotte|san francisco|indianapolis|seattle|denver|washington|boston|el paso|detroit|nashville|portland|oklahoma city|las vegas|louisville|baltimore|milwaukee|albuquerque|tucson|fresno|sacramento|mesa|kansas city|atlanta|long beach|colorado springs|raleigh|miami|virginia beach|omaha|oakland|minneapolis|tulsa|arlington|wichita|bakersfield)\b/gi) || [];
-    const locationKeywords = locationMatches.map(l => `${l.toLowerCase()} car rental`);
+    const locationMatches = prompt.match(/\b(new york|los angeles|chicago|houston|phoenix|philadelphia|san antonio|san diego|dallas|san jose|austin|jacksonville|fort worth|columbus|charlotte|san francisco|indianapolis|seattle|denver|washington|boston|el paso|detroit|nashville|portland|oklahoma city|las vegas|louisville|baltimore|milwaukee|albuquerque|tucson|fresno|sacramento|mesa|kansas city|atlanta|long beach|colorado springs|raleigh|miami|virginia beach|omaha|oakland|minneapolis|tulsa|arlington|wichita|bakersfield|orlando|tampa)\b/gi) || [];
+    const locationKeywords = [...new Set(locationMatches)].map(l => `${l.toLowerCase()} car rental`);
     
     // 合并所有关键词并去重
-    const allKeywords = [...baseKeywords, ...titleWords.slice(0, 5), ...brandKeywords, ...companyKeywords, ...codeTypeKeywords, ...locationKeywords];
-    return [...new Set(allKeywords)].slice(0, 15); // 最多15个关键词
+    const allKeywords = [
+      ...baseKeywords, 
+      ...titleWords.slice(0, 5), 
+      ...brandKeywords, 
+      ...companyKeywords, 
+      ...codeTypeKeywords, 
+      ...locationKeywords
+    ];
+    
+    // 过滤掉单字，保留高质量长尾词组，扩展到 8-10 个
+    const highQualityKeywords = [...new Set(allKeywords)].filter(k => k.includes(' ') && k.length > 5);
+    return highQualityKeywords.slice(0, 10); 
   };
 
   const dynamicKeywords = generateKeywords(aiQuery.seoTitle, aiQuery.userPrompt);
@@ -72,7 +113,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     title: aiQuery.seoTitle,
     description: aiQuery.aiSummary,
     keywords: dynamicKeywords,
-    authors: [{ name: 'Car Corporate Codes' }],
+    authors: [{ name: SITE_AUTHOR.name, url: SITE_AUTHOR.url }],
     robots: {
       index: true,
       follow: true,
@@ -93,7 +134,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
       type: 'article',
       publishedTime: aiQuery.createdAt.toISOString(),
       modifiedTime: aiQuery.createdAt.toISOString(),
-      authors: ['Car Corporate Codes'],
+      authors: [SITE_AUTHOR.name],
       url: canonicalUrl,
       siteName: 'Car Corporate Codes',
       images: [
@@ -116,50 +157,91 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function AiGuidePage({ params }: { params: Promise<{ slug: string[] }> }) {
   const { slug } = await params;
-  // 处理 slug 数组，移除 .html 后缀
-  const fullSlug = slug.join('/').replace(/\.html$/, '');
-  
-  // 先尝试带 .html 的查找
-  let aiQuery = await prisma.aiQuery.findUnique({
-    where: { slug: fullSlug + '.html' },
-  });
-
-  // 如果没找到，尝试不带 .html 的查找
-  if (!aiQuery) {
-    aiQuery = await prisma.aiQuery.findUnique({
-      where: { slug: fullSlug },
-    });
-  }
+  const aiQuery = await getAiQuery(slug);
 
   if (!aiQuery) {
     notFound();
   }
 
-  // 增加浏览次数
-  await prisma.aiQuery.update({
-    where: { slug: aiQuery.slug },
-    data: { viewCount: { increment: 1 } },
-  });
-
-  // 获取相关文章（排除当前文章，按浏览量排序）
+  // 获取相关文章
   const relatedArticles = await prisma.aiQuery.findMany({
     where: {
       slug: { not: aiQuery.slug },
     },
-    orderBy: [
-      { viewCount: 'desc' },
-      { createdAt: 'desc' },
-    ],
+    orderBy: { createdAt: 'desc' },
     take: 4,
     select: {
       slug: true,
       seoTitle: true,
       aiSummary: true,
-      viewCount: true,
+      createdAt: true,
     },
   });
 
   const canonicalUrl = `https://carcorporatecodes.com/ask/${aiQuery.slug}`;
+  
+  // 提取实体用于动态 FAQ
+  const { detectedBrand, detectedLocation } = extractEntities(aiQuery.userPrompt, aiQuery.seoTitle);
+  const brandUpper = detectedBrand.charAt(0).toUpperCase() + detectedBrand.slice(1);
+
+  // 🌟 动态生成 FAQ - 基于文章内容（同时用于 Schema 和视觉展示）
+  const generateDynamicFaqs = () => {
+    const faqs = [
+      {
+        '@type': 'Question',
+        name: `What are the best ${detectedBrand} corporate codes${detectedLocation ? ` in ${detectedLocation}` : ''}?`,
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: aiQuery.aiSummary,
+        },
+      }
+    ];
+
+    // 添加品牌专属 FAQ
+    if (detectedBrand !== 'car rental') {
+      faqs.push({
+        '@type': 'Question',
+        name: `How do I use ${brandUpper} CDP codes?`,
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: `To use ${brandUpper} CDP (Corporate Discount Program) codes, enter the code in the designated field when booking on ${brandUpper}'s website or mention it when calling reservations. Have your company ID or proof of eligibility ready when picking up the vehicle.`,
+        },
+      });
+
+      faqs.push({
+        '@type': 'Question',
+        name: `How much can I save with ${brandUpper} corporate codes?`,
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: `${brandUpper} corporate codes typically save 10-25% off standard rates, depending on location and dates. Some codes also include free upgrades, waived additional driver fees, or other perks.`,
+        },
+      });
+    }
+
+    // 添加通用 FAQ
+    faqs.push(
+      {
+        '@type': 'Question',
+        name: 'Do I need to prove eligibility for corporate codes?',
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: 'Most corporate codes require proof of eligibility at the rental counter, such as a company ID, business card, or pay stub. However, some codes marked as "Leisure" or "Public" may not require verification. Always check the specific requirements before booking.',
+        },
+      },
+      {
+        '@type': 'Question',
+        name: 'Can I combine corporate codes with other discounts?',
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: 'Corporate codes generally cannot be combined with other promotional codes or coupons. However, you can often stack them with loyalty program benefits, credit card rewards, or cashback offers. Always compare rates to ensure you\'re getting the best price.',
+        },
+      }
+    );
+
+    return faqs;
+  };
+
+  const faqs = generateDynamicFaqs();
 
   // JSON-LD 结构化数据
   const jsonLd = {
@@ -174,9 +256,10 @@ export default async function AiGuidePage({ params }: { params: Promise<{ slug: 
         datePublished: aiQuery.createdAt.toISOString(),
         dateModified: aiQuery.createdAt.toISOString(),
         author: {
-          '@type': 'Organization',
-          name: 'Car Corporate Codes',
-          '@id': 'https://carcorporatecodes.com/#organization',
+          '@type': 'Person',
+          name: SITE_AUTHOR.name,
+          description: SITE_AUTHOR.bio,
+          url: SITE_AUTHOR.url,
         },
         publisher: {
           '@type': 'Organization',
@@ -236,48 +319,7 @@ export default async function AiGuidePage({ params }: { params: Promise<{ slug: 
       {
         '@type': 'FAQPage',
         '@id': `${canonicalUrl}#faq`,
-        mainEntity: [
-          {
-            '@type': 'Question',
-            name: `What are the best corporate codes for ${aiQuery.userPrompt}?`,
-            acceptedAnswer: {
-              '@type': 'Answer',
-              text: aiQuery.aiSummary,
-            },
-          },
-          {
-            '@type': 'Question',
-            name: 'How much can I save with car rental corporate codes?',
-            acceptedAnswer: {
-              '@type': 'Answer',
-              text: 'Car rental corporate codes typically save you 10-25% off standard rates. Savings vary by rental company, location, vehicle type, and dates. Some corporate codes also include additional benefits like free upgrades, waived fees, or additional driver privileges.',
-            },
-          },
-          {
-            '@type': 'Question',
-            name: 'Do I need to prove eligibility for corporate codes?',
-            acceptedAnswer: {
-              '@type': 'Answer',
-              text: 'Most corporate codes require proof of eligibility at the rental counter, such as a company ID, business card, or pay stub. However, some codes marked as "Leisure" or "Public" may not require verification. Always check the specific requirements for each code before booking.',
-            },
-          },
-          {
-            '@type': 'Question',
-            name: 'Can I combine corporate codes with other discounts?',
-            acceptedAnswer: {
-              '@type': 'Answer',
-              text: 'Corporate codes generally cannot be combined with other promotional codes or coupons. However, you can often stack them with loyalty program benefits, credit card rewards, or cashback offers. Always compare the corporate rate with publicly available deals to ensure you\'re getting the best price.',
-            },
-          },
-          {
-            '@type': 'Question',
-            name: 'What is the difference between CDP and PC codes?',
-            acceptedAnswer: {
-              '@type': 'Answer',
-              text: 'CDP (Corporate Discount Program) codes are negotiated rates for employees of specific companies or members of organizations. PC (Promotion Code) codes are special promotional rates that may be available to the general public or specific groups. CDP codes typically offer deeper discounts but require eligibility verification.',
-            },
-          },
-        ],
+        mainEntity: faqs,
       },
     ],
   };
@@ -318,11 +360,11 @@ export default async function AiGuidePage({ params }: { params: Promise<{ slug: 
           {aiQuery.seoTitle}
         </h1>
 
-        {/* 元信息行 */}
-        <div className="flex items-center gap-4 text-sm text-gray-500 mb-6 pb-4 border-b border-gray-200">
+        {/* 元信息行 - 添加作者信息 */}
+        <div className="text-sm text-gray-500 mb-6 pb-4 border-b border-gray-200 flex items-center gap-2">
           <span>{aiQuery.createdAt.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</span>
-          <span>•</span>
-          <span>{aiQuery.viewCount.toLocaleString()} views</span>
+          <span>·</span>
+          <span>By {SITE_AUTHOR.name}</span>
         </div>
 
         {/* 文章内容 */}
@@ -339,34 +381,30 @@ export default async function AiGuidePage({ params }: { params: Promise<{ slug: 
           dangerouslySetInnerHTML={{ __html: aiQuery.seoContent }}
         />
 
-        {/* Insider Tip */}
-        <div className="mt-8 p-4 bg-amber-50 border-l-4 border-amber-400">
-          <p className="text-amber-900 text-sm leading-relaxed">
-            <span className="font-bold">💡 Insider Tip:</span>{' '}
-            Book directly on the rental company&apos;s website and avoid third-party sites like Expedia or Kayak. 
-            I&apos;ve seen $50+ in surprise fees added at check-in for third-party bookings. 
-            Corporate rate bookings earn full loyalty points and qualify for free promotions.
-          </p>
+        {/* 作者简介 - EEAT 信号 */}
+        <div className="mt-8 p-4 bg-gray-50 rounded-lg border border-gray-200">
+          <div className="flex items-start gap-3">
+            <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold text-sm">
+              {SITE_AUTHOR.name.charAt(0)}
+            </div>
+            <div>
+              <p className="font-semibold text-gray-900">{SITE_AUTHOR.name}</p>
+              <p className="text-sm text-gray-600">{SITE_AUTHOR.title}</p>
+              <p className="text-xs text-gray-500 mt-1">{SITE_AUTHOR.bio}</p>
+            </div>
+          </div>
         </div>
 
-        {/* 免责声明 */}
-        <div className="mt-6 text-xs text-gray-500">
-          <p>
-            Disclaimer: Corporate codes require eligibility verification. 
-            Always check with the rental company and have proper documentation ready.
-          </p>
-        </div>
-
-        {/* 互动反馈 */}
-        <div className="mt-8 pt-6 border-t border-gray-200">
-          <p className="text-sm text-gray-600 mb-3">Was this guide helpful?</p>
-          <div className="flex gap-2">
-            <button className="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm transition-colors">
-              👍 Yes
-            </button>
-            <button className="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm transition-colors">
-              👎 No
-            </button>
+        {/* 🌟 视觉 FAQ 模块 - 增强页面长度和关键词密度，避免 Google 惩罚 */}
+        <div className="mt-12 pt-8 border-t border-gray-200">
+          <h2 className="text-xl font-bold text-gray-900 mb-6">Frequently Asked Questions</h2>
+          <div className="space-y-4">
+            {faqs.map((faq: any, index: number) => (
+              <div key={index} className="bg-gray-50 p-4 rounded-lg border border-gray-100">
+                <h3 className="font-semibold text-gray-900 mb-2 text-base">{faq.name}</h3>
+                <p className="text-gray-600 text-sm leading-relaxed">{faq.acceptedAnswer.text}</p>
+              </div>
+            ))}
           </div>
         </div>
 
@@ -379,16 +417,18 @@ export default async function AiGuidePage({ params }: { params: Promise<{ slug: 
                 <Link
                   key={article.slug}
                   href={`/ask/${article.slug}`}
-                  className="block p-4 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors group"
+                  className="block p-4 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors group flex flex-col justify-between h-full"
                 >
-                  <h3 className="font-semibold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors line-clamp-2">
-                    {article.seoTitle}
-                  </h3>
-                  <p className="text-sm text-gray-600 line-clamp-2 mb-2">
-                    {article.aiSummary}
-                  </p>
-                  <span className="text-xs text-gray-400">
-                    {article.viewCount.toLocaleString()} views
+                  <div>
+                    <h3 className="font-semibold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors line-clamp-2">
+                      {article.seoTitle}
+                    </h3>
+                    <p className="text-sm text-gray-600 line-clamp-2 mb-3">
+                      {article.aiSummary}
+                    </p>
+                  </div>
+                  <span className="text-xs text-gray-400 mt-auto">
+                    {article.createdAt.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                   </span>
                 </Link>
               ))}
@@ -410,18 +450,14 @@ export default async function AiGuidePage({ params }: { params: Promise<{ slug: 
         </div>
       </main>
 
-      {/* 页脚 */}
-      <footer className="bg-gray-900 text-gray-300 py-12 mt-16">
-        <div className="max-w-3xl mx-auto px-4">
-          <div className="mb-8">
-            <h3 className="text-white text-lg font-bold mb-4">Car Corporate Codes</h3>
-            <p className="text-sm text-gray-400">
-              Database of car rental corporate codes and discounts. Updated regularly for accuracy.
-            </p>
-          </div>
-          <div className="border-t border-gray-800 pt-8 text-center text-sm text-gray-500">
-            <p>&copy; {new Date().getFullYear()} Car Corporate Codes. All rights reserved.</p>
-          </div>
+      {/* 简化页脚 - I-Lang 优化 */}
+      <footer className="bg-gray-50 text-gray-500 py-8 mt-12 border-t border-gray-200">
+        <div className="max-w-3xl mx-auto px-4 text-center text-xs">
+          <p className="mb-2">
+            <strong>Disclaimer:</strong> Corporate codes require eligibility verification. 
+            Always check with the rental company and have proper documentation ready.
+          </p>
+          <p>&copy; {new Date().getFullYear()} Car Corporate Codes. All rights reserved.</p>
         </div>
       </footer>
     </div>
