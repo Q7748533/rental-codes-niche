@@ -27,11 +27,52 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
   const canonicalUrl = `https://carcorporatecodes.com/ask/${aiQuery.slug}`;
 
+  // 动态生成关键词
+  const generateKeywords = (title: string, prompt: string): string[] => {
+    const baseKeywords = ['car rental corporate codes', 'CDP', 'discount codes', 'rental car savings'];
+    
+    // 从标题提取关键词
+    const titleWords = title.toLowerCase()
+      .replace(/[^a-z0-9\s]/g, ' ')
+      .split(/\s+/)
+      .filter(w => w.length > 2 && !['the', 'and', 'for', 'with', 'how', 'what', 'are', 'best', 'top', 'save', 'use', 'get', 'your', 'you', 'can', 'using'].includes(w));
+    
+    // 从 prompt 提取品牌名
+    const brandMatches = prompt.match(/\b(hertz|enterprise|avis|budget|national|alamo|dollar|thrifty)\b/gi) || [];
+    const brandKeywords = brandMatches.map(b => `${b.toLowerCase()} corporate code`);
+    
+    // 提取公司名（常见大公司）
+    const companyMatches = prompt.match(/\b(amazon|google|microsoft|apple|ibm|deloitte|kpmg|pwc|ey|accenture|fedex|ups|ibm|ge|att|verizon|comcast)\b/gi) || [];
+    const companyKeywords = companyMatches.map(c => `${c.toLowerCase()} employee discount`);
+    
+    // 提取代码类型
+    const codeTypeKeywords: string[] = [];
+    if (prompt.toLowerCase().includes('cdp') || title.toLowerCase().includes('cdp')) {
+      codeTypeKeywords.push('CDP code', 'corporate discount program');
+    }
+    if (prompt.toLowerCase().includes('awd') || title.toLowerCase().includes('awd')) {
+      codeTypeKeywords.push('AWD code', 'avis worldwide discount');
+    }
+    if (prompt.toLowerCase().includes('pc') || title.toLowerCase().includes('pc')) {
+      codeTypeKeywords.push('PC code', 'promotion code');
+    }
+    
+    // 提取地点
+    const locationMatches = prompt.match(/\b(new york|los angeles|chicago|houston|phoenix|philadelphia|san antonio|san diego|dallas|san jose|austin|jacksonville|fort worth|columbus|charlotte|san francisco|indianapolis|seattle|denver|washington|boston|el paso|detroit|nashville|portland|oklahoma city|las vegas|louisville|baltimore|milwaukee|albuquerque|tucson|fresno|sacramento|mesa|kansas city|atlanta|long beach|colorado springs|raleigh|miami|virginia beach|omaha|oakland|minneapolis|tulsa|arlington|wichita|bakersfield)\b/gi) || [];
+    const locationKeywords = locationMatches.map(l => `${l.toLowerCase()} car rental`);
+    
+    // 合并所有关键词并去重
+    const allKeywords = [...baseKeywords, ...titleWords.slice(0, 5), ...brandKeywords, ...companyKeywords, ...codeTypeKeywords, ...locationKeywords];
+    return [...new Set(allKeywords)].slice(0, 15); // 最多15个关键词
+  };
+
+  const dynamicKeywords = generateKeywords(aiQuery.seoTitle, aiQuery.userPrompt);
+
   return {
     title: aiQuery.seoTitle,
     description: aiQuery.aiSummary,
-    keywords: ['car rental corporate codes', 'CDP', 'AWD', 'discount codes', 'rental car savings'],
-    authors: [{ name: 'Car Corporate Codes AI' }],
+    keywords: dynamicKeywords,
+    authors: [{ name: 'Car Corporate Codes' }],
     robots: {
       index: true,
       follow: true,
