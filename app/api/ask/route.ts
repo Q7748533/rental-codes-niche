@@ -224,11 +224,11 @@ ${realCodesContext}
 
     const savedQuery = await prisma.aiQuery.create({
       data: {
-        slug: finalSlug,
+        slug: finalSlug + '.html', // 统一添加 .html 后缀，支持伪静态 URL
         userPrompt: query,
         aiSummary: draftData.summary || 'Here is what I found for you.',
         seoTitle: draftData.seoTitle || `${query} - Car Rental Guide`,
-        seoContent: finalHtmlContent, // 🌟 存入经过主编洗礼的无敌最终稿
+        seoContent: finalHtmlContent, // 存入经过主编洗礼的无敌最终稿
       }
     });
 
