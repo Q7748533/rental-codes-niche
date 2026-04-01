@@ -307,7 +307,7 @@ export default async function AiGuidePage({ params }: { params: Promise<{ slug: 
           <ol className="flex items-center space-x-2 text-sm text-gray-500">
             <li><Link href="/" className="hover:text-blue-600">Home</Link></li>
             <li className="text-gray-400">/</li>
-            <li><Link href="/ask" className="hover:text-blue-600">Guides</Link></li>
+            <li><Link href="/ask" className="hover:text-blue-600">Ask</Link></li>
             <li className="text-gray-400">/</li>
             <li className="text-gray-900 truncate max-w-[200px]">{aiQuery.seoTitle}</li>
           </ol>
