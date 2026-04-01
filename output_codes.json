@@ -1,26 +1,18 @@
 [
   {
     "brand": "Avis",
-    "company": "Nebraska Alumni Association",
-    "codeValue": "H776900",
-    "description": "Up to 25% off",
+    "company": "DePaul University",
+    "codeValue": "A740900",
+    "description": "Approximately 20% off retail rates",
     "codeType": "leisure",
-    "source": "Association"
+    "source": "Member"
   },
   {
-    "brand": "Budget",
-    "company": "Nebraska Alumni Association",
-    "codeValue": "R334100",
-    "description": "Up to 20% off",
+    "brand": "Hertz",
+    "company": "DePaul University",
+    "codeValue": "1036300",
+    "description": "Between 5% and 25% off retail rates and complimentary Hertz #1 Club Gold Membership",
     "codeType": "leisure",
-    "source": "Association"
-  },
-  {
-    "brand": "Auto Europe",
-    "company": "Nebraska Alumni Association",
-    "codeValue": "99006509",
-    "description": "Up to 25% discount",
-    "codeType": "leisure",
-    "source": "Association"
+    "source": "Member"
   }
 ]

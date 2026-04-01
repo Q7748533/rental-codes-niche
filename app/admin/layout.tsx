@@ -10,6 +10,7 @@ const menuItems = [
   { href: '/admin/brands', label: '品牌管理', icon: '🏢' },
   { href: '/admin/import', label: '导入代码', icon: '📥' },
   { href: '/admin/codes', label: '代码管理', icon: '🎫' },
+  { href: '/admin/ai-articles', label: 'AI 文章管理', icon: '🤖' },
 ];
 
 export default async function AdminLayout({
