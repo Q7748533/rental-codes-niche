@@ -204,6 +204,22 @@ export default async function Home() {
               text: 'The rental company may charge you the standard rate instead of the corporate rate. In some cases, they may refuse service or void insurance coverage.',
             },
           },
+          {
+            '@type': 'Question',
+            name: 'How often is your database updated?',
+            acceptedAnswer: {
+              '@type': 'Answer',
+              text: 'Our database is updated monthly by crawling publicly available sources. However, we recommend verifying all codes directly with the rental company before booking.',
+            },
+          },
+          {
+            '@type': 'Question',
+            name: 'Are these codes verified to work?',
+            acceptedAnswer: {
+              '@type': 'Answer',
+              text: 'We collect codes from public sources but do not individually verify each code. Codes may expire or change without notice. Always confirm eligibility and validity at checkout.',
+            },
+          },
         ],
       },
     ],
@@ -246,10 +262,24 @@ export default async function Home() {
             for Hertz, Enterprise, Avis, Budget, and National. Save 10-25% on business travel and leisure car rentals 
             with our updated database of {totalCodes} active corporate codes.
           </p>
-          <p className="text-sm text-gray-500 mb-10">
-            Last updated: {new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })} | 
-            Database: {totalCodes} active codes | Free to use
-          </p>
+          <div className="mb-6">
+            <span className="inline-flex items-center gap-2 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white px-4 py-2 rounded-full text-sm font-medium shadow-md">
+              <span className="w-2 h-2 bg-emerald-200 rounded-full animate-pulse"></span>
+              Database Updated: {new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+            </span>
+            <span className="ml-3 text-sm text-gray-500">
+              {totalCodes} codes collected from public sources
+            </span>
+          </div>
+
+          {/* 免责声明 */}
+          <div className="bg-amber-50 border-l-4 border-amber-400 rounded-r-lg p-4 max-w-2xl mx-auto mb-8">
+            <p className="text-amber-800 text-sm leading-relaxed">
+              <strong>⚠️ Disclaimer:</strong> Corporate codes are sourced from publicly available data. 
+              We do not verify individual code validity. Always verify discounts at checkout. 
+              Rental companies may require proof of eligibility. We are not affiliated with any rental companies.
+            </p>
+          </div>
 
           {/* 鍏ㄦ柊鐨?AI 鑱婂ぉ妗嗙粍浠?*/}
           <div className="max-w-3xl mx-auto relative px-4 sm:px-0 z-10">
@@ -362,22 +392,30 @@ export default async function Home() {
           </div>
         </section>
 
-        {/* H2: FAQ */}
+        {/* H2: FAQ - 视觉化展示 */}
         <section id="faq" className="mb-24">
           <h2 className="text-2xl font-bold mb-6 text-gray-900 border-b border-gray-200 pb-3">Frequently Asked Questions</h2>
           <div className="space-y-4">
-            <details className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-              <summary className="font-semibold text-gray-900 cursor-pointer">What is a CDP code?</summary>
-              <p className="mt-3 text-gray-600 text-sm">CDP (Corporate Discount Program) is a negotiated rate between a rental company and an organization. It typically offers 10-25% off standard rates.</p>
-            </details>
-            <details className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-              <summary className="font-semibold text-gray-900 cursor-pointer">Can anyone use corporate codes?</summary>
-              <p className="mt-3 text-gray-600 text-sm">No. Corporate codes are intended for employees or members of specific organizations. Rental agents may ask for proof of eligibility at pickup.</p>
-            </details>
-            <details className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-              <summary className="font-semibold text-gray-900 cursor-pointer">What happens if I use a code without eligibility?</summary>
-              <p className="mt-3 text-gray-600 text-sm">The rental company may charge you the standard rate instead of the corporate rate. In some cases, they may refuse service or void insurance coverage.</p>
-            </details>
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5 hover:border-blue-300 hover:shadow-md transition-all">
+              <h3 className="font-semibold text-gray-900 mb-2">What is a CDP code?</h3>
+              <p className="text-gray-600 text-sm leading-relaxed">CDP (Corporate Discount Program) is a negotiated rate between a rental company and an organization. It typically offers 10-25% off standard rates.</p>
+            </div>
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5 hover:border-blue-300 hover:shadow-md transition-all">
+              <h3 className="font-semibold text-gray-900 mb-2">Can anyone use corporate codes?</h3>
+              <p className="text-gray-600 text-sm leading-relaxed">No. Corporate codes are intended for employees or members of specific organizations. Rental agents may ask for proof of eligibility at pickup.</p>
+            </div>
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5 hover:border-blue-300 hover:shadow-md transition-all">
+              <h3 className="font-semibold text-gray-900 mb-2">What happens if I use a code without eligibility?</h3>
+              <p className="text-gray-600 text-sm leading-relaxed">The rental company may charge you the standard rate instead of the corporate rate. In some cases, they may refuse service or void insurance coverage.</p>
+            </div>
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5 hover:border-blue-300 hover:shadow-md transition-all">
+              <h3 className="font-semibold text-gray-900 mb-2">How often is your database updated?</h3>
+              <p className="text-gray-600 text-sm leading-relaxed">Our database is updated monthly by crawling publicly available sources. However, we recommend verifying all codes directly with the rental company before booking.</p>
+            </div>
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5 hover:border-blue-300 hover:shadow-md transition-all">
+              <h3 className="font-semibold text-gray-900 mb-2">Are these codes verified to work?</h3>
+              <p className="text-gray-600 text-sm leading-relaxed">We collect codes from public sources but do not individually verify each code. Codes may expire or change without notice. Always confirm eligibility and validity at checkout.</p>
+            </div>
           </div>
         </section>
 
@@ -427,14 +465,15 @@ export default async function Home() {
         )}
       </main>
 
-      {/* 椤佃剼 */}
+      {/* 页脚 */}
       <footer className="bg-gray-900 text-gray-300 py-12">
         <div className="max-w-6xl mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
             <div>
               <h3 className="text-white text-lg font-bold mb-4">Car Corporate Codes</h3>
               <p className="text-sm text-gray-400">
-                Database of car rental corporate codes and discounts. Updated regularly for accuracy.
+                Database of car rental corporate codes collected from public sources. 
+                Not affiliated with any rental companies.
               </p>
             </div>
             <div>
@@ -454,8 +493,20 @@ export default async function Home() {
               </ul>
             </div>
           </div>
-          <div className="border-t border-gray-800 pt-8 text-center text-sm text-gray-500">
-            <p>&copy; {new Date().getFullYear()} Car Corporate Codes. All rights reserved.</p>
+          
+          {/* 页脚免责声明 */}
+          <div className="border-t border-gray-800 pt-6 mb-6">
+            <p className="text-xs text-gray-500 leading-relaxed">
+              <strong>Important Notice:</strong> All corporate codes are sourced from publicly available information. 
+              We do not guarantee the validity or eligibility requirements of any code. 
+              Rental companies may change codes, rates, or eligibility criteria at any time. 
+              Always verify discounts directly with the rental company before booking. 
+              Use of corporate codes without proper eligibility may result in rate adjustments or service refusal.
+            </p>
+          </div>
+          
+          <div className="border-t border-gray-800 pt-6 text-center text-sm text-gray-500">
+            <p>&copy; {new Date().getFullYear()} Car Corporate Codes. All rights reserved. | Data last updated: {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</p>
           </div>
         </div>
       </footer>
