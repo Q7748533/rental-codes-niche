@@ -104,6 +104,7 @@ async function deleteBrandAction(formData: FormData) {
     });
     revalidatePath('/admin');
     revalidatePath('/');
+    revalidatePath('/sitemap.xml');
   }
 }
 
