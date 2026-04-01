@@ -4,6 +4,9 @@ import Link from 'next/link';
 import BatchDeleteForm from './components/BatchDeleteForm';
 import PublicDealsManager from './components/PublicDealsManager';
 
+// 强制动态渲染，避免构建时查询数据库
+export const dynamic = 'force-dynamic';
+
 // 单个删除
 async function deleteCodeAction(formData: FormData) {
   'use server';
