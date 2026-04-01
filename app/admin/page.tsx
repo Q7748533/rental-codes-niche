@@ -1,8 +1,10 @@
 import { prisma } from '@/lib/db';
 import { revalidatePath } from 'next/cache';
 import Link from 'next/link';
+import { requireAdminAuth } from '@/lib/auth';
 import BatchDeleteForm from './components/BatchDeleteForm';
 import PublicDealsManager from './components/PublicDealsManager';
+import LogoutButton from './components/LogoutButton';
 
 // 强制动态渲染，避免构建时查询数据库
 export const dynamic = 'force-dynamic';
@@ -88,6 +90,9 @@ async function deletePublicDealAction(formData: FormData) {
 }
 
 export default async function AdminDashboard() {
+  // 验证管理员登录状态，未登录则重定向到登录页
+  await requireAdminAuth();
+  
   const [totalCodes, totalBrands, totalCompanies, totalPublicDeals] = await Promise.all([
     prisma.code.count(),
     prisma.brand.count(),
@@ -115,10 +120,11 @@ export default async function AdminDashboard() {
             <div className="flex items-center">
               <span className="font-extrabold text-xl tracking-wider">Car Corporate Codes 管理后台</span>
             </div>
-            <div className="flex space-x-4">
+            <div className="flex items-center space-x-4">
               <Link href="/" className="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors">
                 查看前台网站 &rarr;
               </Link>
+              <LogoutButton />
             </div>
           </div>
         </div>

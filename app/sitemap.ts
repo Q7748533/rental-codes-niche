@@ -1,77 +1,31 @@
-import { MetadataRoute } from 'next';
-import { prisma } from '@/lib/db';
+// 文件路径：scripts/scraper.ts
+import { chromium } from 'playwright';
+import { PrismaClient } from '@prisma/client';
+import OpenAI from 'openai';
+import dotenv from 'dotenv';
 
-// 强制动态渲染，避免构建时查询数据库
-export const dynamic = 'force-dynamic';
+// 1. 强制加载环境变量
+dotenv.config({ path: '.env.local' });
+dotenv.config({ path: '.env' });
 
-const BASE_URL = 'https://carcorporatecodes.com';
+// 2. 终极兼容写法：使用 require 彻底绕过模块解析冲突
+// @ts-ignore
+const { PrismaLibSQL } = require('@prisma/adapter-libsql');
+// @ts-ignore
+const { createClient } = require('@libsql/client');
 
-export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  // 1. 静态页面
-  const staticRoutes: MetadataRoute.Sitemap = [
-    {
-      url: `${BASE_URL}/`,
-      lastModified: new Date(),
-      changeFrequency: 'daily',
-      priority: 1.0,
-    },
-    {
-      url: `${BASE_URL}/ask`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly',
-      priority: 0.7,
-    },
-    {
-      url: `${BASE_URL}/privacy`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.3,
-    },
-    {
-      url: `${BASE_URL}/terms`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.3,
-    },
-    {
-      url: `${BASE_URL}/about`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.5,
-    },
-    {
-      url: `${BASE_URL}/tips`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly',
-      priority: 0.6,
-    },
-  ];
+// 3. 点火云端数据库
+const libsql = createClient({
+  url: process.env.TURSO_DATABASE_URL!,
+  authToken: process.env.TURSO_AUTH_TOKEN!,
+});
+const adapter = new PrismaLibSQL(libsql);
+const prisma = new PrismaClient({ adapter });
 
-  // 2. 品牌页面
-  const brands = await prisma.brand.findMany({
-    select: { slug: true, updatedAt: true },
-  });
-  
-  const brandRoutes: MetadataRoute.Sitemap = brands.map((brand) => ({
-    url: `${BASE_URL}/${brand.slug}`,
-    lastModified: brand.updatedAt,
-    changeFrequency: 'weekly',
-    priority: 0.8,
-  }));
+// 4. 初始化 AI
+const openai = new OpenAI({
+  apiKey: process.env.VECTOR_ENGINE_API_KEY,
+  // baseURL: 'https://api.xty.app/v1', // 如果用中转接口把双斜杠删掉
+});
 
-  // 3. AI 生成的文章页面
-  const articles = await prisma.aiQuery.findMany({
-    select: { slug: true, createdAt: true },
-    orderBy: { createdAt: 'desc' },
-  });
-  
-  const articleRoutes: MetadataRoute.Sitemap = articles.map((article) => ({
-    url: `${BASE_URL}/ask/${article.slug}`,
-    lastModified: article.createdAt,
-    changeFrequency: 'weekly',
-    priority: 0.7,
-  }));
-
-  // 合并所有路由
-  return [...staticRoutes, ...brandRoutes, ...articleRoutes];
-}
+// ...... (下面的 runScraper 函数部分保持不变) ......
