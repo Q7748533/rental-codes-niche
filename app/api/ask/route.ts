@@ -80,13 +80,42 @@ export async function POST(req: Request) {
       });
     }
 
-    // 6. 从 AI 生成的标题创建 slug（确保 URL 和标题一致）
-    const seoTitleSlug = (aiData.seoTitle || query)
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/(^-|-$)/g, '')
-      .substring(0, 60); // 限制长度
-    const finalSlug = `${seoTitleSlug}-${Date.now().toString().slice(-4)}.html`;
+    // 6. 从 AI 生成的标题创建 SEO 友好的 slug
+    // 提取核心关键词：品牌名 + corporate codes + 年份 + 公司名
+    const extractCoreKeywords = (title: string): string => {
+      const lower = title.toLowerCase();
+      
+      // 提取品牌名 (hertz, enterprise, avis, budget, national, alamo, dollar, thrifty)
+      const brandMatch = lower.match(/\b(hertz|enterprise|avis|budget|national|alamo|dollar|thrifty)\b/);
+      const brand = brandMatch ? brandMatch[1] : '';
+      
+      // 提取年份
+      const yearMatch = lower.match(/\b(202\d)\b/);
+      const year = yearMatch ? yearMatch[1] : '';
+      
+      // 提取公司/组织名 (IBM, Amazon, Deloitte, AAA 等)
+      const companyMatch = title.match(/\b(IBM|Amazon|Deloitte|Microsoft|Google|Apple|AAA|Costco|Sam's Club|AARP)\b/i);
+      const company = companyMatch ? companyMatch[1].toLowerCase() : '';
+      
+      // 构建核心 slug：品牌-corporate-codes-年份-公司
+      const parts = [brand, 'corporate', 'codes', year, company].filter(Boolean);
+      
+      // 如果提取失败，回退到清理后的标题
+      if (parts.length < 2) {
+        return title
+          .toLowerCase()
+          .replace(/\b(up|to|with|the|and|or|for|in|on|at|by|from|save|discount|code|codes)\b/g, '')
+          .replace(/[^a-z0-9]+/g, '-')
+          .replace(/(^-|-$)/g, '')
+          .replace(/-+/g, '-')
+          .substring(0, 50);
+      }
+      
+      return parts.join('-');
+    };
+    
+    const seoTitleSlug = extractCoreKeywords(aiData.seoTitle || query);
+    const finalSlug = `${seoTitleSlug}.html`;
 
     // 7. 将这篇新鲜出炉的 SEO 文章永久存入数据库！
     const savedQuery = await prisma.aiQuery.create({
