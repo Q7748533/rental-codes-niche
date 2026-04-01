@@ -1,31 +1,52 @@
-// 文件路径：scripts/scraper.ts
-import { chromium } from 'playwright';
-import { PrismaClient } from '@prisma/client';
-import OpenAI from 'openai';
-import dotenv from 'dotenv';
+import { prisma } from '@/lib/db';
+import { MetadataRoute } from 'next';
 
-// 1. 强制加载环境变量
-dotenv.config({ path: '.env.local' });
-dotenv.config({ path: '.env' });
+export const dynamic = 'force-dynamic';
 
-// 2. 终极兼容写法：使用 require 彻底绕过模块解析冲突
-// @ts-ignore
-const { PrismaLibSQL } = require('@prisma/adapter-libsql');
-// @ts-ignore
-const { createClient } = require('@libsql/client');
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const baseUrl = 'https://www.carcorporatecodes.com';
 
-// 3. 点火云端数据库
-const libsql = createClient({
-  url: process.env.TURSO_DATABASE_URL!,
-  authToken: process.env.TURSO_AUTH_TOKEN!,
-});
-const adapter = new PrismaLibSQL(libsql);
-const prisma = new PrismaClient({ adapter });
+  // 获取所有品牌页面
+  const brands = await prisma.brand.findMany({
+    select: { slug: true, updatedAt: true },
+  });
 
-// 4. 初始化 AI
-const openai = new OpenAI({
-  apiKey: process.env.VECTOR_ENGINE_API_KEY,
-  // baseURL: 'https://api.xty.app/v1', // 如果用中转接口把双斜杠删掉
-});
+  // 获取所有 AI 生成的文章
+  const articles = await prisma.aiQuery.findMany({
+    select: { slug: true, updatedAt: true },
+  });
 
-// ...... (下面的 runScraper 函数部分保持不变) ......
+  // 静态页面
+  const staticPages = [
+    {
+      url: baseUrl,
+      lastModified: new Date(),
+      changeFrequency: 'daily' as const,
+      priority: 1,
+    },
+    {
+      url: `${baseUrl}/ask`,
+      lastModified: new Date(),
+      changeFrequency: 'daily' as const,
+      priority: 0.9,
+    },
+  ];
+
+  // 品牌页面
+  const brandPages = brands.map((brand) => ({
+    url: `${baseUrl}/${brand.slug}`,
+    lastModified: brand.updatedAt,
+    changeFrequency: 'weekly' as const,
+    priority: 0.8,
+  }));
+
+  // 文章页面
+  const articlePages = articles.map((article) => ({
+    url: `${baseUrl}/ask/${article.slug}`,
+    lastModified: article.updatedAt,
+    changeFrequency: 'weekly' as const,
+    priority: 0.7,
+  }));
+
+  return [...staticPages, ...brandPages, ...articlePages];
+}
