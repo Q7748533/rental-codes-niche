@@ -5,6 +5,7 @@ import { requireAdminAuth } from '@/lib/auth';
 import BatchDeleteForm from './components/BatchDeleteForm';
 import PublicDealsManager from './components/PublicDealsManager';
 import LogoutButton from './components/LogoutButton';
+import JsonImportForm from './components/JsonImportForm';
 
 // 强制动态渲染，避免构建时查询数据库
 export const dynamic = 'force-dynamic';
@@ -167,6 +168,17 @@ export default async function AdminDashboard() {
           </div>
         </div>
 
+        {/* JSON 导入 */}
+        <div className="bg-white shadow rounded-lg overflow-hidden border border-gray-200 mb-8">
+          <div className="px-6 py-5 border-b border-gray-200 bg-gray-50">
+            <h3 className="text-lg font-bold leading-6 text-gray-900">导入代码数据</h3>
+            <p className="text-sm text-gray-500 mt-1">上传 JSON 文件批量导入租车优惠代码</p>
+          </div>
+          <div className="p-6">
+            <JsonImportForm />
+          </div>
+        </div>
+
         {/* 数据表格 */}
         <div className="bg-white shadow rounded-lg overflow-hidden border border-gray-200">
           <div className="px-6 py-5 border-b border-gray-200 flex justify-between items-center bg-gray-50">
@@ -174,9 +186,6 @@ export default async function AdminDashboard() {
               <h3 className="text-lg font-bold leading-6 text-gray-900">数据库记录</h3>
               <p className="text-sm text-gray-500 mt-1">勾选记录可进行批量删除</p>
             </div>
-            <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm font-medium shadow transition-colors">
-              + 导入代码（即将推出）
-            </button>
           </div>
 
           <BatchDeleteForm 
