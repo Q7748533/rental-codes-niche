@@ -90,7 +90,7 @@ export default async function Home() {
         url: 'https://carcorporatecodes.com',
         logo: {
           '@type': 'ImageObject',
-          url: 'https://carcorporatecodes.com/logo.png',
+          url: 'https://carcorporatecodes.com/og-image.svg',
         },
         description: 'Database of verified car rental corporate codes and discounts',
       },
@@ -112,6 +112,19 @@ export default async function Home() {
           'query-input': 'required name=search_term_string',
         },
       },
+      // BreadcrumbList
+      {
+        '@type': 'BreadcrumbList',
+        '@id': 'https://carcorporatecodes.com/#breadcrumb',
+        itemListElement: [
+          {
+            '@type': 'ListItem',
+            position: 1,
+            name: 'Home',
+            item: 'https://carcorporatecodes.com',
+          },
+        ],
+      },
       // WebPage
       {
         '@type': 'WebPage',
@@ -121,6 +134,9 @@ export default async function Home() {
         description: `Verified CDP and PC codes for Hertz, Enterprise, Avis, Budget, and National. Database of ${totalCodes} active codes.`,
         isPartOf: {
           '@id': 'https://carcorporatecodes.com/#website',
+        },
+        breadcrumb: {
+          '@id': 'https://carcorporatecodes.com/#breadcrumb',
         },
         about: {
           '@id': 'https://carcorporatecodes.com/#organization',
@@ -193,18 +209,20 @@ export default async function Home() {
       </header>
 
       <main className="max-w-6xl mx-auto px-4 py-16">
-        {/* H1: 绮惧噯澹版槑鏍稿績瀹炰綋 */}
+        {/* H1: 精准声明核心实体 - 优化关键词覆盖 */}
         <div className="text-center mb-20 mt-8">
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-            Car Rental Corporate Codes 2026
+          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6 leading-tight">
+            Car Rental Corporate Codes 2026:<br className="hidden md:block" />
+            <span className="text-blue-700">Hertz, Enterprise & Avis CDP Discounts</span>
           </h1>
-          <p className="text-xl text-gray-600 mb-4 max-w-3xl mx-auto">
-            Verified CDP and PC codes for Hertz, Enterprise, Avis, Budget, and National. 
-            Save 10-25% on business and leisure car rentals.
+          <p className="text-xl text-gray-600 mb-4 max-w-3xl mx-auto leading-relaxed">
+            Find verified <strong>CDP (Corporate Discount Program)</strong> and <strong>PC (Promotion Code)</strong> numbers 
+            for Hertz, Enterprise, Avis, Budget, and National. Save 10-25% on business travel and leisure car rentals 
+            with our updated database of {totalCodes} active corporate codes.
           </p>
           <p className="text-sm text-gray-500 mb-10">
             Last updated: {new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })} | 
-            Database: {brands.reduce((sum, b) => sum + b._count.codes, 0)} active codes
+            Database: {totalCodes} active codes | Free to use
           </p>
 
           {/* 鍏ㄦ柊鐨?AI 鑱婂ぉ妗嗙粍浠?*/}
