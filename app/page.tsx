@@ -77,7 +77,7 @@ export default async function Home() {
   const brands = await getCachedBrands();
   const companies = await getCachedCompanies();
 
-  // 鑾峰彇鏈€鏂扮敓鎴愮殑 AI 鏂囩珷
+  // 获取最新生成的 AI 文章
   const latestArticles = await prisma.aiQuery.findMany({
     orderBy: { createdAt: 'desc' },
     take: 6,
@@ -90,7 +90,7 @@ export default async function Home() {
     },
   });
 
-  // 鑾峰彇鍏紑浼樻儬閾炬帴锛堢鐞嗗憳鍙紪杈戯級
+  // 获取公开优惠链接（管理员可编辑）
   const publicDeals = await prisma.publicDeal.findMany({
     where: { isActive: true },
     orderBy: { sortOrder: 'asc' },
@@ -163,7 +163,7 @@ export default async function Home() {
         },
         dateModified: new Date().toISOString(),
       },
-      // ItemList - 鍝佺墝鍒楄〃
+      // ItemList - 品牌列表
       {
         '@type': 'ItemList',
         '@id': 'https://carcorporatecodes.com/#brands-list',
@@ -281,13 +281,13 @@ export default async function Home() {
             </p>
           </div>
 
-          {/* 鍏ㄦ柊鐨?AI 鑱婂ぉ妗嗙粍浠?*/}
+          {/* 全新的 AI 聊天框组件 */}
           <div className="max-w-3xl mx-auto relative px-4 sm:px-0 z-10">
             <AskAiWidget companies={companies} />
           </div>
         </div>
 
-        {/* H2: 鍝佺墝鍒楄〃 - 姣忎釜H2鐙珛鍙洖绛旂敤鎴锋悳绱㈡剰鍥?*/}
+        {/* H2: 品牌列表 - 每个H2独立可回答用户搜索意图 */}
         <section id="brands" className="mb-24">
           <h2 className="text-2xl font-bold mb-2 text-gray-900">Browse Codes by Rental Brand</h2>
           <p className="text-gray-600 mb-6">Click any brand to view all available corporate and association discount codes.</p>
@@ -311,7 +311,7 @@ export default async function Home() {
           </div>
         </section>
 
-        {/* H2: 浣跨敤鎸囧崡 */}
+        {/* H2: 使用指南 */}
         <section id="guide" className="mb-24">
           <h2 className="text-2xl font-bold mb-6 text-gray-900 border-b border-gray-200 pb-3">How to Use Car Rental Corporate Codes</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -330,7 +330,7 @@ export default async function Home() {
           </div>
         </section>
 
-        {/* H2: 椋庨櫓鎻愮ず */}
+        {/* H2: 风险提示 */}
         <section id="risks" className="mb-24">
           <h2 className="text-2xl font-bold mb-4 text-gray-900">Corporate Code Risks & Eligibility</h2>
           <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-6">
@@ -349,7 +349,7 @@ export default async function Home() {
           </div>
         </section>
 
-        {/* H2: 鍏紑浼樻儬 */}
+        {/* H2: 公开优惠 */}
         <section className="mb-24">
           <h2 className="text-2xl font-bold mb-4 text-gray-900">No Corporate Code? Use These Public Deals</h2>
           <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-3xl p-8 md:p-10 border border-blue-100 shadow-inner">
@@ -419,7 +419,7 @@ export default async function Home() {
           </div>
         </section>
 
-        {/* H2: 鏈€鏂扮敓鎴愮殑鏂囩珷 */}
+        {/* H2: 最新生成的文章 */}
         {latestArticles.length > 0 && (
           <section id="latest-articles" className="mb-24">
             <div className="flex items-center justify-between mb-6">
