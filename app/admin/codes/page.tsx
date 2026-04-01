@@ -1,6 +1,6 @@
 import { prisma } from '@/lib/db';
 import { revalidatePath } from 'next/cache';
-import BatchDeleteForm from '../components/BatchDeleteForm';
+import CodesManager from '../components/CodesManager';
 
 export const dynamic = 'force-dynamic';
 
@@ -53,7 +53,7 @@ export default async function CodesPage() {
           <h3 className="text-lg font-bold leading-6 text-gray-900">所有代码</h3>
           <p className="text-sm text-gray-500 mt-1">勾选记录可进行批量删除</p>
         </div>
-        <BatchDeleteForm 
+        <CodesManager 
           codes={allCodes} 
           deleteAction={deleteCodeAction}
           batchDeleteAction={batchDeleteCodesAction}
