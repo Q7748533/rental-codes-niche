@@ -6,12 +6,12 @@ import type { Metadata } from 'next';
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: 'AI Rental Guides & Car Rental Tips | Car Corporate Codes',
-  description: 'Browse our collection of AI-generated car rental guides, corporate code tutorials, and money-saving tips for Hertz, Enterprise, Avis, and more.',
+  title: 'Car Rental Guides & Money-Saving Tips | Car Corporate Codes',
+  description: 'Browse our expert car rental guides, corporate code tutorials, and money-saving tips for Hertz, Enterprise, Avis, and more.',
   keywords: ['car rental guides', 'rental car tips', 'corporate code tutorials', 'save on car rentals'],
   openGraph: {
-    title: 'AI Rental Guides & Car Rental Tips',
-    description: 'Browse AI-generated car rental guides and money-saving tips.',
+    title: 'Car Rental Guides & Money-Saving Tips',
+    description: 'Browse expert car rental guides and money-saving tips.',
     type: 'website',
     url: 'https://carcorporatecodes.com/ask',
     siteName: 'Car Corporate Codes',
@@ -59,8 +59,8 @@ export default async function AskPage() {
         '@type': 'CollectionPage',
         '@id': 'https://carcorporatecodes.com/ask/#webpage',
         url: 'https://carcorporatecodes.com/ask',
-        name: 'AI Rental Guides & Car Rental Tips',
-        description: 'Browse our collection of AI-generated car rental guides and tips.',
+        name: 'Car Rental Guides & Money-Saving Tips',
+        description: 'Browse our expert car rental guides and money-saving tips.',
         isPartOf: {
           '@id': 'https://carcorporatecodes.com/#website',
         },
@@ -105,10 +105,10 @@ export default async function AskPage() {
         {/* H1 */}
         <div className="text-center mb-12">
           <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-            AI Rental Guides & Car Rental Tips
+            Car Rental Guides & Money-Saving Tips
           </h1>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Browse our collection of {articles.length} AI-generated guides to help you save money on car rentals.
+            Browse our collection of {articles.length} expert guides to help you save money on car rentals with corporate codes and discount strategies.
           </p>
         </div>
 
