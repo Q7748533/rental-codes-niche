@@ -129,33 +129,38 @@ export async function POST(req: Request) {
       },
     });
 
-    // 9. 生成静态 HTML 文件！
-    try {
-      const publicDir = join(process.cwd(), 'public', 'ask');
-      await mkdir(publicDir, { recursive: true });
-      
-      const htmlContent = generateStaticHtml({
-        title: savedQuery.seoTitle,
-        description: savedQuery.aiSummary,
-        content: savedQuery.seoContent,
-        summary: savedQuery.aiSummary,
-        userPrompt: savedQuery.userPrompt,
-        slug: savedQuery.slug,
-        createdAt: savedQuery.createdAt.toISOString(),
-        viewCount: savedQuery.viewCount,
-        relatedArticles,
-      });
-      
-      const filePath = join(publicDir, savedQuery.slug);
-      await writeFile(filePath, htmlContent, 'utf-8');
-      console.log(`Static HTML generated: ${filePath}`);
+    // 9. 生成静态 HTML 文件（仅在非 Vercel 环境）
+    // Vercel 是只读文件系统，无法写入 public 目录
+    if (process.env.VERCEL !== '1') {
+      try {
+        const publicDir = join(process.cwd(), 'public', 'ask');
+        await mkdir(publicDir, { recursive: true });
+        
+        const htmlContent = generateStaticHtml({
+          title: savedQuery.seoTitle,
+          description: savedQuery.aiSummary,
+          content: savedQuery.seoContent,
+          summary: savedQuery.aiSummary,
+          userPrompt: savedQuery.userPrompt,
+          slug: savedQuery.slug,
+          createdAt: savedQuery.createdAt.toISOString(),
+          viewCount: savedQuery.viewCount,
+          relatedArticles,
+        });
+        
+        const filePath = join(publicDir, savedQuery.slug);
+        await writeFile(filePath, htmlContent, 'utf-8');
+        console.log(`Static HTML generated: ${filePath}`);
 
-      // 重新验证 sitemap，让搜索引擎及时发现新页面
-      revalidatePath('/sitemap.xml');
-      console.log('Sitemap revalidated');
-    } catch (fileError) {
-      console.error('Failed to write static HTML file:', fileError);
-      // 不影响 API 响应，继续返回成功
+        // 重新验证 sitemap，让搜索引擎及时发现新页面
+        revalidatePath('/sitemap.xml');
+        console.log('Sitemap revalidated');
+      } catch (fileError) {
+        console.error('Failed to write static HTML file:', fileError);
+        // 不影响 API 响应，继续返回成功
+      }
+    } else {
+      console.log('Running on Vercel, skipping static HTML generation (read-only filesystem)');
     }
 
     // 9. 把简短的回答和生成的文章链接返回给前端
