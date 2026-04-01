@@ -2,8 +2,8 @@ import { prisma } from '@/lib/db';
 import Link from 'next/link';
 import type { Metadata } from 'next';
 
-// 强制动态渲染
-export const dynamic = 'force-dynamic';
+// ISR 静态缓存：1小时重新验证
+export const revalidate = 3600;
 
 export const metadata: Metadata = {
   title: 'Car Rental Guides & Money-Saving Tips | Car Corporate Codes',
@@ -24,11 +24,11 @@ export const metadata: Metadata = {
 export default async function AskPage() {
   const articles = await prisma.aiQuery.findMany({
     orderBy: { createdAt: 'desc' },
+    take: 100, // 限制查询数量，防止数据库过载
     select: {
       slug: true,
       seoTitle: true,
       aiSummary: true,
-      viewCount: true,
       createdAt: true,
     },
   });
@@ -72,7 +72,7 @@ export default async function AskPage() {
           itemListElement: articles.map((article, index) => ({
             '@type': 'ListItem',
             position: index + 1,
-            url: `https://carcorporatecodes.com/ask/${article.slug}`,
+            url: `https://carcorporatecodes.com/ask/${article.slug.replace(/\.html$/, '')}.html`,
             name: article.seoTitle,
           })),
         },
@@ -118,7 +118,7 @@ export default async function AskPage() {
             {articles.map((article) => (
               <Link
                 key={article.slug}
-                href={`/ask/${article.slug}`}
+                href={`/ask/${article.slug.replace(/\.html$/, '')}.html`}
                 className="block bg-white p-6 rounded-lg border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all"
               >
                 <h2 className="text-lg font-semibold text-gray-900 mb-3 line-clamp-2">
@@ -127,15 +127,12 @@ export default async function AskPage() {
                 <p className="text-sm text-gray-600 mb-4 line-clamp-3">
                   {article.aiSummary}
                 </p>
-                <div className="flex items-center justify-between text-xs text-gray-400">
-                  <span>
-                    {new Date(article.createdAt).toLocaleDateString('en-US', {
-                      month: 'short',
-                      day: 'numeric',
-                      year: 'numeric',
-                    })}
-                  </span>
-                  <span>{article.viewCount} views</span>
+                <div className="text-xs text-gray-400">
+                  {new Date(article.createdAt).toLocaleDateString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric',
+                  })}
                 </div>
               </Link>
             ))}
