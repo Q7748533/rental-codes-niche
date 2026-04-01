@@ -32,7 +32,7 @@ export async function generateMetadata({ params }: { params: Promise<{ brand: st
       siteName: 'Car Corporate Codes',
       images: [
         {
-          url: 'https://carcorporatecodes.com/og-image.jpg',
+          url: 'https://carcorporatecodes.com/og-image.svg',
           width: 1200,
           height: 630,
           alt: `${brand.name} Corporate Codes - Car Corporate Codes`,
@@ -43,7 +43,7 @@ export async function generateMetadata({ params }: { params: Promise<{ brand: st
       card: 'summary_large_image',
       title,
       description,
-      images: ['https://carcorporatecodes.com/og-image.jpg'],
+      images: ['https://carcorporatecodes.com/og-image.svg'],
     },
     alternates: {
       canonical: canonicalUrl,
@@ -150,6 +150,53 @@ export default async function BrandPage({ params }: { params: Promise<{ brand: s
             validFrom: code.createdAt.toISOString(),
           }))
         : []),
+      // FAQPage - 常见问题
+      {
+        '@type': 'FAQPage',
+        '@id': `https://carcorporatecodes.com/${brandData.slug}#faq`,
+        mainEntity: [
+          {
+            '@type': 'Question',
+            name: `What is a ${brandData.name} corporate code?`,
+            acceptedAnswer: {
+              '@type': 'Answer',
+              text: `A ${brandData.name} corporate code (also known as CDP - Corporate Discount Program) is a special discount code that provides reduced rental rates for employees of partner companies and organization members. These codes can save you 10-25% off standard rates.`,
+            },
+          },
+          {
+            '@type': 'Question',
+            name: `How much can I save with ${brandData.name} corporate codes?`,
+            acceptedAnswer: {
+              '@type': 'Answer',
+              text: `With ${brandData.name} corporate codes, you can typically save 10-25% off the standard rental rates. Savings vary by location, vehicle type, and dates. Some codes also include additional benefits like free upgrades or waived fees.`,
+            },
+          },
+          {
+            '@type': 'Question',
+            name: `Do I need proof of employment to use ${brandData.name} corporate codes?`,
+            acceptedAnswer: {
+              '@type': 'Answer',
+              text: `Yes, most ${brandData.name} corporate codes require proof of eligibility at the rental counter. This typically includes a company ID, business card, or pay stub. Some codes marked as "Leisure" or "Public" may not require verification.`,
+            },
+          },
+          {
+            '@type': 'Question',
+            name: `How do I use a ${brandData.name} corporate code?`,
+            acceptedAnswer: {
+              '@type': 'Answer',
+              text: `To use a ${brandData.name} corporate code: 1) Visit ${brandData.name}.com or their mobile app, 2) Enter your pickup location and dates, 3) Look for the "Corporate Account" or "CDP" field, 4) Enter the code from our database, 5) Compare rates and complete your booking, 6) Bring proof of eligibility when picking up the vehicle.`,
+            },
+          },
+          {
+            '@type': 'Question',
+            name: `Are ${brandData.name} corporate codes free to use?`,
+            acceptedAnswer: {
+              '@type': 'Answer',
+              text: `Yes, ${brandData.name} corporate codes are free to use. There is no cost to enter a corporate code when booking. However, you must be eligible (employee or member of the associated organization) to use most codes.`,
+            },
+          },
+        ],
+      },
     ],
   };
 
