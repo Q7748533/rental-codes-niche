@@ -7,6 +7,17 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// Turso 云端数据库配置（用于 Vercel 部署）
+generator tursoClient {
+  provider = "prisma-client-js"
+  output   = "../node_modules/.prisma/turso-client"
+}
+
+datasource turso {
+  provider = "sqlite"
+  url      = env("TURSO_DATABASE_URL")
+}
+
 model Brand {
   id          String   @id @default(cuid())
   name        String   @unique

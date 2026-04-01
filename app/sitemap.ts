@@ -1,7 +1,6 @@
 import { MetadataRoute } from 'next';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/lib/db';
 
-const prisma = new PrismaClient();
 const BASE_URL = 'https://carcorporatecodes.com';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {

@@ -1,10 +1,8 @@
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/lib/db';
 import Link from 'next/link';
 import Script from 'next/script';
 import AskAiWidget from '@/components/AskAiWidget';
 import type { Metadata } from 'next';
-
-const prisma = new PrismaClient();
 
 export const metadata: Metadata = {
   title: 'Car Rental Corporate Codes 2026 | Hertz, Enterprise, Avis Discounts',

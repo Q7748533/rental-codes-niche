@@ -1,8 +1,5 @@
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
-
-// 初始化数据库连接
-const prisma = new PrismaClient();
+import { prisma } from '@/lib/db';
 
 export async function POST(request: Request) {
   try {

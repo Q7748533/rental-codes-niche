@@ -1,13 +1,11 @@
 // app/api/ask/route.ts
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/lib/db';
 import OpenAI from 'openai';
 import { writeFile, mkdir } from 'fs/promises';
 import { join } from 'path';
 import { generateStaticHtml } from '@/lib/htmlGenerator';
 import { revalidatePath } from 'next/cache';
-
-const prisma = new PrismaClient();
 
 // 接入你强大的 VectorEngine 接口
 const openai = new OpenAI({

@@ -1,10 +1,8 @@
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/lib/db';
 import { revalidatePath } from 'next/cache';
 import Link from 'next/link';
 import BatchDeleteForm from './components/BatchDeleteForm';
 import PublicDealsManager from './components/PublicDealsManager';
-
-const prisma = new PrismaClient();
 
 // 单个删除
 async function deleteCodeAction(formData: FormData) {

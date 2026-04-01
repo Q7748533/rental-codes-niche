@@ -1,10 +1,8 @@
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/lib/db';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import Script from 'next/script';
 import type { Metadata } from 'next';
-
-const prisma = new PrismaClient();
 
 // 动态生成 SEO 元数据
 export async function generateMetadata({ params }: { params: Promise<{ brand: string }> }): Promise<Metadata> {
