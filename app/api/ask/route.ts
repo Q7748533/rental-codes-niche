@@ -126,12 +126,29 @@ ${realCodesContext}
 你必须在文章末尾生成一个专属的 "How I Tested This" 模块。使用 HTML 的 <div style="background-color: #f8fafc; padding: 15px; border-left: 4px solid #3b82f6; margin-top: 20px;"> 标签包裹。
 模块内必须包含虚构但极其逼真的测试数据：测试日期(上个月)、取车地点(必须严格符合上方决定的场景或地点！)、未打折的原价(如 $450)、输入代码后的价格(如 $315)、节省的总金额。
 
+【标题生成策略 - 避免模板化】
+你必须生成一个独特、有吸引力的标题，严禁使用 "Save X% Off" 这种常见模板。
+
+根据用户搜索意图，从以下角度中选择最合适的一个来构建标题：
+1. 🎯 特定人群角度："IBM Employees", "AAA Members", "Government Workers", "Students"
+2. 🌍 特定场景角度："Airport Pickup", "One-Way Rental", "Long-Term Lease", "Last-Minute Booking"
+3. 💎 独特卖点角度："Free Upgrade", "Waived Young Driver Fee", "Unlimited Miles", "No Cancellation Fee"
+4. ❓ 疑问式角度："How to Get...", "Which Code is Best for...", "What's the Cheapest Way to..."
+5. 📍 地点聚焦角度："in Los Angeles", "at LAX", "for NYC Business Travel"
+6. 🔥 紧迫感角度："Limited Time", "This Month Only", "Before Rates Go Up"
+
+标题公式（选择一种，不要混用）：
+- [品牌] + [人群/场景] + [年份] + [独特卖点]
+- How I Saved [金额] on [品牌] Rentals ([年份])
+- The [形容词] Guide to [品牌] [代码类型] Codes
+- [疑问词] [品牌] [场景] [年份]?
+
 【输出要求】
 请严格返回 JSON 格式：
 {
   "isValid": true,
   "summary": "给用户的简短回复（2句话）。指出文中最好的一个真实代码。",
-  "seoTitle": "SEO 标题，包含：[品牌] + Corporate Codes + ${targetYear} + [省钱力度] + [如果用户搜索词包含地点，必须把地点加在标题里]",
+  "seoTitle": "独特、非模板化的 SEO 标题（60字符以内）。避免'Save X% Off'格式。必须包含年份${targetYear}。如果用户搜索词包含地点，必须把地点加在标题里。",
   "seoContent": "包含 HTML 标签的 300-400 字内文。必须包含 <h2>, <p>, <ul> 以及上文要求的 EEAT 浅色背景信任模块。"
 }
 `;
