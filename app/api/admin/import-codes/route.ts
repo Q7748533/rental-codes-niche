@@ -137,8 +137,28 @@ export async function POST(request: NextRequest) {
         });
 
         if (existingCode) {
-          // 代码已存在，跳过不入库
-          throw new Error('代码已存在，跳过');
+          // 代码已存在，检查 description 是否相同
+          const existingDesc = existingCode.description || '';
+          const newDesc = description || '';
+
+          if (existingDesc === newDesc) {
+            // description 相同，跳过不入库
+            throw new Error('代码已存在且描述相同，跳过');
+          } else {
+            // description 不同，替换更新
+            await prisma.code.update({
+              where: { id: existingCode.id },
+              data: {
+                description,
+                codeType,
+                source,
+              },
+            });
+            detail.status = 'success';
+            result.success++;
+            result.details.push(detail);
+            continue; // 跳过下面的创建逻辑
+          }
         }
 
         // 创建新代码
