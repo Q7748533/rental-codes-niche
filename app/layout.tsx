@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { prisma } from "@/lib/db";
 import Script from "next/script";
+import GlobalTaskNotifier from "@/components/GlobalTaskNotifier";
 
 // 优化字体加载
 const inter = Inter({
@@ -87,7 +88,10 @@ export default async function RootLayout({
           </>
         )}
       </head>
-      <body className="font-sans">{children}</body>
+      <body className="font-sans">
+        {children}
+        <GlobalTaskNotifier /> {/* 🚀 全局任务监控哨兵 */}
+      </body>
     </html>
   );
 }

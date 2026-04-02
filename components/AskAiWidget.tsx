@@ -74,6 +74,16 @@ export default function AskAiWidget({ companies }: AskAiWidgetProps) {
 
       const { taskId } = data;
 
+      // 🚀 新增：持久化任务到本地存储
+      const pendingTasks = JSON.parse(localStorage.getItem('ai_pending_tasks') || '[]');
+      pendingTasks.push({
+        id: taskId,
+        query: query,
+        status: 'processing',
+        createdAt: Date.now()
+      });
+      localStorage.setItem('ai_pending_tasks', JSON.stringify(pendingTasks));
+
       // 🚀 1. 刚拿到 taskId，开始跑进度条
       setProgress(40);
       setStatusText('Scanning corporate discount database...');
@@ -107,6 +117,13 @@ export default function AskAiWidget({ companies }: AskAiWidgetProps) {
             if (pollingIntervalRef.current) clearInterval(pollingIntervalRef.current);
             setProgress(100);
             setStatusText('Guide ready! Redirecting...');
+
+            // 🚀 更新本地存储中的任务状态为完成
+            const tasks = JSON.parse(localStorage.getItem('ai_pending_tasks') || '[]');
+            const updatedTasks = tasks.map((t: any) =>
+              t.id === taskId ? { ...t, status: 'completed', slug: statusData.slug } : t
+            );
+            localStorage.setItem('ai_pending_tasks', JSON.stringify(updatedTasks));
 
             setTimeout(() => {
               router.push(`/ask/${statusData.slug}`); // Ensure correct suffix for jump
