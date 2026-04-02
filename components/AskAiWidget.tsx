@@ -76,32 +76,21 @@ export default function AskAiWidget({ companies }: AskAiWidgetProps) {
 
       // 3. Start visual pseudo-progress bar (stops at 85%)
       setProgress(40);
-      setStatusText('Drafting guide (Gemini)...');
+      setStatusText('Drafting guide (Gemini 3.1 Pro)...');
 
-      // Simulate backend Agent耗时, smoothly increase progress
-      setTimeout(() => {
-        if (isLoading) { setProgress(60); setStatusText('Reviewing & editing (Claude)...'); }
-      }, 4000);
-      setTimeout(() => {
-        if (isLoading) { setProgress(85); setStatusText('Finalizing layout & saving...'); }
-      }, 8000);
+      // 🚀 抛弃 if(isLoading) 的检测，直接启动平滑的伪进度体验
+      setTimeout(() => { setProgress(65); setStatusText('Reviewing & editing (Claude Opus)...'); }, 5000);
+      setTimeout(() => { setProgress(85); setStatusText('Finalizing layout & SEO tags...'); }, 9000);
 
-      // 4. Start real polling engine (check every 2.5s)
+      // 4. Start real polling engine (check every 2s)
       let pollCount = 0;
-      const maxPolls = 24; // Max poll for 60 seconds (24 * 2.5s)
+      const maxPolls = 30; // Max poll for 60 seconds (30 * 2s)
 
       const checkStatus = async () => {
         pollCount++;
         try {
-          const statusRes = await fetch(`/api/ask/status?id=${taskId}`, {
-            // Force no-cache to ensure latest status is retrieved
-            cache: 'no-store',
-            headers: {
-              'Cache-Control': 'no-cache',
-            }
-          });
-
-          if (!statusRes.ok) throw new Error('Status check failed');
+          const statusRes = await fetch(`/api/ask/status?id=${taskId}`, { cache: 'no-store' });
+          if (!statusRes.ok) return; // Ignore single network fluctuation
 
           const statusData = await statusRes.json();
 
@@ -111,37 +100,31 @@ export default function AskAiWidget({ companies }: AskAiWidgetProps) {
             setProgress(100);
             setStatusText('Guide ready! Redirecting...');
 
-            // Brief delay to let user see 100% completion, then redirect
             setTimeout(() => {
-              router.push(`/ask/${statusData.slug}.html`);
+              router.push(`/ask/${statusData.slug}`); // Ensure correct suffix for jump
             }, 500);
             return;
           }
 
           // Failure state: timeout or backend error
-          if (statusData.isFailed || statusData.error) {
-            throw new Error(statusData.error || 'Generation timed out. Please try again.');
+          if (statusData.isFailed) {
+            throw new Error('Generation timed out.');
           }
 
           // Local defense: exceeded max poll count
           if (pollCount >= maxPolls) {
-            throw new Error('This is taking longer than expected. Please check the articles list in a minute.');
+            throw new Error('Taking too long. Please check back later.');
           }
-
-          // If not yet generated, do nothing, wait for next poll
-
         } catch (err: any) {
           if (pollingIntervalRef.current) clearInterval(pollingIntervalRef.current);
           setError(err.message);
           setIsLoading(false);
           setProgress(0);
-          setStatusText('Ready');
         }
       };
 
-      // Check immediately once (handle rapid generation case), then start loop
-      setTimeout(checkStatus, 2000);
-      pollingIntervalRef.current = setInterval(checkStatus, 2500);
+      // Start polling loop
+      pollingIntervalRef.current = setInterval(checkStatus, 2000);
 
     } catch (err: any) {
       setError(err.message || 'Something went wrong.');

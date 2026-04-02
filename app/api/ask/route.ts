@@ -170,33 +170,49 @@ Please strictly return JSON format:
 }
 `;
 
-    console.log("🤖 Starting editorial mode... [Writer Gemini] is writing...");
-    const draftCompletion = await openai.chat.completions.create({
-      model: "gemini-3.1-pro-preview",
-      messages: [
-        { role: "system", content: writerPrompt },
-        { role: "user", content: query }
-      ],
-      temperature: 0.8,
-      response_format: { type: "json_object" }
+    // 🚀 1. 拦截点：先创建一条空的占位记录，立即拿到 taskId
+    const savedQuery = await prisma.aiQuery.create({
+      data: {
+        slug: '', // 留空，作为未完成的标志
+        userPrompt: query,
+        aiSummary: 'Generating your personalized guide...',
+        seoTitle: `${query} - Car Rental Guide`,
+        seoContent: '',
+      }
     });
 
-    const draftResponseText = draftCompletion.choices[0].message.content || '{}';
-    let draftData;
-    try {
-      draftData = JSON.parse(draftResponseText.match(/\{[\s\S]*\}/)?.[0] || draftResponseText);
-    } catch (e) {
-      throw new Error('Writer Agent failed to output valid JSON.');
-    }
+    const taskId = savedQuery.id;
 
-    if (!draftData.isValid) {
-      return NextResponse.json({ summary: draftData.summary || "No valid codes found.", slug: "" });
-    }
+    // 🚀 2. 核心剥离：把所有会阻塞的 AI 调用扔进后台异步闭包
+    (async () => {
+      try {
+        console.log("🤖 [Writer Gemini] is writing...");
+        const draftCompletion = await openai.chat.completions.create({
+          model: "gemini-3.1-pro-preview",
+          messages: [
+            { role: "system", content: writerPrompt },
+            { role: "user", content: query }
+          ],
+          temperature: 0.8,
+          response_format: { type: "json_object" }
+        });
 
-    // ==========================================
-    // 🔪 PHASE 2: Editor Agent (Agent B - Editor / Claude)
-    // ==========================================
-    const editorPrompt = `
+        const draftResponseText = draftCompletion.choices[0].message.content || '{}';
+        let draftData;
+        try {
+          draftData = JSON.parse(draftResponseText.match(/\{[\s\S]*\}/)?.[0] || draftResponseText);
+        } catch (e) {
+          console.error('Writer Agent failed to output valid JSON.');
+          return;
+        }
+
+        if (!draftData.isValid) {
+          console.log('Draft invalid, terminating background task.');
+          return;
+        }
+
+        // 🔪 PHASE 2: Editor Agent (Agent B - Editor / Claude)
+        const editorPrompt = `
 [ROLE: Cynical English SEO Editor | ton=cynical,direct,anti-corporate | lang=en]
 [STRICT RULE: REMOVE ALL CHINESE CHARACTERS]
 If you find any Chinese text or punctuation in the draft, translate it into natural, high-level business English immediately.
@@ -223,67 +239,49 @@ The final output must be 100% English. No Chinese characters allowed.
 }
 `;
 
-    console.log("🔪 Draft complete. [Editor Claude] is de-AI-ing the content...");
-    const editorCompletion = await openai.chat.completions.create({
-      model: "claude-opus-4-6",
-      messages: [
-        { role: "system", content: editorPrompt },
-        { role: "user", content: `[DRAFT_HTML_INPUT]:\n${draftData.seoContent}` }
-      ],
-      temperature: 0.4,
-      response_format: { type: "json_object" }
-    });
+        console.log("🔪 [Editor Claude] is refining...");
+        const editorCompletion = await openai.chat.completions.create({
+          model: "claude-opus-4-6",
+          messages: [
+            { role: "system", content: editorPrompt },
+            { role: "user", content: `[DRAFT_HTML_INPUT]:\n${draftData.seoContent}` }
+          ],
+          temperature: 0.4,
+          response_format: { type: "json_object" }
+        });
 
-    const editorResponseText = editorCompletion.choices[0].message.content || '{}';
-    let finalHtmlContent = draftData.seoContent; // Default fallback: use Gemini's draft if Claude fails
-    try {
-      const editorData = JSON.parse(editorResponseText.match(/\{[\s\S]*\}/)?.[0] || editorResponseText);
-      if (editorData.editedHtml) finalHtmlContent = editorData.editedHtml;
-    } catch (e) {
-      console.warn('Editor Agent failed, falling back to Draft HTML.');
-    }
+        const editorResponseText = editorCompletion.choices[0].message.content || '{}';
+        let finalHtmlContent = draftData.seoContent;
+        try {
+          const editorData = JSON.parse(editorResponseText.match(/\{[\s\S]*\}/)?.[0] || editorResponseText);
+          if (editorData.editedHtml) finalHtmlContent = editorData.editedHtml;
+        } catch (e) {
+          console.warn('Editor Agent failed, using draft HTML.');
+        }
 
-    // ==========================================
-    // 💾 FINAL PHASE: Generate URL and save to database
-    // ==========================================
-    const finalSlug = await generateUniqueSlug(prisma, draftData.seoTitle || query, 60);
+        const finalSlug = await generateUniqueSlug(prisma, draftData.seoTitle || query, 60);
 
-    // 🚀 Create record first (no slug), return taskId for frontend polling
-    const savedQuery = await prisma.aiQuery.create({
-      data: {
-        slug: '', // Initially empty, will be updated after AI generation completes
-        userPrompt: query,
-        aiSummary: 'Generating your personalized guide...',
-        seoTitle: draftData.seoTitle || `${query} - Car Rental Guide`,
-        seoContent: '', // Initially empty
-      }
-    });
-
-    // 🚀 Return taskId immediately for frontend to start polling
-    const taskId = savedQuery.id;
-
-    // Complete AI generation and update in background
-    (async () => {
-      try {
-        // Update record with final content
+        // 🚀 3. 后台任务完成，更新数据库写入 slug，这会触发前端轮询成功
         await prisma.aiQuery.update({
           where: { id: taskId },
           data: {
             slug: finalSlug + '.html',
             aiSummary: draftData.summary || 'Here is what I found for you.',
             seoContent: finalHtmlContent,
+            seoTitle: draftData.seoTitle || `${query} - Car Rental Guide`,
           }
         });
 
         revalidatePath('/sitemap.xml');
-        console.log('✅ Article published successfully! Sitemap updated.');
+        console.log(`✅ Task ${taskId} completed.`);
       } catch (err) {
-        console.error('Background update error:', err);
+        console.error('Background AI task error:', err);
       }
-    })();
+    })(); // <-- 异步闭包立即执行完毕，不阻塞主线程
 
+    // 🚀 4. 立即返回 taskId！前端不再死等！
     return NextResponse.json({
-      taskId: taskId, // 🚀 Return taskId for polling
+      taskId: taskId,
       summary: 'Generating your personalized guide...',
     });
 
