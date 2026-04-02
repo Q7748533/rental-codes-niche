@@ -1,18 +1,1 @@
-[
-  {
-    "brand": "Avis",
-    "company": "DePaul University",
-    "codeValue": "A740900",
-    "description": "Approximately 20% off retail rates",
-    "codeType": "leisure",
-    "source": "Member"
-  },
-  {
-    "brand": "Hertz",
-    "company": "DePaul University",
-    "codeValue": "1036300",
-    "description": "Between 5% and 25% off retail rates and complimentary Hertz #1 Club Gold Membership",
-    "codeType": "leisure",
-    "source": "Member"
-  }
-]
+[]
