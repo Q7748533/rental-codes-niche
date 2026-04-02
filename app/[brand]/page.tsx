@@ -4,8 +4,16 @@ import Link from 'next/link';
 import Script from 'next/script';
 import type { Metadata } from 'next';
 
-// 强制动态渲染，避免构建时查询数据库
+// ISR：每5分钟重新生成一次页面
 export const revalidate = 300;
+
+// 构建时预生成所有品牌页面，避免首次访问 SSR
+export async function generateStaticParams() {
+  const brands = await prisma.brand.findMany({
+    select: { slug: true }
+  });
+  return brands.map(brand => ({ brand: brand.slug }));
+}
 
 // 动态生成 SEO 元数据
 export async function generateMetadata({ params }: { params: Promise<{ brand: string }> }): Promise<Metadata> {
