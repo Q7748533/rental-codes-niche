@@ -125,6 +125,7 @@ ${realCodesContext}
 1. LANGUAGE: You MUST output the entire response in 100% ENGLISH. ZERO CHINESE CHARACTERS ALLOWED.
 2. Even if the user's query contains Chinese, you MUST respond entirely in English.
 3. Do not use any Chinese punctuation (，。！？）. Use only English punctuation.
+4. BANNED PHRASES: You MUST NOT use phrases like "As an experienced...", "As a seasoned...", "Listen up", "Dive in", or "In conclusion". Write directly and objectively without roleplaying preambles.
 
 🚨 [WRITING DETAIL REQUIREMENTS - Must include all 3 points]:
 1. Website Operation Guide: When recommending codes, briefly mention specific operation details on the rental company's website (e.g., Hertz's "Pay Later" option, Enterprise's dropdown menus, Avis's AWD input box location) to enhance practical usability.
