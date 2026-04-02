@@ -19,7 +19,7 @@ const SITE_AUTHOR = {
 // 🌟 核心优化：使用 React cache 包裹数据库查询，确保 metadata 和页面共享一次查询结果
 const getAiQuery = cache(async (slugArray: string[]) => {
   const fullSlug = slugArray.join('/').replace(/\.html$/, '');
-  
+
   let aiQuery = await prisma.aiQuery.findUnique({
     where: { slug: fullSlug + '.html' },
   });
@@ -31,6 +31,23 @@ const getAiQuery = cache(async (slugArray: string[]) => {
   }
   return aiQuery;
 });
+
+// 🚀 终极防护：在构建时预渲染最新的 1000 篇文章，防止爬虫并发击穿数据库
+export async function generateStaticParams() {
+  const articles = await prisma.aiQuery.findMany({
+    take: 1000,
+    orderBy: { createdAt: 'desc' },
+    select: { slug: true }
+  });
+
+  return articles.map((article) => {
+    // 将数据库里的 "hertz-ibm.html" 拆解为 Next.js [...slug] 需要的数组格式 ['hertz-ibm']
+    const cleanSlug = article.slug.replace(/\.html$/, '');
+    return {
+      slug: cleanSlug.split('/'),
+    };
+  });
+}
 
 // 提取品牌和地点用于动态 FAQ
 const extractEntities = (prompt: string, title: string) => {
