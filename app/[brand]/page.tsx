@@ -325,7 +325,7 @@ export default async function BrandPage({ params }: { params: Promise<{ brand: s
                     <tr key={codeItem.id} className="hover:bg-blue-50 transition-colors">
                       {/* 公司名 */}
                       <td className="p-5">
-                        <div className="font-bold text-gray-900 text-base capitalize">{codeItem.company.name}</div>
+                        <div className="font-bold text-gray-900 text-base">{codeItem.company.name}</div>
                       </td>
                       {/* 来源标签 */}
                       <td className="p-5">
@@ -381,7 +381,7 @@ export default async function BrandPage({ params }: { params: Promise<{ brand: s
               {brandData.codes.map((codeItem: any) => (
                 <div key={codeItem.id} className="p-5 hover:bg-gray-50 transition-colors">
                   <div className="flex justify-between items-start mb-3">
-                    <div className="font-bold text-gray-900 text-lg capitalize">{codeItem.company.name}</div>
+                    <div className="font-bold text-gray-900 text-lg">{codeItem.company.name}</div>
                     <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-gray-100 text-gray-600 uppercase tracking-wider border border-gray-200">
                       {codeItem.source || 'Employee'}
                     </span>
