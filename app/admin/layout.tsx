@@ -11,6 +11,7 @@ const menuItems = [
   { href: '/admin/import', label: '导入代码', icon: '📥' },
   { href: '/admin/codes', label: '代码管理', icon: '🎫' },
   { href: '/admin/ai-articles', label: 'AI 文章管理', icon: '🤖' },
+  { href: '/admin/adsense', label: 'AdSense 广告', icon: '💰' },
 ];
 
 export default async function AdminLayout({

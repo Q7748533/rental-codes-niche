@@ -68,3 +68,13 @@ model PublicDeal {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
+
+// AdSense 广告配置
+model AdSenseConfig {
+  id            String   @id @default(cuid())
+  publisherId   String   @default("ca-pub-5289849412154503") // 发布商 ID
+  isEnabled     Boolean  @default(false) // 全局开关
+  autoAdsEnabled Boolean @default(true)  // Auto Ads 开关
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}

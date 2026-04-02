@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import Script from "next/script";
+import { prisma } from "@/lib/db";
 
 // 优化字体加载
 const inter = Inter({
@@ -15,13 +17,36 @@ export const metadata: Metadata = {
   keywords: ["car rental corporate codes", "hertz cdp codes", "enterprise discount codes", "avis corporate codes", "rental car discounts"],
 };
 
-export default function RootLayout({
+// 获取 AdSense 配置
+async function getAdSenseConfig() {
+  try {
+    const config = await prisma.adSenseConfig.findFirst();
+    return config;
+  } catch {
+    return null;
+  }
+}
+
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const adSenseConfig = await getAdSenseConfig();
+  const shouldLoadAdSense = adSenseConfig?.isEnabled && adSenseConfig?.publisherId;
+
   return (
     <html lang="en" className={inter.variable}>
+      <head>
+        {shouldLoadAdSense && (
+          <Script
+            async
+            src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adSenseConfig.publisherId}`}
+            crossOrigin="anonymous"
+            strategy="afterInteractive"
+          />
+        )}
+      </head>
       <body className="font-sans">{children}</body>
     </html>
   );
