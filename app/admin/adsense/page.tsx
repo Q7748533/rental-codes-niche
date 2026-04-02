@@ -12,8 +12,18 @@ interface AdSenseConfig {
   updatedAt: string;
 }
 
+// 默认配置
+const defaultConfig: AdSenseConfig = {
+  id: '',
+  publisherId: 'ca-pub-5289849412154503',
+  isEnabled: false,
+  autoAdsEnabled: true,
+  createdAt: '',
+  updatedAt: '',
+};
+
 export default function AdSensePage() {
-  const [config, setConfig] = useState<AdSenseConfig | null>(null);
+  const [config, setConfig] = useState<AdSenseConfig>(defaultConfig);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
@@ -28,9 +38,14 @@ export default function AdSensePage() {
       if (res.ok) {
         const data = await res.json();
         setConfig(data);
+      } else {
+        // 如果获取失败，使用默认配置
+        setConfig(defaultConfig);
       }
     } catch (error) {
       console.error('Failed to fetch config:', error);
+      // 如果获取失败，使用默认配置
+      setConfig(defaultConfig);
     } finally {
       setLoading(false);
     }
@@ -38,7 +53,6 @@ export default function AdSensePage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!config) return;
 
     setSaving(true);
     setMessage('');
@@ -59,13 +73,19 @@ export default function AdSensePage() {
         setConfig(data);
         setMessage('✅ 配置保存成功！');
       } else {
-        setMessage('❌ 保存失败，请重试');
+        const errorData = await res.json();
+        setMessage(`❌ 保存失败：${errorData.error || '请重试'}`);
       }
     } catch (error) {
-      setMessage('❌ 保存失败，请重试');
+      setMessage('❌ 保存失败，请检查网络连接');
     } finally {
       setSaving(false);
     }
+  };
+
+  // 更新配置字段
+  const updateConfig = (field: keyof AdSenseConfig, value: string | boolean) => {
+    setConfig(prev => ({ ...prev, [field]: value }));
   };
 
   if (loading) {
@@ -96,13 +116,14 @@ export default function AdSensePage() {
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* 发布商 ID */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="publisherId" className="block text-sm font-medium text-gray-700 mb-2">
               AdSense 发布商 ID
             </label>
             <input
+              id="publisherId"
               type="text"
-              value={config?.publisherId || ''}
-              onChange={(e) => setConfig(prev => prev ? { ...prev, publisherId: e.target.value } : null)}
+              value={config.publisherId}
+              onChange={(e) => updateConfig('publisherId', e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               placeholder="ca-pub-xxxxxxxxxxxxxxxx"
             />
@@ -121,15 +142,15 @@ export default function AdSensePage() {
                 开启后网站将加载 AdSense 代码，用于验证所有权和展示广告
               </p>
             </div>
-            <label className="relative inline-flex items-center cursor-pointer">
-              <input
-                type="checkbox"
-                checked={config?.isEnabled || false}
-                onChange={(e) => setConfig(prev => prev ? { ...prev, isEnabled: e.target.checked } : null)}
-                className="sr-only peer"
+            <button
+              type="button"
+              onClick={() => updateConfig('isEnabled', !config.isEnabled)}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${config.isEnabled ? 'bg-blue-600' : 'bg-gray-200'}`}
+            >
+              <span
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${config.isEnabled ? 'translate-x-6' : 'translate-x-1'}`}
               />
-              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-            </label>
+            </button>
           </div>
 
           {/* Auto Ads 开关 */}
@@ -142,15 +163,15 @@ export default function AdSensePage() {
                 Google 自动决定广告位置和类型，无需手动配置广告位
               </p>
             </div>
-            <label className="relative inline-flex items-center cursor-pointer">
-              <input
-                type="checkbox"
-                checked={config?.autoAdsEnabled || false}
-                onChange={(e) => setConfig(prev => prev ? { ...prev, autoAdsEnabled: e.target.checked } : null)}
-                className="sr-only peer"
+            <button
+              type="button"
+              onClick={() => updateConfig('autoAdsEnabled', !config.autoAdsEnabled)}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${config.autoAdsEnabled ? 'bg-blue-600' : 'bg-gray-200'}`}
+            >
+              <span
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${config.autoAdsEnabled ? 'translate-x-6' : 'translate-x-1'}`}
               />
-              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-            </label>
+            </button>
           </div>
 
           {/* 保存按钮 */}
