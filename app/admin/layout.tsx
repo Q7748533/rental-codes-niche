@@ -20,6 +20,7 @@ export default async function AdminLayout({
   children: React.ReactNode;
 }) {
   // 验证管理员登录
+  // 注意：login 页面在 (public) 分组中，不受此 layout 影响
   await requireAdminAuth();
 
   return (
