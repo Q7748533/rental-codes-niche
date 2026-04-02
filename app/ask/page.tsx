@@ -21,17 +21,83 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function AskPage() {
-  const articles = await prisma.aiQuery.findMany({
-    orderBy: { createdAt: 'desc' },
-    take: 100, // 限制查询数量，防止数据库过载
-    select: {
-      slug: true,
-      seoTitle: true,
-      aiSummary: true,
-      createdAt: true,
-    },
-  });
+// 分页组件
+function Pagination({ currentPage, totalPages }: { currentPage: number; totalPages: number }) {
+  if (totalPages <= 1) return null;
+
+  const pages = [];
+  for (let i = 1; i <= totalPages; i++) {
+    if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
+      pages.push(i);
+    } else if (i === currentPage - 2 || i === currentPage + 2) {
+      pages.push('...');
+    }
+  }
+
+  return (
+    <div className="flex justify-center items-center gap-2 mt-12">
+      {currentPage > 1 && (
+        <Link
+          href={`/ask?page=${currentPage - 1}`}
+          className="px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 text-gray-700"
+        >
+          ← Prev
+        </Link>
+      )}
+
+      {pages.map((page, index) => (
+        <span key={index}>
+          {page === '...' ? (
+            <span className="px-3 text-gray-400">...</span>
+          ) : (
+            <Link
+              href={`/ask?page=${page}`}
+              className={`px-4 py-2 rounded-lg border ${
+                page === currentPage
+                  ? 'bg-blue-600 text-white border-blue-600'
+                  : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+              }`}
+            >
+              {page}
+            </Link>
+          )}
+        </span>
+      ))}
+
+      {currentPage < totalPages && (
+        <Link
+          href={`/ask?page=${currentPage + 1}`}
+          className="px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 text-gray-700"
+        >
+          Next →
+        </Link>
+      )}
+    </div>
+  );
+}
+
+export default async function AskPage({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
+  const resolvedParams = await searchParams;
+  const currentPage = Number(resolvedParams.page) || 1;
+  const pageSize = 50; // 每页50篇，保护DOM性能
+  const skip = (currentPage - 1) * pageSize;
+
+  const [articles, totalCount] = await Promise.all([
+    prisma.aiQuery.findMany({
+      orderBy: { createdAt: 'desc' },
+      skip: skip,
+      take: pageSize,
+      select: {
+        slug: true,
+        seoTitle: true,
+        aiSummary: true,
+        createdAt: true,
+      },
+    }),
+    prisma.aiQuery.count(), // 获取总数以渲染分页器
+  ]);
+
+  const totalPages = Math.ceil(totalCount / pageSize);
 
   // JSON-LD 结构化数据
   const jsonLd = {
@@ -148,6 +214,9 @@ export default async function AskPage() {
             </Link>
           </div>
         )}
+
+        {/* 分页器 */}
+        <Pagination currentPage={currentPage} totalPages={totalPages} />
 
         {/* Back to Home */}
         <div className="mt-12 text-center">
