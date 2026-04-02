@@ -127,7 +127,7 @@ ${realCodesContext}
 
 🚨 【动态意图嗅探指令】：
 用户的原始搜索词是："${query}"。
-1. 🎯 专家避坑转折：如果搜索词中指定了具体的租车品牌或公司（如 IBM），但提供的【真实代码数据】里碰巧没有，【绝对不要】说“我的数据库里没有”。你必须像个老司机一样这样转场：“官方的 [搜索词] 内部代码现在查工牌极其严格，在柜台极易被反薅。为了安全起见，我强烈建议你使用以下几个同样给力、且免查 ID 的平替神码：”
+1. 🎯 专家避坑转折：如果搜索词中指定了具体的租车品牌或公司（如 IBM），但提供的【真实代码数据】里碰巧没有，【绝对不要】说"我的数据库里没有"。你必须像个老司机一样这样转场："官方的 [搜索词] 内部代码现在查工牌极其严格，在柜台极易被反薅。为了安全起见，我强烈建议你使用以下几个同样给力、且免查 ID 的平替神码："
 2. 📍 地点嗅探：如果搜索词中包含了任何具体的城市名、州名或机场代码（例如 LAX, Miami, Hawaii, NYC 等），你**必须**以该地点作为你实战经验的背景！
 3. 🎲 备用场景：如果搜索词中没有提到地点，请使用这个随机场景作为背景：${randomScenario}。
 
@@ -189,20 +189,24 @@ ${realCodesContext}
     // 🔪 第二阶段：主编智能体 (Agent B - Editor / Claude)
     // ==========================================
     const editorPrompt = `
-你是一个极其尖酸刻薄、追求极简和高转化率的顶级 SEO 主编。
-下面是你的初级撰稿人写的一篇租车攻略的 HTML 草稿。你需要对其进行"脱水"和"去 AI 化"洗稿。
+[ROLE: Cynical SEO Editor | ton=cynical,direct,anti-corporate | lang=en]
+[INPUT: draft_html]
+[VARS: LSI_TERMS=[${selectedLSI}]]
 
-【修改指令】：
-1. 彻底删除典型的 AI 废话：如 "In conclusion", "As a travel hacker", "Delve into", "Navigating the landscape" 等词汇。
-2. 【禁用语癖】：严禁使用 "While my strictly verified database...", "Real talk", "Look,", "Here's the deal" 这种千篇一律的 AI 套话！让语气更像一个真实的 Reddit 网友在吐槽。增加一些短句和真实的停顿。
-3. 确保 [${selectedLSI}] 这三个专业术语依然保留在文中。
-4. 🚨【不可触碰的红线】：初稿末尾带有 background-color: #f8fafc 样式的 <div...> 信任模块，你必须【100%原封不动地保留其全部 HTML 标签和内联 CSS】！绝对不许把它剥离成纯文本格式！
-5. 修复任何破损 HTML 标签，但严禁使用 Markdown 代码块包裹输出。
-6. 【绝对禁止转义 HTML】：必须输出原生的 < 和 > 符号，绝对不能输出 &lt; 或 &gt;！
+=== WORKFLOW ===
+[STEP1: SCAN|tgt=AI-fluff]=>[DEL: "As an experienced...", "In conclusion", "Fortunately,"]
+[STEP2: SCAN|tgt=cliches]=>[BAN: "Real talk", "Look:", "Here's the deal", "Game-changer"]
+[STEP3: REWRITE|ton=cynical|sty=short-sentences,reddit-rant]
+[STEP4: CHECK|tgt=LSI_TERMS|action=ensure-exist]
+[STEP5: EXTRACT|tgt=<div style="background-color: #f8fafc...">]=>[SHIELD: HTML+CSS|allow-modify=false]
+[STEP6: FMT|tgt=tags]=>[FIX: broken-html]
 
-请仅返回 JSON 格式：
+=== BEHAVIOR ===
+[OUTPUT: direct | fmt=json]
+[ESCAPE: false | allow-markdown=false]
+
 {
-  "editedHtml": "清洗并润色后的最终 HTML 代码"
+  "editedHtml": "[RAW_HTML_ONLY]"
 }
 `;
 
