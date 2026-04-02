@@ -2,7 +2,7 @@ import { prisma } from '@/lib/db';
 import Link from 'next/link';
 import Script from 'next/script';
 import MobileNav from '@/components/MobileNav';
-import AskAiWidget from '@/components/AskAiWidget';
+import AskAiWidgetLazy from '@/components/AskAiWidgetLazy';
 import { unstable_cache } from 'next/cache';
 import type { Metadata } from 'next';
 
@@ -310,7 +310,7 @@ export default async function Home() {
 
           {/* 全新的 AI 聊天框组件 */}
           <div className="max-w-3xl mx-auto relative px-4 sm:px-0 z-10">
-            <AskAiWidget companies={companies} />
+            <AskAiWidgetLazy companies={companies} />
           </div>
         </div>
 
