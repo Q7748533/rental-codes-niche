@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/db';
 import Link from 'next/link';
+import Script from 'next/script';
 import type { Metadata } from 'next';
 
 // ISR 静态缓存：1小时重新验证
@@ -148,7 +149,8 @@ export default async function AskPage({ searchParams }: { searchParams: Promise<
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <script
+      <Script
+        id="ask-hub-json-ld"
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
