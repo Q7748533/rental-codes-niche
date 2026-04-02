@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import Script from "next/script";
 import { prisma } from "@/lib/db";
 
 // 优化字体加载
@@ -39,11 +38,10 @@ export default async function RootLayout({
     <html lang="en" className={inter.variable}>
       <head>
         {shouldLoadAdSense && (
-          <Script
+          <script
             async
             src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adSenseConfig.publisherId}`}
             crossOrigin="anonymous"
-            strategy="afterInteractive"
           />
         )}
       </head>
