@@ -119,6 +119,15 @@ export default async function BrandPage({ params }: { params: Promise<{ brand: s
   };
   const terminology = brandTerminology[currentBrandSlug.toLowerCase()] || 'Corporate Program';
 
+  // 计算真实的最后修改时间（品牌更新时间 vs 最新代码更新时间）
+  let realLastModifiedDate = brandData.updatedAt;
+  if (brandData.codes.length > 0) {
+    const latestCodeUpdate = brandData.codes.reduce((latest, current) =>
+      current.updatedAt > latest ? current.updatedAt : latest
+    , brandData.codes[0].updatedAt);
+    realLastModifiedDate = new Date(Math.max(brandData.updatedAt.getTime(), latestCodeUpdate.getTime()));
+  }
+
   // JSON-LD 结构化数据
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -136,7 +145,7 @@ export default async function BrandPage({ params }: { params: Promise<{ brand: s
         breadcrumb: {
           '@id': `https://carcorporatecodes.com/${brandData.slug}#breadcrumb`,
         },
-        dateModified: new Date().toISOString(),
+        dateModified: realLastModifiedDate.toISOString(),
       },
       // BreadcrumbList
       {
