@@ -203,61 +203,19 @@ export default async function AiGuidePage({ params }: { params: Promise<{ slug: 
   const { detectedBrand, detectedLocation } = extractEntities(aiQuery.userPrompt, aiQuery.seoTitle);
   const brandUpper = detectedBrand.charAt(0).toUpperCase() + detectedBrand.slice(1);
 
-  // 🌟 动态生成 FAQ - 基于文章内容（同时用于 Schema 和视觉展示）
+  // 🌟 动态生成 FAQ - 只保留最核心、最独特的 AI 生成摘要
   const generateDynamicFaqs = () => {
-    const faqs = [
+    // 整个数组只留这一个最精准的！
+    return [
       {
         '@type': 'Question',
-        name: `What are the best ${detectedBrand} corporate codes${detectedLocation ? ` in ${detectedLocation}` : ''}?`,
+        name: `What is the best way to save on ${detectedBrand} rentals${detectedLocation ? ` in ${detectedLocation}` : ''} in ${new Date().getFullYear()}?`,
         acceptedAnswer: {
           '@type': 'Answer',
-          text: aiQuery.aiSummary,
+          text: aiQuery.aiSummary, // 直接使用 AI 提炼的独特摘要作为完美答案
         },
       }
     ];
-
-    // 添加品牌专属 FAQ
-    if (detectedBrand !== 'car rental') {
-      faqs.push({
-        '@type': 'Question',
-        name: `How do I use ${brandUpper} CDP codes?`,
-        acceptedAnswer: {
-          '@type': 'Answer',
-          text: `To use ${brandUpper} CDP (Corporate Discount Program) codes, enter the code in the designated field when booking on ${brandUpper}'s website or mention it when calling reservations. Have your company ID or proof of eligibility ready when picking up the vehicle.`,
-        },
-      });
-
-      faqs.push({
-        '@type': 'Question',
-        name: `How much can I save with ${brandUpper} corporate codes?`,
-        acceptedAnswer: {
-          '@type': 'Answer',
-          text: `${brandUpper} corporate codes typically save 10-25% off standard rates, depending on location and dates. Some codes also include free upgrades, waived additional driver fees, or other perks.`,
-        },
-      });
-    }
-
-    // 添加通用 FAQ
-    faqs.push(
-      {
-        '@type': 'Question',
-        name: 'Do I need to prove eligibility for corporate codes?',
-        acceptedAnswer: {
-          '@type': 'Answer',
-          text: 'Most corporate codes require proof of eligibility at the rental counter, such as a company ID, business card, or pay stub. However, some codes marked as "Leisure" or "Public" may not require verification. Always check the specific requirements before booking.',
-        },
-      },
-      {
-        '@type': 'Question',
-        name: 'Can I combine corporate codes with other discounts?',
-        acceptedAnswer: {
-          '@type': 'Answer',
-          text: 'Corporate codes generally cannot be combined with other promotional codes or coupons. However, you can often stack them with loyalty program benefits, credit card rewards, or cashback offers. Always compare rates to ensure you\'re getting the best price.',
-        },
-      }
-    );
-
-    return faqs;
   };
 
   const faqs = generateDynamicFaqs();
@@ -418,16 +376,12 @@ export default async function AiGuidePage({ params }: { params: Promise<{ slug: 
             </div>
           </footer>
 
-          {/* 🌟 视觉 FAQ 模块 - 也在 Article 内部 */}
+          {/* 🌟 视觉 FAQ 模块 - 简化为单一高价值问答 */}
           <section className="mt-12 pt-8 border-t border-gray-200">
-            <h2 className="text-xl font-bold text-gray-900 mb-6">Frequently Asked Questions</h2>
-            <div className="space-y-4">
-              {faqs.map((faq: any, index: number) => (
-                <div key={index} className="bg-gray-50 p-4 rounded-lg border border-gray-100">
-                  <h3 className="font-semibold text-gray-900 mb-2 text-base">{faq.name}</h3>
-                  <p className="text-gray-600 text-sm leading-relaxed">{faq.acceptedAnswer.text}</p>
-                </div>
-              ))}
+            <h2 className="text-xl font-bold text-gray-900 mb-6">Frequently Asked Question</h2>
+            <div className="bg-blue-50 p-5 rounded-xl border border-blue-100">
+              <h3 className="font-bold text-blue-900 mb-2 text-lg">{faqs[0].name}</h3>
+              <p className="text-blue-800 text-sm leading-relaxed">{faqs[0].acceptedAnswer.text}</p>
             </div>
           </section>
         </article>

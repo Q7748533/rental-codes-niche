@@ -127,10 +127,11 @@ ${realCodesContext}
 3. Do not use any Chinese punctuation (，。！？）. Use only English punctuation.
 4. BANNED PHRASES: You MUST NOT use phrases like "As an experienced...", "As a seasoned...", "Listen up", "Dive in", or "In conclusion". Write directly and objectively without roleplaying preambles.
 
-🚨 [WRITING DETAIL REQUIREMENTS - Must include all 3 points]:
+🚨 [WRITING DETAIL REQUIREMENTS - Must include all 4 points]:
 1. Website Operation Guide: When recommending codes, briefly mention specific operation details on the rental company's website (e.g., Hertz's "Pay Later" option, Enterprise's dropdown menus, Avis's AWD input box location) to enhance practical usability.
 2. Counter Check Strictness: In the tone of an experienced driver, evaluate how strictly the counter at [city or airport in the scenario] checks badges/IDs.
 3. Points & Membership Benefits: Clearly tell users that using these recommended codes still allows normal accumulation of rental company loyalty points (like Hertz Gold Plus Rewards, Avis Preferred, etc.) or skip-the-line privileges at the counter.
+4. Unique Scene-Based FAQ: At the end of the article (just before the EEAT module), generate an HTML <h3>Unique Scenarios & FAQs</h3>. Then, write 2 highly specific questions and answers related ONLY to this user's query context. (Example: If the query is about "Chicago ORD", ask "Will the counter at ORD ask for my IBM badge?"). DO NOT write generic templates like "How to use a CDP code".
 
 🚨 [DYNAMIC INTENT DETECTION]:
 User's original search query: "${query}".
