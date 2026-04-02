@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { prisma } from "@/lib/db";
-import { cookies } from "next/headers";
+import { headers } from "next/headers";
 
 // 优化字体加载
 const inter = Inter({
@@ -37,11 +37,11 @@ async function getAnalyticsConfig() {
   }
 }
 
-// 检查是否为管理员
+// 检查是否为管理员（从 Middleware 传递的请求头读取）
 async function isAdmin() {
   try {
-    const cookieStore = await cookies();
-    return cookieStore.get('admin_session')?.value === 'true';
+    const headersList = await headers();
+    return headersList.get('x-is-admin') === 'true';
   } catch {
     return false;
   }
