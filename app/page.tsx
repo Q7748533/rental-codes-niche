@@ -74,7 +74,7 @@ export const metadata: Metadata = {
 
 export default async function Home() {
   // 并发获取所有数据，减少网络往返时间
-  const [brands, companies, latestArticles, publicDeals] = await Promise.all([
+  const [brands, companies, latestArticles, publicDeals, latestCodeRecord] = await Promise.all([
     // 使用缓存查询 brands
     getCachedBrands(),
     // 使用缓存查询 companies
@@ -96,9 +96,21 @@ export default async function Home() {
       where: { isActive: true },
       orderBy: { sortOrder: 'asc' },
     }),
+    // 获取最新更新的代码时间
+    prisma.code.findFirst({
+      orderBy: { updatedAt: 'desc' },
+      select: { updatedAt: true },
+    }),
   ]);
 
   const totalCodes = brands.reduce((sum, b) => sum + b._count.codes, 0);
+
+  // 计算真正的全局最后修改时间（取文章和代码中最新的那个）
+  const latestArticleDate = latestArticles.length > 0 ? latestArticles[0].createdAt.getTime() : 0;
+  const latestCodeDate = latestCodeRecord ? latestCodeRecord.updatedAt.getTime() : 0;
+  const realLastModified = new Date(Math.max(latestArticleDate, latestCodeDate));
+  const isoDateModified = realLastModified.toISOString();
+  const displayDateModified = realLastModified.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
 
   // JSON-LD 结构化数据
   const jsonLd = {
@@ -163,7 +175,7 @@ export default async function Home() {
         about: {
           '@id': 'https://carcorporatecodes.com/#organization',
         },
-        dateModified: new Date().toISOString(),
+        dateModified: isoDateModified,
       },
       // ItemList - 品牌列表
       {
@@ -267,7 +279,7 @@ export default async function Home() {
           <div className="mb-6">
             <span className="inline-flex items-center gap-2 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white px-4 py-2 rounded-full text-sm font-medium shadow-md">
               <span className="w-2 h-2 bg-emerald-200 rounded-full animate-pulse"></span>
-              Database Updated: {new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+              Database Updated: {displayDateModified}
             </span>
             <span className="ml-3 text-sm text-gray-500">
               {totalCodes} codes collected from public sources
@@ -508,7 +520,7 @@ export default async function Home() {
           </div>
           
           <div className="border-t border-gray-800 pt-6 text-center text-sm text-gray-500">
-            <p>&copy; {new Date().getFullYear()} Car Corporate Codes. All rights reserved. | Data last updated: {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</p>
+            <p>&copy; {new Date().getFullYear()} Car Corporate Codes. All rights reserved. | Data last updated: {realLastModified.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</p>
           </div>
         </div>
       </footer>
