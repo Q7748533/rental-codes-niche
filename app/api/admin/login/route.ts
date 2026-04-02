@@ -37,7 +37,7 @@ export async function POST(request: Request) {
     const cookieStore = await cookies();
     cookieStore.set('admin_session', token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: false, // 暂时关闭 secure，测试是否为 HTTPS 问题
       sameSite: 'lax',
       maxAge: 60 * 60 * 24 * 7, // 7天
       path: '/',
@@ -45,7 +45,7 @@ export async function POST(request: Request) {
 
     // 设置一个标记 cookie（用于前端判断登录状态）
     cookieStore.set('admin_logged_in', 'true', {
-      secure: process.env.NODE_ENV === 'production',
+      secure: false, // 暂时关闭 secure，测试是否为 HTTPS 问题
       sameSite: 'lax',
       maxAge: 60 * 60 * 24 * 7,
       path: '/',
