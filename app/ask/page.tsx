@@ -2,9 +2,32 @@ import { prisma } from '@/lib/db';
 import Link from 'next/link';
 import Script from 'next/script';
 import type { Metadata } from 'next';
+import { unstable_cache } from 'next/cache'; // 🚀 引入缓存 API
 
-// ISR 静态缓存：1小时重新验证
+// ISR 静态缓存：1小时重新验证（作为没有 searchParams 时的后备）
 export const revalidate = 3600;
+
+// 🚀 核心：封装带缓存的数据库查询函数
+const getPaginatedArticles = unstable_cache(
+  async (skip: number, pageSize: number) => {
+    return Promise.all([
+      prisma.aiQuery.findMany({
+        orderBy: { createdAt: 'desc' },
+        skip: skip,
+        take: pageSize,
+        select: {
+          slug: true,
+          seoTitle: true,
+          aiSummary: true,
+          createdAt: true,
+        },
+      }),
+      prisma.aiQuery.count(),
+    ]);
+  },
+  ['ask-page-articles'], // 缓存的键名前缀
+  { revalidate: 3600, tags: ['ai-articles'] } // 强制在这个函数级别缓存 1 小时
+);
 
 export const metadata: Metadata = {
   title: 'Car Rental Guides & Money-Saving Tips | Car Corporate Codes',
@@ -83,20 +106,8 @@ export default async function AskPage({ searchParams }: { searchParams: Promise<
   const pageSize = 50; // 每页50篇，保护DOM性能
   const skip = (currentPage - 1) * pageSize;
 
-  const [articles, totalCount] = await Promise.all([
-    prisma.aiQuery.findMany({
-      orderBy: { createdAt: 'desc' },
-      skip: skip,
-      take: pageSize,
-      select: {
-        slug: true,
-        seoTitle: true,
-        aiSummary: true,
-        createdAt: true,
-      },
-    }),
-    prisma.aiQuery.count(), // 获取总数以渲染分页器
-  ]);
+  // 🚀 使用缓存函数替换原始查询
+  const [articles, totalCount] = await getPaginatedArticles(skip, pageSize);
 
   const totalPages = Math.ceil(totalCount / pageSize);
 
