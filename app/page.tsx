@@ -7,7 +7,7 @@ import { unstable_cache } from 'next/cache';
 import type { Metadata } from 'next';
 
 // 强制动态渲染，避免构建时查询数据库
-export const dynamic = 'force-dynamic';
+export const revalidate = 3600;
 
 // 缓存 brands 查询（1小时）
 const getCachedBrands = unstable_cache(
