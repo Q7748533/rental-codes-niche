@@ -23,9 +23,12 @@ export async function GET() {
     }
 
     return NextResponse.json(config);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Get AdSense config error:', error);
-    return NextResponse.json({ error: 'Failed to get config' }, { status: 500 });
+    return NextResponse.json({ 
+      error: 'Failed to get config', 
+      details: error?.message || String(error) 
+    }, { status: 500 });
   }
 }
 
@@ -63,8 +66,11 @@ export async function POST(req: Request) {
     }
 
     return NextResponse.json(config);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Update AdSense config error:', error);
-    return NextResponse.json({ error: 'Failed to update config' }, { status: 500 });
+    return NextResponse.json({ 
+      error: 'Failed to update config', 
+      details: error?.message || String(error) 
+    }, { status: 500 });
   }
 }
