@@ -74,13 +74,21 @@ export default function AskAiWidget({ companies }: AskAiWidgetProps) {
 
       const { taskId } = data;
 
-      // 3. Start visual pseudo-progress bar (stops at 85%)
+      // 🚀 1. 刚拿到 taskId，开始跑进度条
       setProgress(40);
-      setStatusText('Drafting guide (Gemini 3.1 Pro)...');
+      setStatusText('Scanning internal corporate databases...'); // 扫描内部企业数据库
 
-      // 🚀 抛弃 if(isLoading) 的检测，直接启动平滑的伪进度体验
-      setTimeout(() => { setProgress(65); setStatusText('Reviewing & editing (Claude Opus)...'); }, 5000);
-      setTimeout(() => { setProgress(85); setStatusText('Finalizing layout & SEO tags...'); }, 9000);
+      // 🚀 2. 模拟撰稿阶段
+      setTimeout(() => {
+        setProgress(65);
+        setStatusText('Cross-referencing ID requirements & terms...'); // 交叉比对证件要求与条款
+      }, 5000);
+
+      // 🚀 3. 模拟编辑阶段
+      setTimeout(() => {
+        setProgress(85);
+        setStatusText('Finalizing your personalized savings guide...'); // 生成您的专属省钱指南
+      }, 9000);
 
       // 4. Start real polling engine (check every 2s)
       let pollCount = 0;
