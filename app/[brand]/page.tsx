@@ -3,9 +3,23 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import Script from 'next/script';
 import type { Metadata } from 'next';
+import { cache } from 'react';
 
-// ISR：每5分钟重新生成一次页面
-export const revalidate = 300;
+// ISR：每小时重新生成一次页面
+export const revalidate = 3600;
+
+// 使用 React cache 包装数据库查询，确保 Metadata 和 Page 共享一次查询结果
+const getBrandData = cache(async (slug: string) => {
+  return prisma.brand.findUnique({
+    where: { slug },
+    include: {
+      codes: {
+        include: { company: true },
+        orderBy: { createdAt: 'desc' },
+      },
+    },
+  });
+});
 
 // 构建时预生成所有品牌页面，避免首次访问 SSR
 export async function generateStaticParams() {
@@ -18,7 +32,7 @@ export async function generateStaticParams() {
 // 动态生成 SEO 元数据
 export async function generateMetadata({ params }: { params: Promise<{ brand: string }> }): Promise<Metadata> {
   const { brand: slug } = await params;
-  const brand = await prisma.brand.findUnique({ where: { slug } });
+  const brand = await getBrandData(slug);
 
   if (!brand) {
     return { title: 'Brand Not Found' };
@@ -78,15 +92,7 @@ export async function generateMetadata({ params }: { params: Promise<{ brand: st
 export default async function BrandPage({ params }: { params: Promise<{ brand: string }> }) {
   const { brand: currentBrandSlug } = await params;
 
-  const brandData = await prisma.brand.findUnique({
-    where: { slug: currentBrandSlug },
-    include: {
-      codes: {
-        include: { company: true },
-        orderBy: { createdAt: 'desc' },
-      },
-    },
-  });
+  const brandData = await getBrandData(currentBrandSlug);
 
   if (!brandData) {
     notFound();
