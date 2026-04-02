@@ -277,7 +277,6 @@ export default async function AiGuidePage({ params }: { params: Promise<{ slug: 
           '@id': `${canonicalUrl}#webpage`,
         },
         articleSection: 'Car Rental Guides',
-        wordCount: aiQuery.seoContent?.length || 0,
       },
       {
         '@type': 'WebPage',
