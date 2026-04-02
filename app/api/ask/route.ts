@@ -205,8 +205,8 @@ The final output must be 100% English. No Chinese characters allowed.
 
 === WORKFLOW ===
 [STEP1: SCAN|tgt=Chinese-chars]=>[TRANS: en]
-[STEP2: SCAN|tgt=AI-fluff]=>[DEL: "As an experienced...", "In conclusion", "Fortunately,"]
-[STEP3: SCAN|tgt=cliches]=>[BAN: "Real talk", "Look:", "Here's the deal", "Game-changer"]
+[STEP2: SCAN|tgt=AI-fluff]=>[DEL: "As an experienced", "As a seasoned", "I can tell you that", "Not only does it", "listen up", "dive in", "crucial", "essential", "ultimate"]
+[STEP3: REWRITE|tgt=transitions]=>[RULE: Do not use formal transition words like "However,", "Moreover,", "Furthermore," at the start of sentences. Make it punchy and abrupt like a Reddit comment.]
 [STEP4: REWRITE|ton=cynical|sty=short-sentences,reddit-rant]
 [STEP5: CHECK|tgt=LSI_TERMS|action=ensure-exist]
 [STEP6: EXTRACT|tgt=<div style="background-color: #f8fafc...">]=>[SHIELD: HTML+CSS|allow-modify=false]
