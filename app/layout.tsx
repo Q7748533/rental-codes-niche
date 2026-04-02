@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { prisma } from "@/lib/db";
+import { cookies } from "next/headers";
 
 // 优化字体加载
 const inter = Inter({
@@ -26,13 +27,43 @@ async function getAdSenseConfig() {
   }
 }
 
+// 获取 Analytics 配置
+async function getAnalyticsConfig() {
+  try {
+    const config = await prisma.googleAnalyticsConfig.findFirst();
+    return config;
+  } catch {
+    return null;
+  }
+}
+
+// 检查是否为管理员
+async function isAdmin() {
+  try {
+    const cookieStore = await cookies();
+    return cookieStore.get('admin_session')?.value === 'true';
+  } catch {
+    return false;
+  }
+}
+
 export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const adSenseConfig = await getAdSenseConfig();
+  const [adSenseConfig, analyticsConfig, adminStatus] = await Promise.all([
+    getAdSenseConfig(),
+    getAnalyticsConfig(),
+    isAdmin(),
+  ]);
+
   const shouldLoadAdSense = adSenseConfig?.isEnabled && adSenseConfig?.publisherId;
+  
+  // Analytics：启用且（不排除管理员 或 不是管理员）
+  const shouldLoadAnalytics = analyticsConfig?.isEnabled && 
+    analyticsConfig?.measurementId &&
+    !(analyticsConfig?.excludeAdmin && adminStatus);
 
   return (
     <html lang="en" className={inter.variable}>
@@ -43,6 +74,24 @@ export default async function RootLayout({
             src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adSenseConfig.publisherId}`}
             crossOrigin="anonymous"
           />
+        )}
+        {shouldLoadAnalytics && (
+          <>
+            <script
+              async
+              src={`https://www.googletagmanager.com/gtag/js?id=${analyticsConfig.measurementId}`}
+            />
+            <script
+              dangerouslySetInnerHTML={{
+                __html: `
+                  window.dataLayer = window.dataLayer || [];
+                  function gtag(){dataLayer.push(arguments);}
+                  gtag('js', new Date());
+                  gtag('config', '${analyticsConfig.measurementId}'${analyticsConfig.anonymizeIp ? ", { 'anonymize_ip': true }" : ''});
+                `,
+              }}
+            />
+          </>
         )}
       </head>
       <body className="font-sans">{children}</body>
