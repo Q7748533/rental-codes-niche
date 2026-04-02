@@ -179,8 +179,8 @@ export default function AskAiWidget({ companies }: AskAiWidgetProps) {
           <div className="bg-green-600 text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3">
             <span className="text-2xl">✅</span>
             <div>
-              <p className="font-semibold">攻略已生成完成！</p>
-              <p className="text-sm text-green-100">点击查看完整内容</p>
+              <p className="font-semibold">Guide Ready!</p>
+              <p className="text-sm text-green-100">Click to view the full guide</p>
             </div>
             {activeTask.slug && (
               <Link
@@ -188,7 +188,7 @@ export default function AskAiWidget({ companies }: AskAiWidgetProps) {
                 onClick={clearTask}
                 className="ml-4 bg-white text-green-600 px-4 py-2 rounded-lg font-medium hover:bg-green-50 transition-colors"
               >
-                查看 →
+                View →
               </Link>
             )}
             <button
@@ -212,18 +212,18 @@ export default function AskAiWidget({ companies }: AskAiWidgetProps) {
               <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-indigo-500 rounded-full border-2 border-white animate-ping"></div>
             </div>
             <div className="flex-1">
-              <p className="font-medium text-gray-900">正在为您生成专属攻略...</p>
+              <p className="font-medium text-gray-900">Generating your personalized guide...</p>
               <p className="text-sm text-gray-600">
-                主题：{activeTask.query}
+                Topic: {activeTask.query}
               </p>
               <p className="text-xs text-gray-500 mt-1">
-                ⏱️ 已用时 {getElapsedTime()} 秒 · 预计 30-60 秒
+                ⏱️ {getElapsedTime()}s elapsed · Est. 30-60s
               </p>
             </div>
             <button
               onClick={clearTask}
               className="text-gray-400 hover:text-gray-600 p-2"
-              title="隐藏提示"
+              title="Dismiss"
             >
               ✕
             </button>
@@ -276,7 +276,7 @@ export default function AskAiWidget({ companies }: AskAiWidgetProps) {
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"></circle>
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
-                生成中...
+                Generating...
               </span>
             ) : (
               'Ask AI'
