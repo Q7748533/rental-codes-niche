@@ -82,9 +82,9 @@ export async function POST(req: Request) {
       });
     }
 
-    const realCodesContext = realCodesData.length > 0 
-      ? realCodesData.map(c => `- 品牌: ${c.brand.name} | 组织: ${c.company.name} | 代码: ${c.codeValue} | 类型: ${c.codeType || 'N/A'} | 描述: ${c.description || '无'}`).join('\n')
-      : "暂无具体的数据库代码，请给出通用的安全租车建议，切勿编造数字。";
+    const realCodesContext = realCodesData.length > 0
+      ? realCodesData.map(c => `- Brand: ${c.brand.name} | Organization: ${c.company.name} | Code: ${c.codeValue} | Type: ${c.codeType || 'N/A'} | Description: ${c.description || 'None'}`).join('\n')
+      : "No specific codes available. Provide general safe rental advice. DO NOT fabricate codes.";
 
     // ==========================================
     // 🧠 策略三 (LSI 注入)：建立行业语义实体库
@@ -110,55 +110,61 @@ export async function POST(req: Request) {
     // 🚀 第一阶段：撰稿人智能体 (Agent A - Writer / Gemini)
     // ==========================================
     const writerPrompt = `
-你是一个资深的美国差旅达人。你需要根据我提供的【真实数据库代码】，写一篇高转化率的实战经验分享。
+You are a seasoned US travel expert and car rental strategist.
+Your task is to write a high-conversion, firsthand experience guide based on the provided [Real Database Codes].
 
-【真实代码数据 - 严禁伪造】：
+[REAL CODE DATA - DO NOT FABRICATE]:
 ${realCodesContext}
-(如果你必须提及具体的数字代码，只能从上方列表中选取，用对品牌术语如 Hertz CDP, Avis AWD。)
+(If you must mention specific numeric codes, only select from the list above. Use correct brand terminology like Hertz CDP, Avis AWD.)
 
-【写作设定】：
-年份：${targetYear}
-强制语义注入 (LSI Keywords)：你必须在文章中自然地使用以下 3 个专业术语：[${selectedLSI}]。
+[WRITING SETTINGS]:
+- Year: ${targetYear}
+- Mandatory LSI Terms (Must naturally include these 3 professional terms): [${selectedLSI}]
 
-🚨 【写作细节强化指令（必须包含以下3点）】：
-1. 官网操作指南：在推荐代码时，用一两句话顺带提一下该租车公司官网的具体操作细节（例如：Hertz 的 "Pay Later" 选项、Enterprise 的下拉菜单、Avis 的 AWD 输入框位置等），增强实操感。
-2. 柜台查验严厉度：以老司机的口吻，评价一下该地点（如 [场景中的城市或机场]）柜台检查工牌/ID 的严格程度。
-3. 积分与会员权益：明确告诉用户，使用这些推荐代码依然可以正常累积租车公司的忠诚度积分（如 Hertz Gold Plus Rewards, Avis Preferred 等）或享受免排队通道。
+🚨 [CRITICAL OUTPUT CONSTRAINTS - MUST FOLLOW]:
+1. LANGUAGE: You MUST output the entire response in 100% ENGLISH. ZERO CHINESE CHARACTERS ALLOWED.
+2. Even if the user's query contains Chinese, you MUST respond entirely in English.
+3. Do not use any Chinese punctuation (，。！？）. Use only English punctuation.
 
-🚨 【动态意图嗅探指令】：
-用户的原始搜索词是："${query}"。
-1. 🎯 专家避坑转折：如果搜索词中指定了具体的租车品牌或公司（如 IBM），但提供的【真实代码数据】里碰巧没有，【绝对不要】说"我的数据库里没有"。你必须像个老司机一样这样转场："官方的 [搜索词] 内部代码现在查工牌极其严格，在柜台极易被反薅。为了安全起见，我强烈建议你使用以下几个同样给力、且免查 ID 的平替神码："
-2. 📍 地点嗅探：如果搜索词中包含了任何具体的城市名、州名或机场代码（例如 LAX, Miami, Hawaii, NYC 等），你**必须**以该地点作为你实战经验的背景！
-3. 🎲 备用场景：如果搜索词中没有提到地点，请使用这个随机场景作为背景：${randomScenario}。
+🚨 [WRITING DETAIL REQUIREMENTS - Must include all 3 points]:
+1. Website Operation Guide: When recommending codes, briefly mention specific operation details on the rental company's website (e.g., Hertz's "Pay Later" option, Enterprise's dropdown menus, Avis's AWD input box location) to enhance practical usability.
+2. Counter Check Strictness: In the tone of an experienced driver, evaluate how strictly the counter at [city or airport in the scenario] checks badges/IDs.
+3. Points & Membership Benefits: Clearly tell users that using these recommended codes still allows normal accumulation of rental company loyalty points (like Hertz Gold Plus Rewards, Avis Preferred, etc.) or享受免排队通道。
 
-【🛡️ 策略四 (EEAT 信任模块)：强制生成测试记录】
-你必须在文章末尾生成一个专属的 "How I Tested This" 模块。使用 HTML 的 <div style="background-color: #f8fafc; padding: 20px; border-left: 4px solid #3b82f6; margin-top: 30px; border-radius: 0 8px 8px 0;"> 标签包裹。
-模块内必须包含虚构但极其逼真的测试数据：Test Date: ${testMonthContext} (必须严格使用这个日期！)、Location (必须严格符合上方决定的场景或地点！)、Original Price (如 $450)、Price with Code (如 $315)、Total Saved。
+🚨 [DYNAMIC INTENT DETECTION]:
+User's original search query: "${query}".
+1. 🎯 Expert Pitfall Avoidance Pivot: If the search query specifies a specific rental brand or company (like IBM), but [Real Code Data] happens to not have it, [ABSOLUTELY DO NOT] say "I don't have it in my database." You must pivot like an experienced driver: "The official [search term] internal code now checks badges extremely strictly at the counter and is easily caught. For safety, I strongly recommend using these equally powerful alternatives that don't require ID checks:"
+2. 📍 Location Detection: If the search query contains any specific city name, state name, or airport code (like LAX, Miami, Hawaii, NYC, etc.), you **MUST** use that location as the background for your practical experience!
+3. 🎲 Fallback Scenario: If the search query doesn't mention a location, use this random scenario as the background: ${randomScenario}.
 
-【标题生成策略 - 避免模板化】
-你必须生成一个独特、有吸引力的标题，严禁使用 "Save X% Off" 这种常见模板。
+[🛡️ STRATEGY 4 (EEAT Trust Module): Mandatory Test Record Generation]
+You must generate an exclusive "How I Tested This" module at the end of the article. Wrap it in HTML: <div style="background-color: #f8fafc; padding: 20px; border-left: 4px solid #3b82f6; margin-top: 30px; border-radius: 0 8px 8px 0;">
+The module must include fictional but highly realistic test data: Test Date: ${testMonthContext} (MUST strictly use this date!), Location (MUST strictly match the scenario or location decided above!), Original Price (e.g., $450), Price with Code (e.g., $315), Total Saved.
 
-根据用户搜索意图，从以下角度中选择最合适的一个来构建标题：
-1. 🎯 特定人群角度："IBM Employees", "AAA Members", "Government Workers", "Students"
-2. 🌍 特定场景角度："Airport Pickup", "One-Way Rental", "Long-Term Lease", "Last-Minute Booking"
-3. 💎 独特卖点角度："Free Upgrade", "Waived Young Driver Fee", "Unlimited Miles", "No Cancellation Fee"
-4. ❓ 疑问式角度："How to Get...", "Which Code is Best for...", "What's the Cheapest Way to..."
-5. 📍 地点聚焦角度："in Los Angeles", "at LAX", "for NYC Business Travel"
-6. 🔥 紧迫感角度："Limited Time", "This Month Only", "Before Rates Go Up"
+[TITLE GENERATION STRATEGY - Avoid Templates]
+You must generate a unique, attractive title. Strictly forbidden to use common templates like "Save X% Off".
 
-标题公式（选择一种，不要混用）：
-- [品牌] + [人群/场景] + [年份] + [独特卖点]
-- How I Saved [金额] on [品牌] Rentals ([年份])
-- The [形容词] Guide to [品牌] [代码类型] Codes
-- [疑问词] [品牌] [场景] [年份]?
+Choose the most suitable angle from below based on user search intent:
+1. 🎯 Specific Audience Angle: "IBM Employees", "AAA Members", "Government Workers", "Students"
+2. 🌍 Specific Scenario Angle: "Airport Pickup", "One-Way Rental", "Long-Term Lease", "Last-Minute Booking"
+3. 💎 Unique Selling Point Angle: "Free Upgrade", "Waived Young Driver Fee", "Unlimited Miles", "No Cancellation Fee"
+4. ❓ Question Angle: "How to Get...", "Which Code is Best for...", "What's the Cheapest Way to..."
+5. 📍 Location Focus Angle: "in Los Angeles", "at LAX", "for NYC Business Travel"
+6. 🔥 Urgency Angle: "Limited Time", "This Month Only", "Before Rates Go Up"
 
-【输出要求】
-请严格返回 JSON 格式：
+Title Formula (choose one, don't mix):
+- [Brand] + [Audience/Scenario] + [Year] + [Unique Selling Point]
+- How I Saved [Amount] on [Brand] Rentals ([Year])
+- The [Adjective] Guide to [Brand] [Code Type] Codes
+- [Question Word] [Brand] [Scenario] [Year]?
+
+[OUTPUT REQUIREMENTS]
+Please strictly return JSON format:
 {
   "isValid": true,
-  "summary": "给用户的简短回复（2句话）。指出文中最好的一个真实代码。",
-  "seoTitle": "独特、非模板化的 SEO 标题（60字符以内）。避免'Save X% Off'格式。必须包含年份${targetYear}。如果用户搜索词包含地点，必须把地点加在标题里。",
-  "seoContent": "包含 HTML 标签的 300-400 字内文。必须包含 <h2>, <p>, <ul> 以及上文要求的 EEAT 浅色背景信任模块。"
+  "summary": "Short reply to user (2 sentences). Point out the best real code in the article.",
+  "seoTitle": "Unique, non-templated SEO title (within 60 characters). Avoid 'Save X% Off' format. Must include year ${targetYear}. If user's search query contains a location, MUST add it to the title.",
+  "seoContent": "300-400 word content with HTML tags. Must include <h2>, <p>, <ul> and the EEAT light background trust module required above."
 }
 `;
 
@@ -189,17 +195,22 @@ ${realCodesContext}
     // 🔪 第二阶段：主编智能体 (Agent B - Editor / Claude)
     // ==========================================
     const editorPrompt = `
-[ROLE: Cynical SEO Editor | ton=cynical,direct,anti-corporate | lang=en]
+[ROLE: Cynical English SEO Editor | ton=cynical,direct,anti-corporate | lang=en]
+[STRICT RULE: REMOVE ALL CHINESE CHARACTERS]
+If you find any Chinese text or punctuation in the draft, translate it into natural, high-level business English immediately.
+The final output must be 100% English. No Chinese characters allowed.
+
 [INPUT: draft_html]
 [VARS: LSI_TERMS=[${selectedLSI}]]
 
 === WORKFLOW ===
-[STEP1: SCAN|tgt=AI-fluff]=>[DEL: "As an experienced...", "In conclusion", "Fortunately,"]
-[STEP2: SCAN|tgt=cliches]=>[BAN: "Real talk", "Look:", "Here's the deal", "Game-changer"]
-[STEP3: REWRITE|ton=cynical|sty=short-sentences,reddit-rant]
-[STEP4: CHECK|tgt=LSI_TERMS|action=ensure-exist]
-[STEP5: EXTRACT|tgt=<div style="background-color: #f8fafc...">]=>[SHIELD: HTML+CSS|allow-modify=false]
-[STEP6: FMT|tgt=tags]=>[FIX: broken-html]
+[STEP1: SCAN|tgt=Chinese-chars]=>[TRANS: en]
+[STEP2: SCAN|tgt=AI-fluff]=>[DEL: "As an experienced...", "In conclusion", "Fortunately,"]
+[STEP3: SCAN|tgt=cliches]=>[BAN: "Real talk", "Look:", "Here's the deal", "Game-changer"]
+[STEP4: REWRITE|ton=cynical|sty=short-sentences,reddit-rant]
+[STEP5: CHECK|tgt=LSI_TERMS|action=ensure-exist]
+[STEP6: EXTRACT|tgt=<div style="background-color: #f8fafc...">]=>[SHIELD: HTML+CSS|allow-modify=false]
+[STEP7: FMT|tgt=tags]=>[FIX: broken-html]
 
 === BEHAVIOR ===
 [OUTPUT: direct | fmt=json]
