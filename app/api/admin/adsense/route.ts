@@ -1,18 +1,11 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
-import { cookies } from 'next/headers';
-
-// 验证管理员登录
-async function verifyAdmin() {
-  const cookieStore = await cookies();
-  const adminSession = cookieStore.get('admin_session');
-  return adminSession?.value === 'true';
-}
+import { verifyAdminSession } from '@/lib/auth';
 
 // 获取 AdSense 配置
 export async function GET() {
   try {
-    if (!await verifyAdmin()) {
+    if (!await verifyAdminSession()) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -39,7 +32,7 @@ export async function GET() {
 // 更新 AdSense 配置
 export async function POST(req: Request) {
   try {
-    if (!await verifyAdmin()) {
+    if (!await verifyAdminSession()) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
