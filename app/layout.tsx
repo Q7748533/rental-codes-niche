@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { prisma } from "@/lib/db";
 import { headers } from "next/headers";
+import Script from "next/script";
 
 // 优化字体加载
 const inter = Inter({
@@ -69,19 +70,21 @@ export default async function RootLayout({
     <html lang="en" className={inter.variable}>
       <head>
         {shouldLoadAdSense && (
-          <script
-            async
+          <Script
             src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adSenseConfig.publisherId}`}
+            strategy="afterInteractive"
             crossOrigin="anonymous"
           />
         )}
         {shouldLoadAnalytics && (
           <>
-            <script
-              async
+            <Script
               src={`https://www.googletagmanager.com/gtag/js?id=${analyticsConfig.measurementId}`}
+              strategy="afterInteractive"
             />
-            <script
+            <Script
+              id="ga4-config"
+              strategy="afterInteractive"
               dangerouslySetInnerHTML={{
                 __html: `
                   window.dataLayer = window.dataLayer || [];
