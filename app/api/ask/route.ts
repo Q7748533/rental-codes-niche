@@ -235,22 +235,43 @@ ${realCodesContext}
     // ==========================================
     const finalSlug = await generateUniqueSlug(prisma, draftData.seoTitle || query, 60);
 
+    // 🚀 先创建记录（无 slug），返回 taskId 给前端开始轮询
     const savedQuery = await prisma.aiQuery.create({
       data: {
-        slug: finalSlug + '.html', // 统一添加 .html 后缀，支持伪静态 URL
+        slug: '', // 初始为空，AI 生成完成后再更新
         userPrompt: query,
-        aiSummary: draftData.summary || 'Here is what I found for you.',
+        aiSummary: 'Generating your personalized guide...',
         seoTitle: draftData.seoTitle || `${query} - Car Rental Guide`,
-        seoContent: finalHtmlContent, // 存入经过主编洗礼的无敌最终稿
+        seoContent: '', // 初始为空
       }
     });
 
-    revalidatePath('/sitemap.xml');
-    console.log('✅ 文章发布成功！Sitemap 已更新。');
+    // 🚀 立即返回 taskId，让前端开始轮询
+    const taskId = savedQuery.id;
+
+    // 在后台异步完成 AI 生成和更新
+    (async () => {
+      try {
+        // 更新记录为最终内容
+        await prisma.aiQuery.update({
+          where: { id: taskId },
+          data: {
+            slug: finalSlug + '.html',
+            aiSummary: draftData.summary || 'Here is what I found for you.',
+            seoContent: finalHtmlContent,
+          }
+        });
+
+        revalidatePath('/sitemap.xml');
+        console.log('✅ 文章发布成功！Sitemap 已更新。');
+      } catch (err) {
+        console.error('Background update error:', err);
+      }
+    })();
 
     return NextResponse.json({
-      summary: savedQuery.aiSummary,
-      slug: savedQuery.slug
+      taskId: taskId, // 🚀 返回 taskId 供轮询
+      summary: 'Generating your personalized guide...',
     });
 
   } catch (error) {

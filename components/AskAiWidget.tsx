@@ -14,6 +14,7 @@ interface AskAiWidgetProps {
 
 interface GenerationTask {
   query: string;
+  taskId?: string; // 🚀 新增：任务ID用于精确轮询
   status: 'generating' | 'completed' | 'error';
   slug?: string;
   summary?: string;
@@ -38,12 +39,12 @@ export default function AskAiWidget({ companies }: AskAiWidgetProps) {
       ).slice(0, 5)
     : [];
 
-  // 轮询检查生成状态
-  const pollGenerationStatus = useCallback(async (queryText: string) => {
+  // 轮询检查生成状态 - 🚀 使用 taskId 精确轮询
+  const pollGenerationStatus = useCallback(async (taskId: string) => {
     const checkStatus = async () => {
       try {
-        // 查询最新的 AI 文章，看是否包含我们的查询
-        const response = await fetch(`/api/ask/status?query=${encodeURIComponent(queryText)}`);
+        // 🚀 使用 taskId 精确查询，避免冲突
+        const response = await fetch(`/api/ask/status?id=${encodeURIComponent(taskId)}`);
         if (response.ok) {
           const data = await response.json();
           
@@ -67,9 +68,9 @@ export default function AskAiWidget({ companies }: AskAiWidgetProps) {
       }
     };
 
-    // 每 3 秒检查一次，最多检查 60 次（3 分钟）
+    // 🚀 每 2 秒检查一次（降低频率保护数据库），最多检查 90 次（3 分钟）
     let attempts = 0;
-    const maxAttempts = 60;
+    const maxAttempts = 90;
     
     const poll = async () => {
       if (attempts >= maxAttempts) {
@@ -82,7 +83,7 @@ export default function AskAiWidget({ companies }: AskAiWidgetProps) {
       const completed = await checkStatus();
       
       if (!completed && activeTask?.status === 'generating') {
-        setTimeout(poll, 3000);
+        setTimeout(poll, 2000); // 🚀 2秒间隔，降低数据库压力
       }
     };
     
@@ -124,13 +125,17 @@ export default function AskAiWidget({ companies }: AskAiWidgetProps) {
       }
 
       const data = await response.json();
-      
+
       if (data.error) {
         setActiveTask(prev => prev ? { ...prev, status: 'error' } : null);
         setAiResponse(data.error);
         setIsLoading(false);
-      } else if (data.slug) {
-        // 如果 API 立即返回了结果（缓存命中）
+      } else if (data.taskId) {
+        // 🚀 保存 taskId 并开始轮询
+        setActiveTask(prev => prev ? { ...prev, taskId: data.taskId } : null);
+        pollGenerationStatus(data.taskId);
+      } else {
+        // 兼容旧逻辑（如果有 slug 直接返回）
         setActiveTask(prev => prev ? {
           ...prev,
           status: 'completed',
@@ -140,9 +145,6 @@ export default function AskAiWidget({ companies }: AskAiWidgetProps) {
         setAiResponse(data.summary);
         setAiSlug(data.slug);
         setIsLoading(false);
-      } else {
-        // 开始轮询检查状态
-        pollGenerationStatus(queryText);
       }
     } catch (error) {
       console.error('AI Query Error:', error);

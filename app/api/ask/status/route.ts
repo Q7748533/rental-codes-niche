@@ -5,28 +5,14 @@ import { prisma } from '@/lib/db';
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
-    const query = searchParams.get('query');
+    const id = searchParams.get('id'); // 🚀 改用唯一的 ID 替代模糊查询
 
-    if (!query) {
-      return NextResponse.json({ error: 'Query is required' }, { status: 400 });
+    if (!id) {
+      return NextResponse.json({ error: 'Task ID is required' }, { status: 400 });
     }
 
-    // 查询最近 5 分钟内创建的、包含该查询词的文章
-    const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
-    
-    const article = await prisma.aiQuery.findFirst({
-      where: {
-        userPrompt: {
-          contains: query,
-          mode: 'insensitive',
-        },
-        createdAt: {
-          gte: fiveMinutesAgo,
-        },
-      },
-      orderBy: {
-        createdAt: 'desc',
-      },
+    const article = await prisma.aiQuery.findUnique({
+      where: { id }, // 🚀 精确匹配，杜绝冲突
       select: {
         slug: true,
         seoTitle: true,
@@ -34,18 +20,18 @@ export async function GET(req: Request) {
       },
     });
 
-    if (article) {
+    // 如果 slug 已经存在，说明 AI 生成并写入数据库已完成
+    if (article?.slug) {
       return NextResponse.json({
         found: true,
-        slug: article.slug,
+        // 🚀 统一处理后缀，保证跳转不出现 404
+        slug: article.slug.replace(/\.html$/, ''),
         title: article.seoTitle,
         summary: article.aiSummary,
       });
     }
 
-    return NextResponse.json({
-      found: false,
-    });
+    return NextResponse.json({ found: false });
   } catch (error) {
     console.error('Check status error:', error);
     return NextResponse.json({
