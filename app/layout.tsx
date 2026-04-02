@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { prisma } from "@/lib/db";
-import { headers } from "next/headers";
 import Script from "next/script";
 
 // 优化字体加载
@@ -38,33 +37,19 @@ async function getAnalyticsConfig() {
   }
 }
 
-// 检查是否为管理员（从 Middleware 传递的请求头读取）
-async function isAdmin() {
-  try {
-    const headersList = await headers();
-    return headersList.get('x-is-admin') === 'true';
-  } catch {
-    return false;
-  }
-}
-
 export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const [adSenseConfig, analyticsConfig, adminStatus] = await Promise.all([
+  // 仅查询基础配置，不再有任何 Dynamic API 阻碍静态化
+  const [adSenseConfig, analyticsConfig] = await Promise.all([
     getAdSenseConfig(),
     getAnalyticsConfig(),
-    isAdmin(),
   ]);
 
   const shouldLoadAdSense = adSenseConfig?.isEnabled && adSenseConfig?.publisherId;
-  
-  // Analytics：启用且（不排除管理员 或 不是管理员）
-  const shouldLoadAnalytics = analyticsConfig?.isEnabled && 
-    analyticsConfig?.measurementId &&
-    !(analyticsConfig?.excludeAdmin && adminStatus);
+  const shouldLoadAnalytics = analyticsConfig?.isEnabled && analyticsConfig?.measurementId;
 
   return (
     <html lang="en" className={inter.variable}>
@@ -87,6 +72,11 @@ export default async function RootLayout({
               strategy="afterInteractive"
               dangerouslySetInnerHTML={{
                 __html: `
+                  // 客户端判断：如果是管理员，禁用 GA 追踪
+                  if (${analyticsConfig.excludeAdmin} && document.cookie.indexOf('admin_session=true') > -1) {
+                    window['ga-disable-${analyticsConfig.measurementId}'] = true;
+                  }
+
                   window.dataLayer = window.dataLayer || [];
                   function gtag(){dataLayer.push(arguments);}
                   gtag('js', new Date());
