@@ -373,58 +373,64 @@ export default async function AiGuidePage({ params }: { params: Promise<{ slug: 
           </ol>
         </nav>
 
-        {/* 标题 */}
-        <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 mb-6 leading-tight">
-          {aiQuery.seoTitle}
-        </h1>
+        {/* 🚀 扩大 article 边界，将 EEAT 信号和 FAQ 锁死在文章语义内 */}
+        <article>
+          {/* 标题 */}
+          <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 mb-6 leading-tight">
+            {aiQuery.seoTitle}
+          </h1>
 
-        {/* 元信息行 - 添加作者信息 */}
-        <div className="text-sm text-gray-500 mb-6 pb-4 border-b border-gray-200 flex items-center gap-2">
-          <span>{aiQuery.createdAt.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</span>
-          <span>·</span>
-          <span>By {SITE_AUTHOR.name}</span>
-        </div>
-
-        {/* 文章内容 */}
-        <article 
-          className="prose prose-base max-w-none 
-            prose-headings:text-gray-900 prose-headings:font-bold prose-headings:mt-6 prose-headings:mb-3
-            prose-h2:text-lg prose-h2:md:text-xl prose-h2:text-gray-800
-            prose-p:text-gray-700 prose-p:leading-7 prose-p:mb-4
-            prose-strong:text-gray-900 prose-strong:font-semibold
-            prose-strong:bg-blue-50 prose-strong:px-1 prose-strong:py-0.5 prose-strong:rounded
-            prose-li:text-gray-700 prose-li:mb-1 prose-li:leading-7
-            prose-ul:my-4 prose-ul:list-disc prose-ul:pl-5
-            prose-ol:my-4 prose-ol:list-decimal prose-ol:pl-5"
-          dangerouslySetInnerHTML={{ __html: aiQuery.seoContent }}
-        />
-
-        {/* 作者简介 - EEAT 信号 */}
-        <div className="mt-8 p-4 bg-gray-50 rounded-lg border border-gray-200">
-          <div className="flex items-start gap-3">
-            <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold text-sm">
-              {SITE_AUTHOR.name.charAt(0)}
-            </div>
-            <div>
-              <p className="font-semibold text-gray-900">{SITE_AUTHOR.name}</p>
-              <p className="text-sm text-gray-600">{SITE_AUTHOR.title}</p>
-              <p className="text-xs text-gray-500 mt-1">{SITE_AUTHOR.bio}</p>
-            </div>
+          {/* 元信息行 - 添加作者信息 */}
+          <div className="text-sm text-gray-500 mb-6 pb-4 border-b border-gray-200 flex items-center gap-2">
+            <time dateTime={aiQuery.createdAt.toISOString()}>
+              {aiQuery.createdAt.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+            </time>
+            <span>·</span>
+            {/* 明确告诉爬虫这是作者 */}
+            <span rel="author">By {SITE_AUTHOR.name}</span>
           </div>
-        </div>
 
-        {/* 🌟 视觉 FAQ 模块 - 增强页面长度和关键词密度，避免 Google 惩罚 */}
-        <div className="mt-12 pt-8 border-t border-gray-200">
-          <h2 className="text-xl font-bold text-gray-900 mb-6">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            {faqs.map((faq: any, index: number) => (
-              <div key={index} className="bg-gray-50 p-4 rounded-lg border border-gray-100">
-                <h3 className="font-semibold text-gray-900 mb-2 text-base">{faq.name}</h3>
-                <p className="text-gray-600 text-sm leading-relaxed">{faq.acceptedAnswer.text}</p>
+          {/* 文章正文 */}
+          <div
+            className="prose prose-base max-w-none
+              prose-headings:text-gray-900 prose-headings:font-bold prose-headings:mt-6 prose-headings:mb-3
+              prose-h2:text-lg prose-h2:md:text-xl prose-h2:text-gray-800
+              prose-p:text-gray-700 prose-p:leading-7 prose-p:mb-4
+              prose-strong:text-gray-900 prose-strong:font-semibold
+              prose-strong:bg-blue-50 prose-strong:px-1 prose-strong:py-0.5 prose-strong:rounded
+              prose-li:text-gray-700 prose-li:mb-1 prose-li:leading-7
+              prose-ul:my-4 prose-ul:list-disc prose-ul:pl-5
+              prose-ol:my-4 prose-ol:list-decimal prose-ol:pl-5"
+            dangerouslySetInnerHTML={{ __html: aiQuery.seoContent }}
+          />
+
+          {/* 作者简介 - EEAT 信号 - 语义化包裹 */}
+          <footer className="mt-8 p-4 bg-gray-50 rounded-lg border border-gray-200">
+            <div className="flex items-start gap-3">
+              <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                {SITE_AUTHOR.name.charAt(0)}
               </div>
-            ))}
-          </div>
-        </div>
+              <div>
+                <p className="font-semibold text-gray-900">{SITE_AUTHOR.name}</p>
+                <p className="text-sm text-gray-600">{SITE_AUTHOR.title}</p>
+                <p className="text-xs text-gray-500 mt-1">{SITE_AUTHOR.bio}</p>
+              </div>
+            </div>
+          </footer>
+
+          {/* 🌟 视觉 FAQ 模块 - 也在 Article 内部 */}
+          <section className="mt-12 pt-8 border-t border-gray-200">
+            <h2 className="text-xl font-bold text-gray-900 mb-6">Frequently Asked Questions</h2>
+            <div className="space-y-4">
+              {faqs.map((faq: any, index: number) => (
+                <div key={index} className="bg-gray-50 p-4 rounded-lg border border-gray-100">
+                  <h3 className="font-semibold text-gray-900 mb-2 text-base">{faq.name}</h3>
+                  <p className="text-gray-600 text-sm leading-relaxed">{faq.acceptedAnswer.text}</p>
+                </div>
+              ))}
+            </div>
+          </section>
+        </article>
 
         {/* 相关文章推荐 */}
         {relatedArticles.length > 0 && (
