@@ -170,10 +170,12 @@ Please strictly return JSON format:
 }
 `;
 
-    // 🚀 1. 拦截点：先创建一条空的占位记录，立即拿到 taskId
+    // 🚀 1. 拦截点：生成唯一临时 slug，创建占位记录，立即拿到 taskId
+    const tempSlug = `pending-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+
     const savedQuery = await prisma.aiQuery.create({
       data: {
-        slug: '', // 留空，作为未完成的标志
+        slug: tempSlug, // 🚀 使用唯一临时 slug，避免 UNIQUE constraint 错误
         userPrompt: query,
         aiSummary: 'Generating your personalized guide...',
         seoTitle: `${query} - Car Rental Guide`,

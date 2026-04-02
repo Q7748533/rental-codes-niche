@@ -38,8 +38,8 @@ export async function GET(req: Request) {
       );
     }
 
-    // 1. 成功态：生成完成
-    if (article.slug) {
+    // 1. 成功态：生成完成 (slug 存在且不是 pending- 开头的临时 slug)
+    if (article.slug && !article.slug.startsWith('pending-')) {
       return NextResponse.json({
         found: true,
         slug: article.slug.replace(/\.html$/, ''),
