@@ -16,8 +16,13 @@ export async function generateMetadata({ params }: { params: Promise<{ brand: st
     return { title: 'Brand Not Found' };
   }
 
-  const title = `${brand.name} Corporate Codes 2026 | CDP & PC Discount Numbers`;
-  const description = `Verified ${brand.name} corporate discount codes (CDP/PC) for employees and members. Save 10-25% on car rentals. Updated ${new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}.`;
+  const termMap: Record<string, string> = {
+    hertz: 'CDP', avis: 'AWD', enterprise: 'ECM', national: 'CDP',
+    alamo: 'AWD', budget: 'BCD', payless: 'Corp ID', dollar: 'Dollar Express', thrifty: 'THR',
+  };
+  const brandTerm = termMap[slug.toLowerCase()] || 'Corporate';
+  const title = `${brand.name} Corporate Codes 2026 | ${brandTerm} & PC Discount Numbers`;
+  const description = `Verified ${brand.name} corporate discount codes (${brandTerm}/PC) for employees and members. Save 10-25% on car rentals. Updated ${new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}.`;
   const canonicalUrl = `https://carcorporatecodes.com/${brand.slug}`;
 
   return {
@@ -86,6 +91,20 @@ export default async function BrandPage({ params }: { params: Promise<{ brand: s
     include: { _count: { select: { codes: true } } },
   });
 
+  // 品牌术语映射 (CDP/AWD/ECM 等)
+  const brandTerminology: Record<string, string> = {
+    hertz: 'CDP (Corporate Discount Program)',
+    avis: 'AWD (Avis Worldwide Discount)',
+    enterprise: 'ECM (Enterprise Corporate Membership)',
+    national: 'CDP (Corporate Discount Program)',
+    alamo: 'AWD (Avis Worldwide Discount)',
+    budget: 'BCD (Budget Corporate Discount)',
+    payless: 'Corp ID',
+    dollar: 'Dollar Express',
+    thrifty: 'THR (Thrifty Corporate Rate)',
+  };
+  const terminology = brandTerminology[currentBrandSlug.toLowerCase()] || 'Corporate Program';
+
   // JSON-LD 结构化数据
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -95,8 +114,8 @@ export default async function BrandPage({ params }: { params: Promise<{ brand: s
         '@type': 'WebPage',
         '@id': `https://carcorporatecodes.com/${brandData.slug}#webpage`,
         url: `https://carcorporatecodes.com/${brandData.slug}`,
-        name: `${brandData.name} Corporate Codes 2026 | CDP & PC Discount Numbers`,
-        description: `Verified ${brandData.name} corporate discount codes (CDP/PC) for employees and members. Save 10-25% on car rentals.`,
+        name: `${brandData.name} Corporate Codes 2026 | ${terminology.split('(')[0].trim()} & PC Discount Numbers`,
+        description: `Verified ${brandData.name} corporate discount codes (${terminology.split('(')[0].trim()}/PC) for employees and members. Save 10-25% on car rentals.`,
         isPartOf: {
           '@id': 'https://carcorporatecodes.com/#website',
         },
@@ -160,7 +179,7 @@ export default async function BrandPage({ params }: { params: Promise<{ brand: s
             name: `What is a ${brandData.name} corporate code?`,
             acceptedAnswer: {
               '@type': 'Answer',
-              text: `A ${brandData.name} corporate code (also known as CDP - Corporate Discount Program) is a special discount code that provides reduced rental rates for employees of partner companies and organization members. These codes can save you 10-25% off standard rates.`,
+              text: `A ${brandData.name} corporate code (also known as ${terminology}) is a special discount code that provides reduced rental rates for employees of partner companies and organization members. These codes can save you 10-25% off standard rates.`,
             },
           },
           {
@@ -184,7 +203,7 @@ export default async function BrandPage({ params }: { params: Promise<{ brand: s
             name: `How do I use a ${brandData.name} corporate code?`,
             acceptedAnswer: {
               '@type': 'Answer',
-              text: `To use a ${brandData.name} corporate code: 1) Visit ${brandData.name}.com or their mobile app, 2) Enter your pickup location and dates, 3) Look for the "Corporate Account" or "CDP" field, 4) Enter the code from our database, 5) Compare rates and complete your booking, 6) Bring proof of eligibility when picking up the vehicle.`,
+              text: `To use a ${brandData.name} corporate code: 1) Visit ${brandData.name}.com or their mobile app, 2) Enter your pickup location and dates, 3) Look for the "Corporate Account" or "${terminology.split(' ')[0]}" field, 4) Enter the code from our database, 5) Compare rates and complete your booking, 6) Bring proof of eligibility when picking up the vehicle.`,
             },
           },
           {
@@ -234,7 +253,7 @@ export default async function BrandPage({ params }: { params: Promise<{ brand: s
         {/* H1: 精准包含品牌名和核心关键词 */}
         <div className="mb-10">
           <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4 capitalize">
-            {brandData.name} Corporate Codes & CDP Numbers 2026
+            {brandData.name} Corporate Codes & {terminology.split('(')[0].trim()} Numbers 2026
           </h1>
           <p className="text-lg text-gray-600">
             Complete list of verified {brandData.name} corporate discount program (CDP) codes and promotion codes. 
@@ -266,6 +285,9 @@ export default async function BrandPage({ params }: { params: Promise<{ brand: s
             {/* ========================================== */}
             <div className="hidden sm:block overflow-x-auto">
               <table className="w-full text-left border-collapse min-w-[800px]">
+                <caption className="sr-only">
+                  List of active {brandData.name} corporate discount codes, including business and leisure use cases.
+                </caption>
                 <thead>
                   <tr className="bg-gray-50 border-b border-gray-200 text-gray-600 text-xs uppercase tracking-wider">
                     <th className="p-5 font-bold w-1/5">Organization</th>
@@ -399,7 +421,7 @@ export default async function BrandPage({ params }: { params: Promise<{ brand: s
             <ol className="list-decimal list-inside space-y-3 text-gray-700">
               <li>Visit <strong>{brandData.name}.com</strong> or use their mobile app</li>
               <li>Enter your pickup location and dates</li>
-              <li>Look for "Corporate Account" or "CDP" field</li>
+              <li>Look for &quot;Corporate Account&quot; or &quot;{terminology.split(' ')[0]}&quot; field</li>
               <li>Enter the code from the table above</li>
               <li>Compare rates and complete your booking</li>
               <li>Bring proof of eligibility when picking up the vehicle</li>
@@ -415,7 +437,7 @@ export default async function BrandPage({ params }: { params: Promise<{ brand: s
             <a
               href={`https://www.discovercars.com/?brand=${brandData.name.toLowerCase()}`}
               target="_blank"
-              rel="noopener noreferrer"
+              rel="nofollow sponsored noopener noreferrer"
               className="inline-block bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-lg font-bold shadow transition-colors"
             >
               Compare {brandData.name} Prices

@@ -365,7 +365,7 @@ export default async function Home() {
                     <a 
                       href={deal.linkUrl}
                       target="_blank" 
-                      rel="noopener noreferrer"
+                      rel="nofollow sponsored noopener noreferrer"
                       className="w-full md:w-auto bg-orange-500 hover:bg-orange-600 text-white px-8 py-4 rounded-xl font-bold shadow-md transition-transform hover:scale-105 active:scale-95 text-center"
                     >
                       {deal.buttonText}
@@ -382,7 +382,7 @@ export default async function Home() {
                 <a 
                   href="https://www.discovercars.com" 
                   target="_blank" 
-                  rel="noopener noreferrer"
+                  rel="nofollow sponsored noopener noreferrer"
                   className="w-full md:w-auto bg-orange-500 hover:bg-orange-600 text-white px-8 py-4 rounded-xl font-bold shadow-md transition-transform hover:scale-105 active:scale-95 text-center"
                 >
                   Compare Prices
