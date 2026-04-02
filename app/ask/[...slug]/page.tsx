@@ -273,7 +273,7 @@ export default async function AiGuidePage({ params }: { params: Promise<{ slug: 
         description: aiQuery.aiSummary,
         url: canonicalUrl,
         datePublished: aiQuery.createdAt.toISOString(),
-        dateModified: aiQuery.createdAt.toISOString(),
+        dateModified: (aiQuery.updatedAt || aiQuery.createdAt).toISOString(),
         author: {
           '@type': 'Person',
           name: SITE_AUTHOR.name,
@@ -308,7 +308,7 @@ export default async function AiGuidePage({ params }: { params: Promise<{ slug: 
           '@id': `${canonicalUrl}#breadcrumb`,
         },
         datePublished: aiQuery.createdAt.toISOString(),
-        dateModified: aiQuery.createdAt.toISOString(),
+        dateModified: (aiQuery.updatedAt || aiQuery.createdAt).toISOString(),
       },
       {
         '@type': 'BreadcrumbList',
