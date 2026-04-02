@@ -73,28 +73,30 @@ export const metadata: Metadata = {
 };
 
 export default async function Home() {
-  // 使用缓存查询 brands 和 companies
-  const brands = await getCachedBrands();
-  const companies = await getCachedCompanies();
-
-  // 获取最新生成的 AI 文章
-  const latestArticles = await prisma.aiQuery.findMany({
-    orderBy: { createdAt: 'desc' },
-    take: 6,
-    select: {
-      slug: true,
-      seoTitle: true,
-      aiSummary: true,
-      viewCount: true,
-      createdAt: true,
-    },
-  });
-
-  // 获取公开优惠链接（管理员可编辑）
-  const publicDeals = await prisma.publicDeal.findMany({
-    where: { isActive: true },
-    orderBy: { sortOrder: 'asc' },
-  });
+  // 并发获取所有数据，减少网络往返时间
+  const [brands, companies, latestArticles, publicDeals] = await Promise.all([
+    // 使用缓存查询 brands
+    getCachedBrands(),
+    // 使用缓存查询 companies
+    getCachedCompanies(),
+    // 获取最新生成的 AI 文章
+    prisma.aiQuery.findMany({
+      orderBy: { createdAt: 'desc' },
+      take: 6,
+      select: {
+        slug: true,
+        seoTitle: true,
+        aiSummary: true,
+        viewCount: true,
+        createdAt: true,
+      },
+    }),
+    // 获取公开优惠链接（管理员可编辑）
+    prisma.publicDeal.findMany({
+      where: { isActive: true },
+      orderBy: { sortOrder: 'asc' },
+    }),
+  ]);
 
   const totalCodes = brands.reduce((sum, b) => sum + b._count.codes, 0);
 
