@@ -6,7 +6,7 @@ import OpenAI from 'openai';
 import { revalidatePath } from 'next/cache';
 
 const openai = new OpenAI({
-  apiKey: process.env.VECTOR_ENGINE_API_KEY || "在这里填入你的真实 API KEY", 
+  apiKey: process.env.VECTOR_ENGINE_API_KEY || "YOUR_API_KEY_HERE",
   baseURL: "https://api.vectorengine.ai/v1"
 });
 
@@ -20,46 +20,46 @@ export async function POST(req: Request) {
     }
 
     // ==========================================
-    // 🎯 核心修复 1：精准捕获年份意图 & 锁定时间线
+    // 🎯 CORE FIX 1: Precise Year Intent Capture & Timeline Lock
     // ==========================================
     const now = new Date();
     const currentYear = now.getFullYear();
-    
-    // 尝试从用户的 query 中提取四位数的年份 (例如 "2024", "2025", "2026")
-    const queryYearMatch = query.match(/\b(202[4-9])\b/); 
-    
-    // 【优化】：如果用户没写年份，强制使用当前真实年份，彻底杜绝 2024/2025 的时空穿越！
+
+    // Extract 4-digit year from user's query (e.g., "2024", "2025", "2026")
+    const queryYearMatch = query.match(/\b(202[4-9])\b/);
+
+    // [OPTIMIZATION]: If user didn't specify year, force current real year to prevent 2024/2025 time travel!
     const targetYear = queryYearMatch ? queryYearMatch[1] : currentYear.toString();
 
-    // 【优化】：动态计算上个月的月份和年份，用于注入极其逼真的 EEAT 测试数据
+    // [OPTIMIZATION]: Dynamically calculate last month's date for highly realistic EEAT test data injection
     const lastMonthDate = new Date();
     lastMonthDate.setMonth(now.getMonth() - 1);
     const testMonthContext = lastMonthDate.toLocaleString('en-US', { month: 'long', year: 'numeric' });
 
     // ==========================================
-    // 🚗 核心修复 2：动态品牌雷达 (实时同步数据库)
+    // 🚗 CORE FIX 2: Dynamic Brand Radar (Real-time DB Sync)
     // ==========================================
-    // 瞬间拉取你数据库中所有存在的品牌名称
+    // Instantly fetch all brand names existing in your database
     const dbBrands = await prisma.brand.findMany({
       select: { name: true }
     });
-    
-    // 转换成全小写的数组，例如: ['hertz', 'avis', 'fox', 'europcar']
+
+    // Convert to lowercase array, e.g., ['hertz', 'avis', 'fox', 'europcar']
     const dynamicBrands = dbBrands.map(b => b.name.toLowerCase());
     const queryLower = query.toLowerCase();
     
-    // 嗅探用户查询中是否包含了你数据库里【真实存在】的品牌
+    // Detect if user query contains brands that [actually exist] in your database
     const detectedBrand = dynamicBrands.find(brand => queryLower.includes(brand));
 
     // ==========================================
-    // 🛡️ 基础护城河：从数据库抓取真实数据，终结 AI 幻觉
+    // 🛡️ FOUNDATION MOAT: Fetch real data from database to end AI hallucinations
     // ==========================================
     const words = query.split(/[^a-zA-Z0-9]/).filter((w: string) => w.length > 2);
-    // 如果雷达扫到了品牌，就用品牌名；否则退回到找第一个有意义的词
+    // If radar detected a brand, use it; otherwise fallback to first meaningful word
     const searchKeyword = detectedBrand || (words.length > 0 ? words[0] : '');
     const lowerKeyword = searchKeyword.toLowerCase();
 
-    // 优先尝试匹配用户搜索的品牌、组织名或描述
+    // Prioritize matching user's searched brand, organization name or description
     let realCodesData = await prisma.code.findMany({
       where: {
         OR: [
@@ -69,15 +69,15 @@ export async function POST(req: Request) {
         ]
       },
       take: 5,
-      orderBy: { createdAt: 'desc' }, 
+      orderBy: { createdAt: 'desc' },
       include: { brand: true, company: true }
     });
 
-    // Fallback 机制：如果用户的 query 极其冷门，没匹配到任何数据，抓取最新高价值代码兜底
+    // Fallback mechanism: If user's query is extremely niche with no matches, fetch latest high-value codes as backup
     if (realCodesData.length === 0) {
       realCodesData = await prisma.code.findMany({
         take: 3,
-        orderBy: { createdAt: 'desc' }, 
+        orderBy: { createdAt: 'desc' },
         include: { brand: true, company: true }
       });
     }
@@ -87,17 +87,17 @@ export async function POST(req: Request) {
       : "No specific codes available. Provide general safe rental advice. DO NOT fabricate codes.";
 
     // ==========================================
-    // 🧠 策略三 (LSI 注入)：建立行业语义实体库
+    // 🧠 STRATEGY 3 (LSI Injection): Build industry semantic entity library
     // ==========================================
     const lsiVocabulary = [
-      "walk-up rate", "liability coverage", "counter bypass", "underage fee waiver", 
-      "blackout dates", "dynamic pricing", "airport concession fee", "base rate", 
+      "walk-up rate", "liability coverage", "counter bypass", "underage fee waiver",
+      "blackout dates", "dynamic pricing", "airport concession fee", "base rate",
       "fleet availability", "premium upgrade", "drop-off charge", "loyalty tier status"
     ];
-    // 随机抽取 3 个 LSI 词汇强制注入
+    // Randomly select 3 LSI terms for mandatory injection
     const selectedLSI = lsiVocabulary.sort(() => 0.5 - Math.random()).slice(0, 3).join(", ");
 
-    // 随机场景与语气
+    // Random scenarios and tone
     const scenarios = [
       "A stressful family vacation to Disney World in Orlando (MCO)",
       "A last-minute tech conference at McCormick Place in Chicago (ORD)",
@@ -107,7 +107,7 @@ export async function POST(req: Request) {
     const randomScenario = scenarios[Math.floor(Math.random() * scenarios.length)];
 
     // ==========================================
-    // 🚀 第一阶段：撰稿人智能体 (Agent A - Writer / Gemini)
+    // 🚀 PHASE 1: Writer Agent (Agent A - Writer / Gemini)
     // ==========================================
     const writerPrompt = `
 You are a seasoned US travel expert and car rental strategist.
@@ -129,7 +129,7 @@ ${realCodesContext}
 🚨 [WRITING DETAIL REQUIREMENTS - Must include all 3 points]:
 1. Website Operation Guide: When recommending codes, briefly mention specific operation details on the rental company's website (e.g., Hertz's "Pay Later" option, Enterprise's dropdown menus, Avis's AWD input box location) to enhance practical usability.
 2. Counter Check Strictness: In the tone of an experienced driver, evaluate how strictly the counter at [city or airport in the scenario] checks badges/IDs.
-3. Points & Membership Benefits: Clearly tell users that using these recommended codes still allows normal accumulation of rental company loyalty points (like Hertz Gold Plus Rewards, Avis Preferred, etc.) or享受免排队通道。
+3. Points & Membership Benefits: Clearly tell users that using these recommended codes still allows normal accumulation of rental company loyalty points (like Hertz Gold Plus Rewards, Avis Preferred, etc.) or skip-the-line privileges at the counter.
 
 🚨 [DYNAMIC INTENT DETECTION]:
 User's original search query: "${query}".
@@ -168,15 +168,15 @@ Please strictly return JSON format:
 }
 `;
 
-    console.log("🤖 启动编辑部模式... [撰稿人 Gemini] 正在疯狂码字...");
+    console.log("🤖 Starting editorial mode... [Writer Gemini] is writing...");
     const draftCompletion = await openai.chat.completions.create({
-      model: "gemini-3.1-pro-preview", 
+      model: "gemini-3.1-pro-preview",
       messages: [
         { role: "system", content: writerPrompt },
         { role: "user", content: query }
       ],
-      temperature: 0.8, 
-      response_format: { type: "json_object" } 
+      temperature: 0.8,
+      response_format: { type: "json_object" }
     });
 
     const draftResponseText = draftCompletion.choices[0].message.content || '{}';
@@ -192,7 +192,7 @@ Please strictly return JSON format:
     }
 
     // ==========================================
-    // 🔪 第二阶段：主编智能体 (Agent B - Editor / Claude)
+    // 🔪 PHASE 2: Editor Agent (Agent B - Editor / Claude)
     // ==========================================
     const editorPrompt = `
 [ROLE: Cynical English SEO Editor | ton=cynical,direct,anti-corporate | lang=en]
@@ -221,19 +221,19 @@ The final output must be 100% English. No Chinese characters allowed.
 }
 `;
 
-    console.log("🔪 初稿完成。[毒舌主编 Claude] 正在进行去 AI 化洗稿...");
+    console.log("🔪 Draft complete. [Editor Claude] is de-AI-ing the content...");
     const editorCompletion = await openai.chat.completions.create({
-      model: "claude-opus-4-6", 
+      model: "claude-opus-4-6",
       messages: [
         { role: "system", content: editorPrompt },
-        { role: "user", content: `【初稿 HTML】：\n${draftData.seoContent}` }
+        { role: "user", content: `[DRAFT_HTML_INPUT]:\n${draftData.seoContent}` }
       ],
-      temperature: 0.4, 
-      response_format: { type: "json_object" } 
+      temperature: 0.4,
+      response_format: { type: "json_object" }
     });
 
     const editorResponseText = editorCompletion.choices[0].message.content || '{}';
-    let finalHtmlContent = draftData.seoContent; // 默认 fallback，如果 Claude 崩溃则用 Gemini 的初稿
+    let finalHtmlContent = draftData.seoContent; // Default fallback: use Gemini's draft if Claude fails
     try {
       const editorData = JSON.parse(editorResponseText.match(/\{[\s\S]*\}/)?.[0] || editorResponseText);
       if (editorData.editedHtml) finalHtmlContent = editorData.editedHtml;
@@ -242,28 +242,28 @@ The final output must be 100% English. No Chinese characters allowed.
     }
 
     // ==========================================
-    // 💾 最终阶段：生成 URL 并存入数据库
+    // 💾 FINAL PHASE: Generate URL and save to database
     // ==========================================
     const finalSlug = await generateUniqueSlug(prisma, draftData.seoTitle || query, 60);
 
-    // 🚀 先创建记录（无 slug），返回 taskId 给前端开始轮询
+    // 🚀 Create record first (no slug), return taskId for frontend polling
     const savedQuery = await prisma.aiQuery.create({
       data: {
-        slug: '', // 初始为空，AI 生成完成后再更新
+        slug: '', // Initially empty, will be updated after AI generation completes
         userPrompt: query,
         aiSummary: 'Generating your personalized guide...',
         seoTitle: draftData.seoTitle || `${query} - Car Rental Guide`,
-        seoContent: '', // 初始为空
+        seoContent: '', // Initially empty
       }
     });
 
-    // 🚀 立即返回 taskId，让前端开始轮询
+    // 🚀 Return taskId immediately for frontend to start polling
     const taskId = savedQuery.id;
 
-    // 在后台异步完成 AI 生成和更新
+    // Complete AI generation and update in background
     (async () => {
       try {
-        // 更新记录为最终内容
+        // Update record with final content
         await prisma.aiQuery.update({
           where: { id: taskId },
           data: {
@@ -274,14 +274,14 @@ The final output must be 100% English. No Chinese characters allowed.
         });
 
         revalidatePath('/sitemap.xml');
-        console.log('✅ 文章发布成功！Sitemap 已更新。');
+        console.log('✅ Article published successfully! Sitemap updated.');
       } catch (err) {
         console.error('Background update error:', err);
       }
     })();
 
     return NextResponse.json({
-      taskId: taskId, // 🚀 返回 taskId 供轮询
+      taskId: taskId, // 🚀 Return taskId for polling
       summary: 'Generating your personalized guide...',
     });
 
