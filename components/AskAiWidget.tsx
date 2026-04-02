@@ -47,9 +47,9 @@ export default function AskAiWidget({ companies }: AskAiWidgetProps) {
         const response = await fetch(`/api/ask/status?id=${encodeURIComponent(taskId)}`);
         if (response.ok) {
           const data = await response.json();
-          
+
+          // 🚀 1. 成功态：生成完成
           if (data.found && data.slug) {
-            // 生成完成
             setActiveTask(prev => prev ? {
               ...prev,
               status: 'completed',
@@ -57,6 +57,14 @@ export default function AskAiWidget({ companies }: AskAiWidgetProps) {
               summary: data.summary
             } : null);
             setShowToast(true);
+            setIsLoading(false);
+            return true; // 停止轮询
+          }
+
+          // 🚀 2. 失败态：后端判定任务超时或失败
+          if (data.isFailed) {
+            setActiveTask(prev => prev ? { ...prev, status: 'error' } : null);
+            setAiResponse(data.error || 'Generation failed. Please try again.');
             setIsLoading(false);
             return true; // 停止轮询
           }
@@ -68,25 +76,26 @@ export default function AskAiWidget({ companies }: AskAiWidgetProps) {
       }
     };
 
-    // 🚀 每 2 秒检查一次（降低频率保护数据库），最多检查 90 次（3 分钟）
+    // 🚀 每 2 秒检查一次（降低频率保护数据库），最多检查 100 次（3分20秒）
     let attempts = 0;
-    const maxAttempts = 90;
-    
+    const maxAttempts = 100;
+
     const poll = async () => {
       if (attempts >= maxAttempts) {
         setActiveTask(prev => prev ? { ...prev, status: 'error' } : null);
+        setAiResponse('Generation timeout. Please try again.');
         setIsLoading(false);
         return;
       }
-      
+
       attempts++;
       const completed = await checkStatus();
-      
+
       if (!completed && activeTask?.status === 'generating') {
         setTimeout(poll, 2000); // 🚀 2秒间隔，降低数据库压力
       }
     };
-    
+
     poll();
   }, [activeTask?.status]);
 
