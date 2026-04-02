@@ -3,7 +3,6 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 
 export async function GET(req: Request) {
-  // 🚀 强制禁用缓存：确保轮询拿到的是实时状态，而非边缘节点的旧数据
   const responseHeaders = {
     'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
     'Pragma': 'no-cache',
@@ -15,31 +14,36 @@ export async function GET(req: Request) {
     const id = searchParams.get('id');
 
     if (!id) {
-      return NextResponse.json(
-        { error: 'Task ID is required' },
-        { status: 400, headers: responseHeaders }
-      );
+      return NextResponse.json({ error: 'Task ID is required' }, { status: 400, headers: responseHeaders });
     }
 
+    // 🚀 新增：把 seoContent 也查出来，作为判断是否真完成的终极依据
     const article = await prisma.aiQuery.findUnique({
       where: { id },
       select: {
         slug: true,
         seoTitle: true,
         aiSummary: true,
-        createdAt: true, // 🚀 用于判断是否超时
+        seoContent: true, // <-- 必须查这个
+        createdAt: true,
       },
     });
 
     if (!article) {
-      return NextResponse.json(
-        { found: false, error: 'Task not found' },
-        { status: 404, headers: responseHeaders }
-      );
+      return NextResponse.json({ found: false, error: 'Task not found' }, { status: 404, headers: responseHeaders });
     }
 
-    // 1. 成功态：生成完成 (slug 存在且不是 pending- 开头的临时 slug)
-    if (article.slug && !article.slug.startsWith('pending-')) {
+    // ==========================================
+    // 🎯 核心修复：严谨的"完成态"判定
+    // 必须满足：1. 有 slug  2. slug 不是占位符  3. 正文 seoContent 真的有东西
+    // ==========================================
+    const isActuallyCompleted =
+      article.slug &&
+      !article.slug.startsWith('pending-') &&
+      article.seoContent &&
+      article.seoContent.length > 50;
+
+    if (isActuallyCompleted) {
       return NextResponse.json({
         found: true,
         slug: article.slug.replace(/\.html$/, ''),
@@ -48,24 +52,21 @@ export async function GET(req: Request) {
       }, { headers: responseHeaders });
     }
 
-    // 2. 失败态/超时检测：如果 3 分钟还没生成 slug，判定后台任务已死
+    // 2. 失败态/超时检测：如果 3 分钟还没生成完，判定后台任务已死
     const threeMinutesAgo = new Date(Date.now() - 3 * 60 * 1000);
     if (article.createdAt < threeMinutesAgo) {
       return NextResponse.json({
         found: false,
-        error: 'Generation timeout',
-        isFailed: true, // 🚀 告知前端停止轮询并报错
+        error: 'Generation timeout or failed in background.',
+        isFailed: true,
       }, { headers: responseHeaders });
     }
 
-    // 3. 进行态：还在排队或生成中
+    // 3. 进行态：还在排队或生成中（返回 false，让前端继续耐心轮询）
     return NextResponse.json({ found: false }, { headers: responseHeaders });
 
   } catch (error) {
     console.error('Check status error:', error);
-    return NextResponse.json(
-      { found: false, error: 'Internal Server Error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ found: false, error: 'Internal Server Error' }, { status: 500 });
   }
 }
