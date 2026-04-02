@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 interface Company {
   name: string;
@@ -12,210 +13,182 @@ interface AskAiWidgetProps {
   companies: Company[];
 }
 
-interface GenerationTask {
-  query: string;
-  taskId?: string; // 🚀 新增：任务ID用于精确轮询
-  status: 'generating' | 'completed' | 'error';
-  slug?: string;
-  summary?: string;
-  startTime: number;
-}
-
 export default function AskAiWidget({ companies }: AskAiWidgetProps) {
+  const router = useRouter();
   const [query, setQuery] = useState('');
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [aiResponse, setAiResponse] = useState<string | null>(null);
-  const [aiSlug, setAiSlug] = useState<string | null>(null);
-  
-  // 异步生成任务状态
-  const [activeTask, setActiveTask] = useState<GenerationTask | null>(null);
-  const [showToast, setShowToast] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [statusText, setStatusText] = useState('Ready');
+  const [error, setError] = useState('');
 
-  // 根据输入过滤公司
+  // Use useRef to save timer, prevent memory leaks and race conditions from multiple clicks
+  const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Cleanup timer on unmount
+  useEffect(() => {
+    return () => {
+      if (pollingIntervalRef.current) clearInterval(pollingIntervalRef.current);
+    };
+  }, []);
+
+  // Filter companies based on input
   const filteredCompanies = query.length > 0
     ? companies.filter(c =>
         c.name.toLowerCase().includes(query.toLowerCase())
       ).slice(0, 5)
     : [];
 
-  // 轮询检查生成状态 - 🚀 使用 taskId 精确轮询
-  const pollGenerationStatus = useCallback(async (taskId: string) => {
-    const checkStatus = async () => {
-      try {
-        // 🚀 使用 taskId 精确查询，避免冲突
-        const response = await fetch(`/api/ask/status?id=${encodeURIComponent(taskId)}`);
-        if (response.ok) {
-          const data = await response.json();
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!query.trim()) return;
 
-          // 🚀 1. 成功态：生成完成
-          if (data.found && data.slug) {
-            setActiveTask(prev => prev ? {
-              ...prev,
-              status: 'completed',
-              slug: data.slug,
-              summary: data.summary
-            } : null);
-            setShowToast(true);
-            setIsLoading(false);
-            return true; // 停止轮询
-          }
-
-          // 🚀 2. 失败态：后端判定任务超时或失败
-          if (data.isFailed) {
-            setActiveTask(prev => prev ? { ...prev, status: 'error' } : null);
-            setAiResponse(data.error || 'Generation failed. Please try again.');
-            setIsLoading(false);
-            return true; // 停止轮询
-          }
-        }
-        return false; // 继续轮询
-      } catch (error) {
-        console.error('Poll error:', error);
-        return false;
-      }
-    };
-
-    // 🚀 每 2 秒检查一次（降低频率保护数据库），最多检查 100 次（3分20秒）
-    let attempts = 0;
-    const maxAttempts = 100;
-
-    const poll = async () => {
-      if (attempts >= maxAttempts) {
-        setActiveTask(prev => prev ? { ...prev, status: 'error' } : null);
-        setAiResponse('Generation timeout. Please try again.');
-        setIsLoading(false);
-        return;
-      }
-
-      attempts++;
-      const completed = await checkStatus();
-
-      if (!completed && activeTask?.status === 'generating') {
-        setTimeout(poll, 2000); // 🚀 2秒间隔，降低数据库压力
-      }
-    };
-
-    poll();
-  }, [activeTask?.status]);
-
-  // 处理 AI 查询 - 异步生成
-  const handleAskAI = async () => {
-    if (!query.trim()) {
-      alert('Please enter your question first');
-      return;
-    }
-
-    const queryText = query.trim();
+    // 1. Initialize state
     setIsLoading(true);
-    setAiResponse(null);
-    setAiSlug(null);
-    
-    // 创建生成任务
-    const task: GenerationTask = {
-      query: queryText,
-      status: 'generating',
-      startTime: Date.now()
-    };
-    setActiveTask(task);
+    setError('');
+    setProgress(10);
+    setStatusText('Initializing AI Agent...');
 
     try {
-      // 启动异步生成
-      const response = await fetch('/api/ask', {
+      // 2. Initiate generation request (returns taskId quickly)
+      setStatusText('Analyzing query & gathering data...');
+      setProgress(25);
+
+      const res = await fetch('/api/ask', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ query: queryText }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query: query.trim() }),
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to start generation');
+      if (!res.ok) {
+        if (res.status === 429) throw new Error('System busy. Please try again in a minute.');
+        throw new Error('Failed to initiate AI generation');
       }
 
-      const data = await response.json();
+      const data = await res.json();
 
-      if (data.error) {
-        setActiveTask(prev => prev ? { ...prev, status: 'error' } : null);
-        setAiResponse(data.error);
-        setIsLoading(false);
-      } else if (data.taskId) {
-        // 🚀 保存 taskId 并开始轮询
-        setActiveTask(prev => prev ? { ...prev, taskId: data.taskId } : null);
-        pollGenerationStatus(data.taskId);
-      } else {
-        // 兼容旧逻辑（如果有 slug 直接返回）
-        setActiveTask(prev => prev ? {
-          ...prev,
-          status: 'completed',
-          slug: data.slug,
-          summary: data.summary
-        } : null);
-        setAiResponse(data.summary);
-        setAiSlug(data.slug);
-        setIsLoading(false);
+      // If error occurred or no taskId received
+      if (data.error || !data.taskId) {
+        throw new Error(data.error || 'Failed to get Task ID');
       }
-    } catch (error) {
-      console.error('AI Query Error:', error);
-      setActiveTask(prev => prev ? { ...prev, status: 'error' } : null);
-      setAiResponse('Sorry, something went wrong. Please try again later.');
+
+      const { taskId } = data;
+
+      // 3. Start visual pseudo-progress bar (stops at 85%)
+      setProgress(40);
+      setStatusText('Drafting guide (Gemini)...');
+
+      // Simulate backend Agent耗时, smoothly increase progress
+      setTimeout(() => {
+        if (isLoading) { setProgress(60); setStatusText('Reviewing & editing (Claude)...'); }
+      }, 4000);
+      setTimeout(() => {
+        if (isLoading) { setProgress(85); setStatusText('Finalizing layout & saving...'); }
+      }, 8000);
+
+      // 4. Start real polling engine (check every 2.5s)
+      let pollCount = 0;
+      const maxPolls = 24; // Max poll for 60 seconds (24 * 2.5s)
+
+      const checkStatus = async () => {
+        pollCount++;
+        try {
+          const statusRes = await fetch(`/api/ask/status?id=${taskId}`, {
+            // Force no-cache to ensure latest status is retrieved
+            cache: 'no-store',
+            headers: {
+              'Cache-Control': 'no-cache',
+            }
+          });
+
+          if (!statusRes.ok) throw new Error('Status check failed');
+
+          const statusData = await statusRes.json();
+
+          // Success state: generation complete
+          if (statusData.found && statusData.slug) {
+            if (pollingIntervalRef.current) clearInterval(pollingIntervalRef.current);
+            setProgress(100);
+            setStatusText('Guide ready! Redirecting...');
+
+            // Brief delay to let user see 100% completion, then redirect
+            setTimeout(() => {
+              router.push(`/ask/${statusData.slug}.html`);
+            }, 500);
+            return;
+          }
+
+          // Failure state: timeout or backend error
+          if (statusData.isFailed || statusData.error) {
+            throw new Error(statusData.error || 'Generation timed out. Please try again.');
+          }
+
+          // Local defense: exceeded max poll count
+          if (pollCount >= maxPolls) {
+            throw new Error('This is taking longer than expected. Please check the articles list in a minute.');
+          }
+
+          // If not yet generated, do nothing, wait for next poll
+
+        } catch (err: any) {
+          if (pollingIntervalRef.current) clearInterval(pollingIntervalRef.current);
+          setError(err.message);
+          setIsLoading(false);
+          setProgress(0);
+          setStatusText('Ready');
+        }
+      };
+
+      // Check immediately once (handle rapid generation case), then start loop
+      setTimeout(checkStatus, 2000);
+      pollingIntervalRef.current = setInterval(checkStatus, 2500);
+
+    } catch (err: any) {
+      setError(err.message || 'Something went wrong.');
       setIsLoading(false);
+      setProgress(0);
+      setStatusText('Ready');
     }
   };
 
-  // 清除任务
+  // Clear task and reset
   const clearTask = () => {
-    setActiveTask(null);
-    setShowToast(false);
+    if (pollingIntervalRef.current) clearInterval(pollingIntervalRef.current);
+    setIsLoading(false);
+    setProgress(0);
+    setStatusText('Ready');
+    setError('');
   };
 
-  // 计算已用时间
-  const getElapsedTime = () => {
-    if (!activeTask) return 0;
-    return Math.floor((Date.now() - activeTask.startTime) / 1000);
-  };
-
-  // 示例提示
+  // Sample suggestions
   const suggestions = [
-    '"Best Hertz code for IBM employees"',
-    '"Enterprise discount for AAA members"',
-    '"Avis corporate rate in Los Angeles"'
+    'Best Hertz code for IBM employees',
+    'Enterprise discount for AAA members',
+    'Avis corporate rate in Los Angeles'
   ];
 
   return (
     <div className="relative">
-      {/* Toast 通知 */}
-      {showToast && activeTask?.status === 'completed' && (
-        <div className="fixed bottom-4 right-4 z-50 animate-slide-up">
-          <div className="bg-green-600 text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3">
-            <span className="text-2xl">✅</span>
-            <div>
-              <p className="font-semibold">Guide Ready!</p>
-              <p className="text-sm text-green-100">Click to view the full guide</p>
-            </div>
-            {activeTask.slug && (
-              <Link
-                href={`/ask/${activeTask.slug}`}
-                onClick={clearTask}
-                className="ml-4 bg-white text-green-600 px-4 py-2 rounded-lg font-medium hover:bg-green-50 transition-colors"
-              >
-                View →
-              </Link>
-            )}
-            <button
-              onClick={clearTask}
-              className="ml-2 text-green-200 hover:text-white"
-            >
-              ✕
-            </button>
+      {/* Error message */}
+      {error && (
+        <div className="mb-4 bg-red-50 border border-red-200 rounded-xl p-4">
+          <div className="flex items-center gap-2">
+            <span className="text-red-500">⚠️</span>
+            <p className="text-red-700 text-sm">{error}</p>
           </div>
+          <button
+            onClick={clearTask}
+            className="mt-2 text-xs text-red-600 hover:text-red-800 underline"
+          >
+            Dismiss
+          </button>
         </div>
       )}
 
-      {/* 生成状态卡片 */}
-      {activeTask?.status === 'generating' && (
-        <div className="mb-4 bg-gradient-to-r from-indigo-50 to-blue-50 border border-indigo-200 rounded-xl p-4 animate-pulse">
-          <div className="flex items-center gap-3">
+      {/* Loading state with progress bar */}
+      {isLoading && (
+        <div className="mb-4 bg-gradient-to-r from-indigo-50 to-blue-50 border border-indigo-200 rounded-xl p-4">
+          <div className="flex items-center gap-3 mb-3">
             <div className="relative">
               <div className="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center">
                 <span className="text-xl">🤖</span>
@@ -223,46 +196,46 @@ export default function AskAiWidget({ companies }: AskAiWidgetProps) {
               <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-indigo-500 rounded-full border-2 border-white animate-ping"></div>
             </div>
             <div className="flex-1">
-              <p className="font-medium text-gray-900">Generating your personalized guide...</p>
+              <p className="font-medium text-gray-900">{statusText}</p>
               <p className="text-sm text-gray-600">
-                Topic: {activeTask.query}
-              </p>
-              <p className="text-xs text-gray-500 mt-1">
-                ⏱️ {getElapsedTime()}s elapsed · Est. 30-60s
+                Topic: {query}
               </p>
             </div>
             <button
               onClick={clearTask}
               className="text-gray-400 hover:text-gray-600 p-2"
-              title="Dismiss"
+              title="Cancel"
             >
               ✕
             </button>
           </div>
-          <div className="mt-3 w-full bg-gray-200 rounded-full h-2">
-            <div 
-              className="bg-indigo-500 h-2 rounded-full transition-all duration-1000"
-              style={{ width: `${Math.min((getElapsedTime() / 60) * 100, 90)}%` }}
+
+          {/* Progress bar */}
+          <div className="w-full bg-gray-200 rounded-full h-2.5">
+            <div
+              className="bg-indigo-600 h-2.5 rounded-full transition-all duration-500 ease-out"
+              style={{ width: `${progress}%` }}
             ></div>
           </div>
+          <p className="text-xs text-gray-500 mt-2 text-right">{progress}%</p>
         </div>
       )}
 
-      {/* 主卡片容器 */}
+      {/* Main card container */}
       <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6">
-        {/* 标题区域 */}
+        {/* Title area */}
         <div className="flex items-center gap-2 mb-3">
           <span className="text-xl">🤖</span>
           <h3 className="text-lg font-bold text-gray-900">AI Rental Code Finder</h3>
         </div>
 
-        {/* 描述文字 */}
+        {/* Description */}
         <p className="text-gray-600 text-sm mb-5">
           Tell me your company and rental brand — I&apos;ll recommend the best corporate code for you.
         </p>
 
-        {/* 搜索输入框 */}
-        <div className="flex gap-3">
+        {/* Search input form */}
+        <form onSubmit={handleSubmit} className="flex gap-3">
           <input
             type="text"
             value={query}
@@ -276,8 +249,7 @@ export default function AskAiWidget({ companies }: AskAiWidgetProps) {
             className="flex-1 px-4 py-3 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-gray-800 bg-gray-50 disabled:bg-gray-100 disabled:cursor-not-allowed"
           />
           <button
-            type="button"
-            onClick={handleAskAI}
+            type="submit"
             disabled={isLoading}
             className="bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white px-4 sm:px-6 py-3 rounded-lg text-sm font-semibold transition-colors whitespace-nowrap shrink-0 disabled:cursor-not-allowed"
           >
@@ -293,29 +265,9 @@ export default function AskAiWidget({ companies }: AskAiWidgetProps) {
               'Ask AI'
             )}
           </button>
-        </div>
+        </form>
 
-        {/* AI 响应区域 */}
-        {aiResponse && (
-          <div className="mt-4 p-4 bg-indigo-50 border border-indigo-200 rounded-lg">
-            <div className="flex items-start gap-2">
-              <span className="text-lg">🤖</span>
-              <div>
-                <p className="text-sm text-gray-800">{aiResponse}</p>
-                {aiSlug && (
-                  <Link
-                    href={`/ask/${aiSlug}`}
-                    className="inline-block mt-2 text-sm text-indigo-600 hover:text-indigo-800 font-medium"
-                  >
-                    Read full guide →
-                  </Link>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* 示例提示 */}
+        {/* Sample suggestions */}
         <div className="mt-4 flex items-start gap-2 text-xs text-gray-500">
           <span className="text-yellow-500">💡</span>
           <div className="flex flex-wrap gap-1">
@@ -323,7 +275,8 @@ export default function AskAiWidget({ companies }: AskAiWidgetProps) {
             {suggestions.map((suggestion, index) => (
               <button
                 key={index}
-                onClick={() => !isLoading && setQuery(suggestion.replace(/"/g, ''))}
+                type="button"
+                onClick={() => !isLoading && setQuery(suggestion)}
                 disabled={isLoading}
                 className="text-gray-400 hover:text-indigo-600 transition-colors disabled:cursor-not-allowed"
               >
@@ -334,7 +287,7 @@ export default function AskAiWidget({ companies }: AskAiWidgetProps) {
         </div>
       </div>
 
-      {/* 下拉建议列表 */}
+      {/* Dropdown suggestions list */}
       {isOpen && (query.length > 0 || filteredCompanies.length > 0) && !isLoading && (
         <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden z-50">
           {filteredCompanies.length > 0 ? (
@@ -371,7 +324,7 @@ export default function AskAiWidget({ companies }: AskAiWidgetProps) {
         </div>
       )}
 
-      {/* 点击外部关闭 */}
+      {/* Click outside to close */}
       {isOpen && (
         <div
           className="fixed inset-0 z-40"
