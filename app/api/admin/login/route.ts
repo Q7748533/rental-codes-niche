@@ -38,7 +38,7 @@ export async function POST(request: Request) {
     cookieStore.set('admin_session', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      sameSite: 'lax',
       maxAge: 60 * 60 * 24 * 7, // 7天
       path: '/',
     });
@@ -46,7 +46,7 @@ export async function POST(request: Request) {
     // 设置一个标记 cookie（用于前端判断登录状态）
     cookieStore.set('admin_logged_in', 'true', {
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      sameSite: 'lax',
       maxAge: 60 * 60 * 24 * 7,
       path: '/',
     });
