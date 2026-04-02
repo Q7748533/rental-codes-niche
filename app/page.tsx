@@ -236,6 +236,19 @@ export default async function Home() {
           },
         ],
       },
+      // ItemList - 最新文章列表（SEO 权重提升）
+      ...(latestArticles.length > 0 ? [{
+        '@type': 'ItemList',
+        '@id': 'https://carcorporatecodes.com/#latest-articles',
+        name: 'Latest Car Rental Corporate Code Guides',
+        itemListElement: latestArticles.map((article, index) => ({
+          '@type': 'ListItem',
+          position: index + 1,
+          name: article.seoTitle,
+          url: `https://carcorporatecodes.com/ask/${article.slug}`,
+          description: article.aiSummary?.substring(0, 160) || '',
+        })),
+      }] : []),
     ],
   };
 
