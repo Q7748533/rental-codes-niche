@@ -1,42 +1,34 @@
 [
   {
-    "brand": "Enterprise",
-    "company": "Long Island University",
-    "codeValue": "Xz24488",
-    "description": "Flat rate program",
+    "brand": "Avis",
+    "company": "University of Florida",
+    "codeValue": "A113400",
+    "description": "Business Use Rentals",
     "codeType": "business",
     "source": "Employee"
   },
   {
-    "brand": "National",
-    "company": "Long Island University",
-    "codeValue": "Xz24488",
-    "description": "Flat rate program",
+    "brand": "Avis",
+    "company": "University of Florida",
+    "codeValue": "S954700",
+    "description": "Leisure Use Rentals",
+    "codeType": "leisure",
+    "source": "Employee"
+  },
+  {
+    "brand": "Budget",
+    "company": "University of Florida",
+    "codeValue": "T417600",
+    "description": "Business Use Rentals",
     "codeType": "business",
     "source": "Employee"
   },
   {
-    "brand": "Enterprise",
-    "company": "Long Island University",
-    "codeValue": "Xz24489",
-    "description": "5% discount program",
-    "codeType": "business",
-    "source": "Employee"
-  },
-  {
-    "brand": "National",
-    "company": "Long Island University",
-    "codeValue": "Xz24489",
-    "description": "5% discount program",
-    "codeType": "business",
-    "source": "Employee"
-  },
-  {
-    "brand": "Hertz",
-    "company": "Long Island University",
-    "codeValue": "1711647",
-    "description": "5%-20% Discounts from Business Travel and Best Available Rate Structures",
-    "codeType": "business",
+    "brand": "Budget",
+    "company": "University of Florida",
+    "codeValue": "T118900",
+    "description": "Leisure Use Rentals",
+    "codeType": "leisure",
     "source": "Employee"
   }
 ]
