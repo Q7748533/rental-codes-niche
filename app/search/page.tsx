@@ -160,16 +160,62 @@ export default async function SearchPage({
   );
 }
 
-// 空状态组件
+// 空状态组件 - 包含完整页面布局
 function EmptySearchState({ message }: { message: string }) {
   return (
-    <div className="bg-white rounded-2xl border border-gray-200 p-12 text-center shadow-sm">
-      <div className="text-4xl mb-4">🔍</div>
-      <h2 className="text-xl font-bold text-gray-900 mb-2">No results found</h2>
-      <p className="text-gray-500 mb-6">{message}</p>
-      <Link href="/" className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-2.5 rounded-lg transition-colors inline-block">
-        Return Home
-      </Link>
+    <div className="min-h-screen bg-gray-50 text-gray-900">
+      {/* 导航栏 */}
+      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200/80 shadow-sm">
+        <div className="max-w-6xl mx-auto px-4 py-3 md:py-4 flex justify-between items-center">
+          <Link href="/" className="text-xl md:text-2xl font-bold text-blue-700">Car Corporate Codes</Link>
+          <div className="flex items-center">
+            <nav className="hidden md:flex items-center space-x-6 text-sm font-medium text-gray-600">
+              <Link href="/ask" className="hover:text-blue-600">Ask AI</Link>
+            </nav>
+            <MobileNav />
+          </div>
+        </div>
+      </header>
+
+      <main className="max-w-4xl mx-auto px-4 py-12">
+        <div className="bg-white rounded-2xl border border-gray-200 p-12 text-center shadow-sm">
+          <div className="text-4xl mb-4">🔍</div>
+          <h2 className="text-xl font-bold text-gray-900 mb-2">No results found</h2>
+          <p className="text-gray-500 mb-6">{message}</p>
+          <Link href="/" className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-2.5 rounded-lg transition-colors inline-block">
+            Return Home
+          </Link>
+        </div>
+      </main>
+
+      {/* 页脚 */}
+      <footer className="bg-gray-900 text-gray-400 py-12 mt-16">
+        <div className="max-w-4xl mx-auto px-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+            <div>
+              <h4 className="text-white font-bold mb-4">Car Corporate Codes</h4>
+              <p className="text-sm text-gray-500">Verified database of corporate discount codes for major rental brands.</p>
+            </div>
+            <div>
+              <h4 className="text-white font-bold mb-4">Quick Links</h4>
+              <ul className="space-y-2 text-sm">
+                <li><Link href="/" className="hover:text-white transition-colors">Home</Link></li>
+                <li><Link href="/ask" className="hover:text-white transition-colors">Ask AI</Link></li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="text-white font-bold mb-4">Legal</h4>
+              <ul className="space-y-2 text-sm">
+                <li><Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link></li>
+                <li><Link href="/terms" className="hover:text-white transition-colors">Terms of Service</Link></li>
+              </ul>
+            </div>
+          </div>
+          <div className="border-t border-gray-800 pt-8 text-center text-sm text-gray-500">
+            <p>&copy; {new Date().getFullYear()} Car Corporate Codes. All rights reserved.</p>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
