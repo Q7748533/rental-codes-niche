@@ -1,1 +1,42 @@
-[]
+[
+  {
+    "brand": "Enterprise",
+    "company": "Long Island University",
+    "codeValue": "Xz24488",
+    "description": "Flat rate program",
+    "codeType": "business",
+    "source": "Employee"
+  },
+  {
+    "brand": "National",
+    "company": "Long Island University",
+    "codeValue": "Xz24488",
+    "description": "Flat rate program",
+    "codeType": "business",
+    "source": "Employee"
+  },
+  {
+    "brand": "Enterprise",
+    "company": "Long Island University",
+    "codeValue": "Xz24489",
+    "description": "5% discount program",
+    "codeType": "business",
+    "source": "Employee"
+  },
+  {
+    "brand": "National",
+    "company": "Long Island University",
+    "codeValue": "Xz24489",
+    "description": "5% discount program",
+    "codeType": "business",
+    "source": "Employee"
+  },
+  {
+    "brand": "Hertz",
+    "company": "Long Island University",
+    "codeValue": "1711647",
+    "description": "5%-20% Discounts from Business Travel and Best Available Rate Structures",
+    "codeType": "business",
+    "source": "Employee"
+  }
+]
