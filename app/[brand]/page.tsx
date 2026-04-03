@@ -116,6 +116,17 @@ export default async function BrandPage({ params }: { params: Promise<{ brand: s
       </header>
 
       <main className="max-w-4xl mx-auto px-4 py-12">
+        {/* 面包屑导航 */}
+        <nav className="text-sm text-gray-500 mb-6" aria-label="Breadcrumb">
+          <ol className="flex items-center space-x-2">
+            <li>
+              <Link href="/" className="hover:text-blue-600 transition-colors">Home</Link>
+            </li>
+            <li className="text-gray-400">/</li>
+            <li className="text-gray-900 font-medium capitalize">{brandData.name} Codes</li>
+          </ol>
+        </nav>
+
         <div className="text-center mb-12">
           <div className="inline-flex items-center gap-2 bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest mb-4">
             <span className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></span>
