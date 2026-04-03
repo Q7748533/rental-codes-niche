@@ -419,30 +419,74 @@ export default async function Home() {
           </div>
         </section>
 
-        {/* H2: FAQ - 视觉化展示 */}
+        {/* H2: FAQ - 手风琴折叠效果 */}
         <section id="faq" className="mb-24">
           <h2 className="text-2xl font-bold mb-6 text-gray-900 border-b border-gray-200 pb-3">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5 hover:border-blue-300 hover:shadow-md transition-all">
-              <h3 className="font-semibold text-gray-900 mb-2">What is a CDP code?</h3>
-              <p className="text-gray-600 text-sm leading-relaxed">CDP (Corporate Discount Program) is a negotiated rate between a rental company and an organization. It typically offers 10-25% off standard rates.</p>
-            </div>
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5 hover:border-blue-300 hover:shadow-md transition-all">
-              <h3 className="font-semibold text-gray-900 mb-2">Can anyone use corporate codes?</h3>
-              <p className="text-gray-600 text-sm leading-relaxed">No. Corporate codes are intended for employees or members of specific organizations. Rental agents may ask for proof of eligibility at pickup.</p>
-            </div>
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5 hover:border-blue-300 hover:shadow-md transition-all">
-              <h3 className="font-semibold text-gray-900 mb-2">What happens if I use a code without eligibility?</h3>
-              <p className="text-gray-600 text-sm leading-relaxed">The rental company may charge you the standard rate instead of the corporate rate. In some cases, they may refuse service or void insurance coverage.</p>
-            </div>
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5 hover:border-blue-300 hover:shadow-md transition-all">
-              <h3 className="font-semibold text-gray-900 mb-2">How often is your database updated?</h3>
-              <p className="text-gray-600 text-sm leading-relaxed">Our database is updated monthly by crawling publicly available sources. However, we recommend verifying all codes directly with the rental company before booking.</p>
-            </div>
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5 hover:border-blue-300 hover:shadow-md transition-all">
-              <h3 className="font-semibold text-gray-900 mb-2">Are these codes verified to work?</h3>
-              <p className="text-gray-600 text-sm leading-relaxed">We collect codes from public sources but do not individually verify each code. Codes may expire or change without notice. Always confirm eligibility and validity at checkout.</p>
-            </div>
+          <div className="max-w-3xl mx-auto space-y-4">
+            {/* FAQ 1 */}
+            <details className="group bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden [&_summary::-webkit-details-marker]:hidden">
+              <summary className="flex items-center justify-between p-5 font-semibold text-gray-900 cursor-pointer hover:bg-gray-50 transition-colors">
+                What is a CDP code?
+                <span className="transition duration-300 group-open:-rotate-180">
+                  <svg fill="none" height="20" width="20" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7"></path></svg>
+                </span>
+              </summary>
+              <div className="p-5 pt-0 text-gray-600 text-sm leading-relaxed border-t border-gray-50 bg-gray-50/50">
+                CDP (Corporate Discount Program) is a negotiated rate between a rental company and an organization. It typically offers 10-25% off standard rates.
+              </div>
+            </details>
+
+            {/* FAQ 2 */}
+            <details className="group bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden [&_summary::-webkit-details-marker]:hidden">
+              <summary className="flex items-center justify-between p-5 font-semibold text-gray-900 cursor-pointer hover:bg-gray-50 transition-colors">
+                Can anyone use corporate codes?
+                <span className="transition duration-300 group-open:-rotate-180">
+                  <svg fill="none" height="20" width="20" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7"></path></svg>
+                </span>
+              </summary>
+              <div className="p-5 pt-0 text-gray-600 text-sm leading-relaxed border-t border-gray-50 bg-gray-50/50">
+                No. Corporate codes are intended for employees or members of specific organizations. Rental agents may ask for proof of eligibility at pickup.
+              </div>
+            </details>
+
+            {/* FAQ 3 */}
+            <details className="group bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden [&_summary::-webkit-details-marker]:hidden">
+              <summary className="flex items-center justify-between p-5 font-semibold text-gray-900 cursor-pointer hover:bg-gray-50 transition-colors">
+                What happens if I use a code without eligibility?
+                <span className="transition duration-300 group-open:-rotate-180">
+                  <svg fill="none" height="20" width="20" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7"></path></svg>
+                </span>
+              </summary>
+              <div className="p-5 pt-0 text-gray-600 text-sm leading-relaxed border-t border-gray-50 bg-gray-50/50">
+                The rental company may charge you the standard rate instead of the corporate rate. In some cases, they may refuse service or void insurance coverage.
+              </div>
+            </details>
+
+            {/* FAQ 4 */}
+            <details className="group bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden [&_summary::-webkit-details-marker]:hidden">
+              <summary className="flex items-center justify-between p-5 font-semibold text-gray-900 cursor-pointer hover:bg-gray-50 transition-colors">
+                How often is your database updated?
+                <span className="transition duration-300 group-open:-rotate-180">
+                  <svg fill="none" height="20" width="20" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7"></path></svg>
+                </span>
+              </summary>
+              <div className="p-5 pt-0 text-gray-600 text-sm leading-relaxed border-t border-gray-50 bg-gray-50/50">
+                Our database is updated monthly by crawling publicly available sources. However, we recommend verifying all codes directly with the rental company before booking.
+              </div>
+            </details>
+
+            {/* FAQ 5 */}
+            <details className="group bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden [&_summary::-webkit-details-marker]:hidden">
+              <summary className="flex items-center justify-between p-5 font-semibold text-gray-900 cursor-pointer hover:bg-gray-50 transition-colors">
+                Are these codes verified to work?
+                <span className="transition duration-300 group-open:-rotate-180">
+                  <svg fill="none" height="20" width="20" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7"></path></svg>
+                </span>
+              </summary>
+              <div className="p-5 pt-0 text-gray-600 text-sm leading-relaxed border-t border-gray-50 bg-gray-50/50">
+                We collect codes from public sources but do not individually verify each code. Codes may expire or change without notice. Always confirm eligibility and validity at checkout.
+              </div>
+            </details>
           </div>
         </section>
 
