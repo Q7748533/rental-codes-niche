@@ -2,9 +2,18 @@ import { prisma } from '@/lib/db';
 import Link from 'next/link';
 import Script from 'next/script';
 import MobileNav from '@/components/MobileNav';
-import AskAiWidgetLazy from '@/components/AskAiWidgetLazy';
+// 🚀 终极优化 1：切断 JS 阻塞，引入极致懒加载
+import dynamic from 'next/dynamic';
 import { unstable_cache } from 'next/cache';
 import type { Metadata } from 'next';
+
+// 🚀 终极优化 1 (续)：带骨架屏的异步组件
+const AskAiWidgetLazy = dynamic(() => import('@/components/AskAiWidgetLazy'), {
+  ssr: true,
+  loading: () => (
+    <div className="w-full h-[60px] md:h-[68px] bg-gray-100 animate-pulse rounded-xl border border-gray-200"></div>
+  ),
+});
 
 // 强制动态渲染，避免构建时查询数据库
 export const revalidate = 3600;
@@ -260,79 +269,81 @@ export default async function Home() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <header className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
+      {/* 🚀 终极优化 2：毛玻璃吸顶导航，移动端压缩高度 */}
+      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200/80 shadow-sm transition-all">
+        <div className="max-w-6xl mx-auto px-4 py-3 md:py-4 flex justify-between items-center">
           <Link href="/" className="text-xl md:text-2xl font-bold text-blue-700">Car Corporate Codes</Link>
           <div className="flex items-center">
-            {/* Desktop Nav */}
             <nav className="hidden md:flex items-center space-x-6 text-sm font-medium text-gray-600">
               <Link href="#brands" className="hover:text-blue-600 min-h-[44px] flex items-center px-2">Brands</Link>
               <Link href="#guide" className="hover:text-blue-600 min-h-[44px] flex items-center px-2">How to Use</Link>
               <Link href="#faq" className="hover:text-blue-600 min-h-[44px] flex items-center px-2">FAQ</Link>
               <Link href="/ask" className="hover:text-blue-600 min-h-[44px] flex items-center px-2">Ask AI</Link>
             </nav>
-            {/* Mobile Nav */}
             <MobileNav />
           </div>
         </div>
       </header>
 
-      <main className="max-w-6xl mx-auto px-4 py-16">
-        {/* H1: 精准声明核心实体 - 优化关键词覆盖 */}
-        <div className="text-center mb-20 mt-8">
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6 leading-tight">
+      <main className="max-w-6xl mx-auto px-4 py-12 md:py-16">
+        <div className="text-center mb-20 mt-4 md:mt-8">
+          {/* 🚀 终极优化 3：移动端收缩字体，留出首屏空间 */}
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-gray-900 mb-4 md:mb-6 leading-tight tracking-tight">
             Car Rental Corporate Codes 2026:<br className="hidden md:block" />
-            <span className="text-blue-700">Hertz, Enterprise & Avis CDP Discounts</span>
+            <span className="text-blue-700"> Hertz, Enterprise & Avis CDP Discounts</span>
           </h1>
-          <p className="text-xl text-gray-600 mb-4 max-w-3xl mx-auto leading-relaxed">
-            Find verified <strong>CDP (Corporate Discount Program)</strong> and <strong>PC (Promotion Code)</strong> numbers 
-            for Hertz, Enterprise, Avis, Budget, and National. Save 10-25% on business travel and leisure car rentals 
-            with our updated database of {totalCodes} active corporate codes.
-          </p>
-          <div className="mb-6">
+
+          {/* 🚀 终极优化 4：修复错位徽章，使用 flex 居中排列 */}
+          <div className="mb-8 flex flex-col sm:flex-row items-center justify-center gap-3">
             <span className="inline-flex items-center gap-2 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white px-4 py-2 rounded-full text-sm font-medium shadow-md">
               <span className="w-2 h-2 bg-emerald-200 rounded-full animate-pulse"></span>
               Database Updated: {displayDateModified}
             </span>
-            <span className="ml-3 text-sm text-gray-500">
+            <span className="text-sm text-gray-500 font-medium">
               {totalCodes} codes collected from public sources
             </span>
           </div>
 
-          {/* 免责声明 */}
-          <div className="bg-amber-50 border-l-4 border-amber-400 rounded-r-lg p-4 max-w-2xl mx-auto mb-8">
-            <p className="text-amber-800 text-sm leading-relaxed">
-              <strong>⚠️ Disclaimer:</strong> Corporate codes are sourced from publicly available data. 
-              We do not verify individual code validity. Always verify discounts at checkout. 
-              Rental companies may require proof of eligibility. We are not affiliated with any rental companies.
-            </p>
+          {/* 🚀 终极优化 5：AI 搜索框置顶！去除多余边距让移动端更宽 */}
+          <div className="max-w-3xl mx-auto relative z-10 mb-6 sm:px-4">
+            <AskAiWidgetLazy companies={companies} />
           </div>
 
-          {/* 全新的 AI 聊天框组件 */}
-          <div className="max-w-3xl mx-auto relative px-4 sm:px-0 z-10">
-            <AskAiWidgetLazy companies={companies} />
+          {/* 🚀 终极优化 6：免责声明下移并弱化，不再喧宾夺主 */}
+          <div className="max-w-2xl mx-auto text-center px-4">
+            <p className="text-gray-400 text-xs leading-relaxed">
+              <span className="font-semibold text-gray-500">Disclaimer:</span> Corporate codes are sourced from public data.
+              Always verify eligibility at checkout. We are not affiliated with any rental companies.
+            </p>
           </div>
         </div>
 
-        {/* H2: 品牌列表 - 每个H2独立可回答用户搜索意图 */}
+        {/* 🚀 终极优化 7：品牌列表拟物化设计，增强点击欲 */}
         <section id="brands" className="mb-24">
           <h2 className="text-2xl font-bold mb-2 text-gray-900">Browse Codes by Rental Brand</h2>
           <p className="text-gray-600 mb-6">Click any brand to view all available corporate and association discount codes.</p>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
             {brands.length > 0 ? (
               brands.map((brand) => (
-                <Link 
-                  key={brand.id} 
+                <Link
+                  key={brand.id}
                   href={`/${brand.slug}`}
-                  className="block bg-white p-5 rounded-lg border border-gray-200 hover:border-blue-300 hover:shadow-sm transition-all text-center"
+                  className="group block bg-white p-5 rounded-2xl border border-gray-100 hover:border-blue-500 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 text-center"
                 >
-                  <h3 className="text-sm font-semibold text-gray-800 mb-1 capitalize">{brand.name}</h3>
-                  <p className="text-xs text-gray-400">{brand._count.codes} codes</p>
+                  <div className="w-12 h-12 mx-auto bg-blue-50 text-blue-600 rounded-full flex items-center justify-center font-bold text-xl mb-3 group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                    {brand.name.charAt(0).toUpperCase()}
+                  </div>
+                  <h3 className="text-sm font-bold text-gray-900 mb-1 capitalize group-hover:text-blue-600 transition-colors">
+                    {brand.name}
+                  </h3>
+                  <span className="inline-block bg-gray-50 text-gray-500 text-[11px] px-2 py-1 rounded-md font-medium">
+                    {brand._count.codes} verified codes
+                  </span>
                 </Link>
               ))
             ) : (
               <div className="col-span-full text-center py-12 text-gray-400 bg-white rounded-lg border border-dashed border-gray-300">
-                No brands found. Add codes via admin panel.
+                No brands found.
               </div>
             )}
           </div>
