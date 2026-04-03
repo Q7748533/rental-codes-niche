@@ -5,8 +5,10 @@ import MobileNav from '@/components/MobileNav';
 // 强制动态渲染，因为搜索词是实时变动的
 export const dynamic = 'force-dynamic';
 
-export async function generateMetadata({ searchParams }: { searchParams: { q?: string } }) {
-  const query = searchParams.q || '';
+// Next.js 16: searchParams 是异步的
+export async function generateMetadata({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
+  const params = await searchParams;
+  const query = params.q || '';
   return {
     title: query ? `Search Results for "${query}" | Car Corporate Codes` : 'Search | Car Corporate Codes',
     robots: { index: false, follow: true } // 关键 SEO：不要让 Google 索引搜索结果页本身，避免重复内容惩罚
@@ -16,9 +18,10 @@ export async function generateMetadata({ searchParams }: { searchParams: { q?: s
 export default async function SearchPage({
   searchParams,
 }: {
-  searchParams: { q?: string };
+  searchParams: Promise<{ q?: string }>;
 }) {
-  const query = searchParams.q || '';
+  const params = await searchParams;
+  const query = params.q || '';
 
   // 1. 如果没有搜索词，直接返回空状态
   if (!query.trim()) {
