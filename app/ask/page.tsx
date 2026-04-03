@@ -243,9 +243,33 @@ export default async function AskPage({ searchParams }: { searchParams: Promise<
       </main>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-gray-400 py-8 mt-16">
-        <div className="max-w-6xl mx-auto px-4 text-center text-sm">
-          <p>&copy; {new Date().getFullYear()} Car Corporate Codes. All rights reserved.</p>
+      <footer className="bg-gray-900 text-gray-400 py-12 mt-16">
+        <div className="max-w-4xl mx-auto px-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+            <div>
+              <h4 className="text-white font-bold mb-4">Car Corporate Codes</h4>
+              <p className="text-sm text-gray-500">Verified database of corporate discount codes for major rental brands. Save 10-25% on your next rental.</p>
+            </div>
+            <div>
+              <h4 className="text-white font-bold mb-4">Quick Links</h4>
+              <ul className="space-y-2 text-sm">
+                <li><Link href="/" className="hover:text-white transition-colors">Home</Link></li>
+                <li><Link href="/ask" className="hover:text-white transition-colors">Ask AI</Link></li>
+                <li><Link href="/search?q=" className="hover:text-white transition-colors">Search</Link></li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="text-white font-bold mb-4">Legal</h4>
+              <ul className="space-y-2 text-sm">
+                <li><Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link></li>
+                <li><Link href="/terms" className="hover:text-white transition-colors">Terms of Service</Link></li>
+              </ul>
+            </div>
+          </div>
+          <div className="border-t border-gray-800 pt-8 text-center text-sm text-gray-500">
+            <p>&copy; {new Date().getFullYear()} Car Corporate Codes. All rights reserved.</p>
+            <p className="mt-2">Corporate codes require eligibility verification. Not affiliated with any rental companies.</p>
+          </div>
         </div>
       </footer>
     </div>
