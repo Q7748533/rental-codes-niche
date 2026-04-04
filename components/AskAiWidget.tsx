@@ -45,7 +45,7 @@ export default function AskAiWidget({ companies = [], initialQuery }: AskAiWidge
     const progressInterval = setInterval(() => {
       setProgress(prev => {
         if (prev >= 90) return prev;
-        return prev + Math.random() * 15;
+        return Math.floor(prev + Math.random() * 15);
       });
     }, 2000);
 
