@@ -184,51 +184,34 @@ Please strictly return JSON format:
 }
 `;
 
-    // 🚀 1. 拦截点：生成唯一临时 slug，创建占位记录，立即拿到 taskId
-    const tempSlug = `pending-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
-
-    const savedQuery = await prisma.aiQuery.create({
-      data: {
-        slug: tempSlug, // 🚀 使用唯一临时 slug，避免 UNIQUE constraint 错误
-        userPrompt: query,
-        aiSummary: 'Generating your personalized guide...',
-        seoTitle: `${query} - Car Rental Guide`,
-        seoContent: '',
-      }
+    // 🚀 SYNC MODE: 同步等待 AI 完成（Vercel Serverless 兼容）
+    console.log("🤖 [Writer Gemini] is writing...");
+    const draftCompletion = await openai.chat.completions.create({
+      model: "gemini-3.1-pro-preview",
+      messages: [
+        { role: "system", content: writerPrompt },
+        { role: "user", content: query }
+      ],
+      temperature: 0.8,
+      response_format: { type: "json_object" }
     });
 
-    const taskId = savedQuery.id;
+    const draftResponseText = draftCompletion.choices[0].message.content || '{}';
+    let draftData;
+    try {
+      draftData = JSON.parse(draftResponseText.match(/\{[\s\S]*\}/)?.[0] || draftResponseText);
+    } catch (e) {
+      console.error('Writer Agent failed to output valid JSON:', draftResponseText);
+      return NextResponse.json({ error: 'AI writer failed to generate valid content' }, { status: 500 });
+    }
 
-    // 🚀 2. 核心剥离：把所有会阻塞的 AI 调用扔进后台异步闭包
-    (async () => {
-      try {
-        console.log("🤖 [Writer Gemini] is writing...");
-        const draftCompletion = await openai.chat.completions.create({
-          model: "gemini-3.1-pro-preview",
-          messages: [
-            { role: "system", content: writerPrompt },
-            { role: "user", content: query }
-          ],
-          temperature: 0.8,
-          response_format: { type: "json_object" }
-        });
+    if (!draftData || !draftData.isValid) {
+      console.log('Draft invalid.');
+      return NextResponse.json({ error: 'AI generated invalid content' }, { status: 500 });
+    }
 
-        const draftResponseText = draftCompletion.choices[0].message.content || '{}';
-        let draftData;
-        try {
-          draftData = JSON.parse(draftResponseText.match(/\{[\s\S]*\}/)?.[0] || draftResponseText);
-        } catch (e) {
-          console.error('Writer Agent failed to output valid JSON:', draftResponseText);
-          throw new Error('Writer Agent failed to output valid JSON.'); // ✅ 抛出异常，让外部 catch 捕获
-        }
-
-        if (!draftData || !draftData.isValid) {
-          console.log('Draft invalid, terminating background task.');
-          throw new Error('Draft invalid or missing isValid flag.'); // ✅ 抛出异常
-        }
-
-        // 🔪 PHASE 2: Editor Agent (Agent B - Editor / Claude)
-        const editorPrompt = `
+    // 🔪 PHASE 2: Editor Agent (Agent B - Editor / Claude)
+    const editorPrompt = `
 [ROLE: Cynical 2026 SEO Editor | ID: Alex Chen's Shadow | lang=en]
 [TONE: Brutally honest, Anti-corporate, Reddit-insider, Punchy]
 
@@ -257,66 +240,49 @@ Please strictly return JSON format:
 }
 `;
 
-        console.log("🔪 [Editor Claude] is refining...");
-        const editorCompletion = await openai.chat.completions.create({
-          model: "claude-opus-4-6",
-          messages: [
-            { role: "system", content: editorPrompt },
-            { role: "user", content: `[DRAFT_HTML_INPUT]:\n${draftData.seoContent}` }
-          ],
-          temperature: 0.4,
-          response_format: { type: "json_object" }
-        });
+    console.log("🔪 [Editor Claude] is refining...");
+    const editorCompletion = await openai.chat.completions.create({
+      model: "claude-opus-4-6",
+      messages: [
+        { role: "system", content: editorPrompt },
+        { role: "user", content: `[DRAFT_HTML_INPUT]:\n${draftData.seoContent}` }
+      ],
+      temperature: 0.4,
+      response_format: { type: "json_object" }
+    });
 
-        const editorResponseText = editorCompletion.choices[0].message.content || '{}';
-        let finalHtmlContent = draftData.seoContent;
-        try {
-          const editorData = JSON.parse(editorResponseText.match(/\{[\s\S]*\}/)?.[0] || editorResponseText);
-          if (editorData.editedHtml) finalHtmlContent = editorData.editedHtml;
-        } catch (e) {
-          console.warn('Editor Agent failed, using draft HTML.');
-        }
+    const editorResponseText = editorCompletion.choices[0].message.content || '{}';
+    let finalHtmlContent = draftData.seoContent;
+    try {
+      const editorData = JSON.parse(editorResponseText.match(/\{[\s\S]*\}/)?.[0] || editorResponseText);
+      if (editorData.editedHtml) finalHtmlContent = editorData.editedHtml;
+    } catch (e) {
+      console.warn('Editor Agent failed, using draft HTML.');
+    }
 
-        // 🚀 URL 年份剥离术 (Slug Purification)
-        const rawTitleForSlug = draftData.seoTitle || query;
-        const cleanTitleForSlug = rawTitleForSlug.replace(/\b202[0-9]\b/g, '').replace(/\s+/g, ' ').trim();
-        const finalSlug = await generateUniqueSlug(prisma, cleanTitleForSlug, 60);
+    // 🚀 URL 年份剥离术 (Slug Purification)
+    const rawTitleForSlug = draftData.seoTitle || query;
+    const cleanTitleForSlug = rawTitleForSlug.replace(/\b202[0-9]\b/g, '').replace(/\s+/g, ' ').trim();
+    const finalSlug = await generateUniqueSlug(prisma, cleanTitleForSlug, 60);
 
-        // 🚀 3. 后台任务完成，更新数据库写入 slug，这会触发前端轮询成功
-        await prisma.aiQuery.update({
-          where: { id: taskId },
-          data: {
-            slug: finalSlug + '.html',
-            aiSummary: draftData.summary || 'Here is what I found for you.',
-            seoContent: finalHtmlContent,
-            seoTitle: draftData.seoTitle || `${query} - Car Rental Guide`,
-          }
-        });
-
-        revalidatePath('/sitemap.xml');
-        console.log(`✅ Task ${taskId} completed.`);
-      } catch (err) {
-        console.error('Background AI task error:', err);
-        // 🚀 修复状态死循环：更新数据库为失败状态，让前端停止轮询
-        try {
-          await prisma.aiQuery.update({
-            where: { id: taskId },
-            data: {
-              aiSummary: 'Generation failed. Please try again.',
-              seoContent: '<p>Sorry, we encountered an error generating your guide. Please <a href="/ask">try again</a> or contact support.</p>',
-              seoTitle: 'Generation Failed',
-            }
-          });
-        } catch (updateErr) {
-          console.error('Failed to update error status:', updateErr);
-        }
+    // 🚀 直接保存最终文章，不再创建 pending 占位
+    const savedQuery = await prisma.aiQuery.create({
+      data: {
+        slug: finalSlug + '.html',
+        userPrompt: query,
+        aiSummary: draftData.summary || 'Here is what I found for you.',
+        seoContent: finalHtmlContent,
+        seoTitle: draftData.seoTitle || `${query} - Car Rental Guide`,
       }
-    })(); // <-- 异步闭包立即执行完毕，不阻塞主线程
+    });
 
-    // 🚀 4. 立即返回 taskId！前端不再死等！
+    revalidatePath('/sitemap.xml');
+    console.log(`✅ Article created: ${finalSlug}.html`);
+
+    // 🚀 同步返回最终 slug，前端直接跳转
     return NextResponse.json({
-      taskId: taskId,
-      summary: 'Generating your personalized guide...',
+      slug: finalSlug + '.html',
+      summary: draftData.summary || 'Here is what I found for you.',
     });
 
   } catch (error) {

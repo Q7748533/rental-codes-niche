@@ -23,15 +23,7 @@ export default function AskAiWidget({ companies = [], initialQuery }: AskAiWidge
   const [statusText, setStatusText] = useState('Ready');
   const [error, setError] = useState('');
 
-  const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const hasTriggered = useRef(false); // 🚀 终极防抖锁，保证生命周期内只触发一次
-
-  // Cleanup timer on unmount
-  useEffect(() => {
-    return () => {
-      if (pollingIntervalRef.current) clearInterval(pollingIntervalRef.current);
-    };
-  }, []);
 
   // Filter companies based on input
   const filteredCompanies = query.length > 0 && companies.length > 0
@@ -49,15 +41,24 @@ export default function AskAiWidget({ companies = [], initialQuery }: AskAiWidge
     setProgress(10);
     setStatusText('Initializing AI Agent...');
 
+    // 🚀 SYNC MODE: 模拟进度动画（因为实际等待是同步的）
+    const progressInterval = setInterval(() => {
+      setProgress(prev => {
+        if (prev >= 90) return prev;
+        return prev + Math.random() * 15;
+      });
+    }, 2000);
+
     try {
       setStatusText('Analyzing query & gathering data...');
-      setProgress(25);
 
       const res = await fetch('/api/ask', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ query: searchQuery.trim() }),
       });
+
+      clearInterval(progressInterval);
 
       if (!res.ok) {
         if (res.status === 429) throw new Error('System busy. Please try again in a minute.');
@@ -66,81 +67,20 @@ export default function AskAiWidget({ companies = [], initialQuery }: AskAiWidge
 
       const data = await res.json();
 
-      if (data.error || !data.taskId) {
-        throw new Error(data.error || 'Failed to get Task ID');
+      if (data.error || !data.slug) {
+        throw new Error(data.error || 'Failed to generate article');
       }
 
-      const { taskId } = data;
-
-      // 持久化任务到本地存储
-      const pendingTasks = JSON.parse(localStorage.getItem('ai_pending_tasks') || '[]');
-      pendingTasks.push({
-        id: taskId,
-        query: searchQuery,
-        status: 'processing',
-        createdAt: Date.now()
-      });
-      localStorage.setItem('ai_pending_tasks', JSON.stringify(pendingTasks));
-
-      setProgress(40);
-      setStatusText('Scanning corporate discount database...');
+      // 🚀 SYNC MODE: 直接拿到最终 slug，无需轮询
+      setProgress(100);
+      setStatusText('Guide ready! Redirecting...');
 
       setTimeout(() => {
-        setProgress(65);
-        setStatusText('Verifying counter check requirements...');
-      }, 5000);
-
-      setTimeout(() => {
-        setProgress(85);
-        setStatusText('Building your rental code guide...');
-      }, 9000);
-
-      let pollCount = 0;
-      const maxPolls = 60; // 🚀 从 30(60秒) 改为 60(120秒)，给双重 AI 留足写作和排版的时间
-
-      const checkStatus = async () => {
-        pollCount++;
-        try {
-          const statusRes = await fetch(`/api/ask/status?id=${taskId}`, { cache: 'no-store' });
-          if (!statusRes.ok) return;
-
-          const statusData = await statusRes.json();
-
-          if (statusData.found && statusData.slug) {
-            if (pollingIntervalRef.current) clearInterval(pollingIntervalRef.current);
-            setProgress(100);
-            setStatusText('Guide ready! Redirecting...');
-
-            const tasks = JSON.parse(localStorage.getItem('ai_pending_tasks') || '[]');
-            const updatedTasks = tasks.map((t: any) =>
-              t.id === taskId ? { ...t, status: 'completed', slug: statusData.slug } : t
-            );
-            localStorage.setItem('ai_pending_tasks', JSON.stringify(updatedTasks));
-
-            setTimeout(() => {
-              router.push(`/ask/${statusData.slug}`);
-            }, 500);
-            return;
-          }
-
-          if (statusData.isFailed) {
-            throw new Error('Generation timed out.');
-          }
-
-          if (pollCount >= maxPolls) {
-            throw new Error('Taking too long. Please check back later.');
-          }
-        } catch (err: any) {
-          if (pollingIntervalRef.current) clearInterval(pollingIntervalRef.current);
-          setError(err.message);
-          setIsLoading(false);
-          setProgress(0);
-        }
-      };
-
-      pollingIntervalRef.current = setInterval(checkStatus, 2000);
+        router.push(`/ask/${data.slug}`);
+      }, 500);
 
     } catch (err: any) {
+      clearInterval(progressInterval);
       setError(err.message || 'Something went wrong.');
       setIsLoading(false);
       setProgress(0);
@@ -164,7 +104,6 @@ export default function AskAiWidget({ companies = [], initialQuery }: AskAiWidge
   };
 
   const clearTask = () => {
-    if (pollingIntervalRef.current) clearInterval(pollingIntervalRef.current);
     setIsLoading(false);
     setProgress(0);
     setStatusText('Ready');
