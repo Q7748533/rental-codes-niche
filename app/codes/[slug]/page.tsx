@@ -264,7 +264,7 @@ export default async function CodeSpokePage({ params }: { params: Promise<{ slug
               default to the inflated walk-up rate.
             </p>
             <Link
-              href={`/ask?q=${encodeURIComponent(`Safe public promo codes for ${codeData.brand.name} without ID check`)}`}
+              href={`/ask?q=${encodeURIComponent(`Safe public alternatives to ${codeData.company.name} code for ${codeData.brand.name} without ID check`)}`}
               className="inline-block bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded-lg text-sm transition-colors shadow-sm"
             >
               Find Safe Public Codes via AI →
