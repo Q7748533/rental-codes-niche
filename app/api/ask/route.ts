@@ -147,27 +147,18 @@ User specifically targeted org: "${userTargetedOrg || 'none'}".
 You must generate an exclusive "How I Tested This" module at the end of the article. Wrap it in HTML: <div style="background-color: #f8fafc; padding: 20px; border-left: 4px solid #3b82f6; margin-top: 30px; border-radius: 0 8px 8px 0;">
 The module must include fictional but highly realistic test data: Test Date: ${testMonthContext} (MUST strictly use this date!), Location (MUST strictly match the scenario or location decided above!), Original Price (e.g., $450), Price with Code (e.g., $315), Total Saved.
 
-[TITLE GENERATION STRATEGY - 2-Step Hybrid Method]
-You MUST generate a unique, highly clickable SEO title under 60 chars. Strictly forbidden to use common templates like "Save X% Off".
+[TITLE GENERATION STRATEGY]
+You MUST generate a unique SEO title under 60 chars. Strictly forbidden to use common templates like "Save X% Off".
 
-STEP 1: Choose the most suitable angle from below based on user search intent:
-1. 🎯 Specific Audience: "IBM Employees", "AAA Members", "Government Workers", "Students"
-2. 🌍 Specific Scenario: "Airport Pickup", "One-Way Rental", "Long-Term Lease", "Last-Minute Booking"
-3. 💎 Unique Selling Point: "Free Upgrade", "Waived Young Driver Fee", "Unlimited Miles", "No Cancellation Fee"
-4. ❓ Question Angle: "How to Get...", "Which Code is Best for...", "What's the Cheapest Way to..."
-5. 📍 Location Focus: "in Los Angeles", "at LAX", "for NYC Business Travel"
-6. 🔥 Urgency: "Limited Time", "This Month Only", "Before Rates Go Up"
+CRITICAL RULE FOR YEAR IN TITLE: To ensure site variance, you MUST follow this strict logic:
+- If the user's query contains the word "code" or "discount", DO NOT use the year ${targetYear} in the title. Use words like 'Verified' or 'Active' instead.
+- IF the user's query does NOT contain those words, USE the year ${targetYear} in the title.
 
-STEP 2: Apply ONE of the following timeline constraints randomly (Crucial for SEO variance):
-- Format A (40% chance): Include the year ${targetYear} (e.g., 'Working as of April ${targetYear}').
-- Format B (30% chance): Use strong validation words (e.g., 'Verified', 'Active', '100% Safe') WITHOUT the year.
-- Format C (30% chance): Phrase it as a counter-check or how-to question (e.g., 'Does [Brand] check [Company] ID?').
-
-Title Formula (Adapt your chosen Angle to your chosen Format):
-- [Brand] + [Audience/Scenario] + [Year or Validation Word] + [USP]
-- How I Saved [Amount] on [Brand] Rentals ([Location or Year])
-- The [Adjective] Guide to [Brand] [Code Type] Codes
-- [Question Word] [Brand] [Scenario] [Year]?
+Choose ONE angle:
+1. 🎯 Specific Audience (e.g., IBM Employees)
+2. 🌍 Specific Scenario (e.g., One-Way Rental)
+3. 💎 USP (e.g., Free Upgrade)
+4. ❓ Question Angle (e.g., Does [Brand] check ID?)
 
 CRITICAL RULES:
 - Title MUST be under 60 characters
@@ -223,13 +214,10 @@ Please strictly return JSON format:
 === MANDATORY WORKFLOW ===
 1. [TERMINATE CHINESE]: If any Chinese characters or punctuation (，。！？） exist, translate to sharp, high-level idiomatic English. 0% tolerance for non-English.
 2. [KILL AI FLUFF]: Delete these immediately: "As an experienced...", "As a seasoned...", "Listen up", "Dive in", "In conclusion", "It is important to note", "crucial", "essential", "ultimate". 
-3. [STYLE INJECTION - CHAOS MODE]: Rewrite transitions to be abrupt and punchy like Reddit or Flyertalk. VARY your transition words in every article. Use diverse options like: 'Truth is', 'Listen', 'Pro tip', 'Heads up', 'Real talk', 'Bottom line', or just jump straight in. NEVER use the same transition style twice.
-4. [2026 CONTEXT INJECTION - CHAOS MODE]:
-   - Randomly insert ONE timely industry warning, but INVENT FRESH EXAMPLES each time. Never reuse the same warning twice.
-   - Vary the topics: TSA delays, new rental fees, insurance changes, fuel policies, app glitches, counter upsells, vehicle shortages, weather disruptions.
-   - Examples of variety (don't copy these exactly): staffing shortages at major hubs, new damage inspection apps, surge pricing algorithms, electric vehicle charging logistics, cross-border documentation changes.
+3. [STYLE INJECTION]: Rewrite transitions to be abrupt and punchy. CRITICAL: You are STRICTLY BANNED from using the phrases "Real talk", "Heads up", "Pro tip", "Truth is", "Look", or "Here's the deal". Invent completely fresh, aggressive transition phrases (e.g., "The harsh reality:", "Forget what you heard:", "Bottom line:").
+4. [2026 CONTEXT INJECTION]: Insert ONE timely industry warning (TSA delays, new fees, app glitches). It MUST be integrated into the main body paragraphs, NEVER in the FAQ or the Test Data module.
 5. [LSI VERIFICATION]: Ensure [${selectedLSI}] are woven into the story, not just listed at the end.
-6. [HTML SHIELD]: Do NOT modify the CSS/Styles in the <div style="..."> module. Keep the test data intact.
+6. [HTML SHIELD]: Do NOT modify the CSS/Styles in the <div style="..."> module. DO NOT add any extra text, warnings, or commentary inside the Test Data block. Keep the numbers clean.
 
 === BEHAVIOR ===
 [OUTPUT: JSON ONLY]
