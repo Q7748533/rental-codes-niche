@@ -136,11 +136,17 @@ export default async function OrganizationPage(props: { params: Promise<{ slug: 
                     </p>
                   </div>
 
-                  <div className="flex flex-col items-center shrink-0">
-                    <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-1">Code</span>
-                    <div className="bg-blue-50 border border-blue-100 text-blue-700 font-mono font-bold text-xl px-6 py-3 rounded-xl min-w-[160px] text-center select-all cursor-copy hover:bg-blue-100 transition-colors" title="Click to copy">
+                  {/* 核心内链：指向 Terminal Node 落地页 */}
+                  <div className="flex flex-col items-center sm:items-end shrink-0 gap-2">
+                    <div className="bg-blue-50/50 border border-blue-100 text-blue-700 font-mono font-bold text-xl px-6 py-2 rounded-xl min-w-[160px] text-center">
                       {code.codeValue}
                     </div>
+                    <Link
+                      href={`/codes/${code.brand.slug}-${company.slug}`}
+                      className="w-full sm:w-auto text-center bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold py-2 px-6 rounded-lg shadow-sm transition-colors"
+                    >
+                      View Details & Book →
+                    </Link>
                   </div>
                 </div>
               ))}
