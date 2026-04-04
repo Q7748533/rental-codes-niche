@@ -275,7 +275,10 @@ Please strictly return JSON format:
           console.warn('Editor Agent failed, using draft HTML.');
         }
 
-        const finalSlug = await generateUniqueSlug(prisma, draftData.seoTitle || query, 60);
+        // 🚀 URL 年份剥离术 (Slug Purification)
+        const rawTitleForSlug = draftData.seoTitle || query;
+        const cleanTitleForSlug = rawTitleForSlug.replace(/\b202[0-9]\b/g, '').replace(/\s+/g, ' ').trim();
+        const finalSlug = await generateUniqueSlug(prisma, cleanTitleForSlug, 60);
 
         // 🚀 3. 后台任务完成，更新数据库写入 slug，这会触发前端轮询成功
         await prisma.aiQuery.update({
