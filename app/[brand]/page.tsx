@@ -26,7 +26,7 @@ const getBrandData = cache(async (slug: string) => {
           description: true,
           codeType: true,
           source: true,
-          company: { select: { name: true } }
+          company: { select: { name: true, slug: true } }
         },
         orderBy: { createdAt: 'desc' },
       },
@@ -180,7 +180,7 @@ export default async function BrandPage({ params }: { params: Promise<{ brand: s
 
         {/* 唯一的列表入口，所有复杂 UI 交给客户端 */}
         <section className="mb-16">
-          <BrandCodeList codes={brandData.codes} brandName={brandData.name} term={term} />
+          <BrandCodeList codes={brandData.codes} brandName={brandData.name} brandSlug={currentBrandSlug} term={term} />
         </section>
 
         {/* 补丁3：FAQ 页面展示 */}

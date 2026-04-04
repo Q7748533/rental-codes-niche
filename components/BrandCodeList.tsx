@@ -3,17 +3,17 @@
 import { useState } from 'react';
 import Link from 'next/link';
 
-// 完美匹配爬虫的 6 字段
+// 完美匹配爬虫的 6 字段 + company slug
 interface CodeItem {
   id: string;
   codeValue: string;
   description: string | null;
   codeType: string | null;
   source: string | null;
-  company: { name: string };
+  company: { name: string; slug: string };
 }
 
-export default function BrandCodeList({ codes, brandName, term }: { codes: CodeItem[], brandName: string, term: string }) {
+export default function BrandCodeList({ codes, brandName, brandSlug, term }: { codes: CodeItem[], brandName: string, brandSlug: string, term: string }) {
   const [searchTerm, setSearchTerm] = useState('');
 
   // 强大的前端搜索引擎
@@ -65,8 +65,8 @@ export default function BrandCodeList({ codes, brandName, term }: { codes: CodeI
               {filteredCodes.map((codeItem) => (
                 <tr key={codeItem.id} className="hover:bg-blue-50/50 transition-colors">
                   <td className="p-5">
-                    <Link 
-                      href={`/ask?q=${encodeURIComponent(`How to use ${codeItem.company.name} corporate code for ${brandName} rentals`)}`}
+                    <Link
+                      href={`/codes/${brandSlug}-${codeItem.company.slug}`}
                       className="font-bold text-gray-900 text-base hover:text-blue-600 hover:underline transition-colors"
                     >
                       {codeItem.company.name}
@@ -110,8 +110,8 @@ export default function BrandCodeList({ codes, brandName, term }: { codes: CodeI
           {filteredCodes.map((codeItem) => (
             <div key={codeItem.id} className="p-5 hover:bg-gray-50 transition-colors">
               <div className="flex justify-between items-start mb-3">
-                <Link 
-                  href={`/ask?q=${encodeURIComponent(`How to use ${codeItem.company.name} corporate code for ${brandName} rentals`)}`}
+                <Link
+                  href={`/codes/${brandSlug}-${codeItem.company.slug}`}
                   className="font-bold text-gray-900 text-lg hover:text-blue-600 hover:underline transition-colors"
                 >
                   {codeItem.company.name}
