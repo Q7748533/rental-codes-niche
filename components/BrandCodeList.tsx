@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 
 // 完美匹配爬虫的 6 字段
 interface CodeItem {
@@ -12,7 +13,7 @@ interface CodeItem {
   company: { name: string };
 }
 
-export default function BrandCodeList({ codes, brandName }: { codes: CodeItem[], brandName: string }) {
+export default function BrandCodeList({ codes, brandName, term }: { codes: CodeItem[], brandName: string, term: string }) {
   const [searchTerm, setSearchTerm] = useState('');
 
   // 强大的前端搜索引擎
@@ -64,7 +65,12 @@ export default function BrandCodeList({ codes, brandName }: { codes: CodeItem[],
               {filteredCodes.map((codeItem) => (
                 <tr key={codeItem.id} className="hover:bg-blue-50/50 transition-colors">
                   <td className="p-5">
-                    <div className="font-bold text-gray-900 text-base">{codeItem.company.name}</div>
+                    <Link 
+                      href={`/ask?q=${encodeURIComponent(`How to use ${codeItem.company.name} corporate code for ${brandName} rentals`)}`}
+                      className="font-bold text-gray-900 text-base hover:text-blue-600 hover:underline transition-colors"
+                    >
+                      {codeItem.company.name}
+                    </Link>
                   </td>
                   <td className="p-5">
                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 border border-gray-200">
@@ -104,7 +110,12 @@ export default function BrandCodeList({ codes, brandName }: { codes: CodeItem[],
           {filteredCodes.map((codeItem) => (
             <div key={codeItem.id} className="p-5 hover:bg-gray-50 transition-colors">
               <div className="flex justify-between items-start mb-3">
-                <div className="font-bold text-gray-900 text-lg">{codeItem.company.name}</div>
+                <Link 
+                  href={`/ask?q=${encodeURIComponent(`How to use ${codeItem.company.name} corporate code for ${brandName} rentals`)}`}
+                  className="font-bold text-gray-900 text-lg hover:text-blue-600 hover:underline transition-colors"
+                >
+                  {codeItem.company.name}
+                </Link>
                 <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-gray-100 text-gray-600 uppercase tracking-wider border border-gray-200">
                   {codeItem.source || 'Employee'}
                 </span>

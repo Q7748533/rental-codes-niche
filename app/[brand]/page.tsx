@@ -68,7 +68,7 @@ export default async function BrandPage({ params }: { params: Promise<{ brand: s
   };
   const term = termMap[currentBrandSlug.toLowerCase()] || 'Corporate Code';
 
-  // 修复后的数组化 JSON-LD (包含 Breadcrumb)
+  // 修复后的数组化 JSON-LD (包含 Breadcrumb + FAQ)
   const jsonLd = {
     '@context': 'https://schema.org',
     '@graph': [
@@ -92,6 +92,27 @@ export default async function BrandPage({ params }: { params: Promise<{ brand: s
         itemListElement: [
           { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://carcorporatecodes.com' },
           { '@type': 'ListItem', position: 2, name: `${brandData.name} Codes`, item: `https://carcorporatecodes.com/${brandData.slug}` }
+        ]
+      },
+      {
+        '@type': 'FAQPage',
+        mainEntity: [
+          {
+            '@type': 'Question',
+            name: `Does ${brandData.name} check corporate ID at the counter?`,
+            acceptedAnswer: {
+              '@type': 'Answer',
+              text: `Yes, ${brandData.name} routinely audits ${term} usage. You should be prepared to present a valid employee badge, corporate email verification, or business card at the rental counter.`
+            }
+          },
+          {
+            '@type': 'Question',
+            name: `Can I earn loyalty points when using a ${brandData.name} ${term}?`,
+            acceptedAnswer: {
+              '@type': 'Answer',
+              text: `Generally, yes. Most legitimately applied corporate negotiated rates still allow you to accrue points and enjoy skip-the-counter benefits within ${brandData.name}'s loyalty program.`
+            }
+          }
         ]
       }
     ]
@@ -140,9 +161,60 @@ export default async function BrandPage({ params }: { params: Promise<{ brand: s
           </p>
         </div>
 
+        {/* 补丁1：How-To 使用说明 + 2026 警告 */}
+        <section className="mb-12">
+          <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">
+              How to Apply {brandData.name} {term}s in 2026
+            </h2>
+            <p className="text-gray-700 mb-4">
+              Using a corporate discount code for <strong>{brandData.name}</strong> can significantly reduce your base rate. To apply these codes, navigate to the official {brandData.name} reservation page. Look for the field labeled <strong>{term}</strong> or <strong>Corporate Account</strong> during checkout.
+            </p>
+            <div className="p-4 bg-amber-50 border-l-4 border-amber-500 rounded-r-md">
+              <p className="text-sm text-amber-800 font-medium m-0">
+                ⚠️ <strong>2026 Counter Warning:</strong> {brandData.name} agents are increasingly strict about verifying corporate eligibility. If you use a high-tier {term} (like IBM or Deloitte), expect a physical ID or badge check at the pickup counter. Failure to provide ID may result in your reservation reverting to the standard walk-up rate.
+              </p>
+            </div>
+          </div>
+        </section>
+
         {/* 唯一的列表入口，所有复杂 UI 交给客户端 */}
         <section className="mb-16">
-          <BrandCodeList codes={brandData.codes} brandName={brandData.name} />
+          <BrandCodeList codes={brandData.codes} brandName={brandData.name} term={term} />
+        </section>
+
+        {/* 补丁3：FAQ 页面展示 */}
+        <section className="mb-16">
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">Frequently Asked Questions</h2>
+          <div className="space-y-4">
+            <details className="group bg-white border border-gray-200 rounded-lg p-4 cursor-pointer hover:border-blue-300 transition-colors">
+              <summary className="font-medium text-gray-900 flex justify-between items-center">
+                Does {brandData.name} check corporate ID at the counter?
+                <span className="text-gray-400 group-open:rotate-180 transition-transform">▼</span>
+              </summary>
+              <p className="mt-3 text-gray-600 text-sm leading-relaxed">
+                Yes, {brandData.name} routinely audits {term} usage. You should be prepared to present a valid employee badge, corporate email verification, or business card at the rental counter. Failure to provide ID may result in your reservation reverting to the standard walk-up rate.
+              </p>
+            </details>
+            <details className="group bg-white border border-gray-200 rounded-lg p-4 cursor-pointer hover:border-blue-300 transition-colors">
+              <summary className="font-medium text-gray-900 flex justify-between items-center">
+                Can I earn loyalty points when using a {brandData.name} {term}?
+                <span className="text-gray-400 group-open:rotate-180 transition-transform">▼</span>
+              </summary>
+              <p className="mt-3 text-gray-600 text-sm leading-relaxed">
+                Generally, yes. Most legitimately applied corporate negotiated rates still allow you to accrue points and enjoy skip-the-counter benefits within {brandData.name}&apos;s loyalty program. However, some deeply discounted rates may exclude points earning, so always check the specific terms.
+              </p>
+            </details>
+            <details className="group bg-white border border-gray-200 rounded-lg p-4 cursor-pointer hover:border-blue-300 transition-colors">
+              <summary className="font-medium text-gray-900 flex justify-between items-center">
+                What happens if I don&apos;t have a corporate ID?
+                <span className="text-gray-400 group-open:rotate-180 transition-transform">▼</span>
+              </summary>
+              <p className="mt-3 text-gray-600 text-sm leading-relaxed">
+                Without proper ID verification, {brandData.name} may refuse the corporate rate and charge you the standard walk-up rate, which can be 2-3x higher. We recommend using our AI tool to find safe, public promo codes and association discounts that don&apos;t require corporate verification.
+              </p>
+            </details>
+          </div>
         </section>
 
         {/* 内部生态引流 */}
