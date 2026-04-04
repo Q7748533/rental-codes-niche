@@ -101,8 +101,7 @@ export async function POST(req: Request) {
     // Randomly select 3 LSI terms for mandatory injection
     const selectedLSI = lsiVocabulary.sort(() => 0.5 - Math.random()).slice(0, 3).join(", ");
 
-    // 🚀 解放场景：不再使用固定场景数组，让 AI 根据品牌和查询自创独特场景
-    // 场景将由 AI 在 Prompt 中根据 context 动态生成，避免重复
+    // 🚀 CHAOS: No fixed scenarios. Let AI invent unique travel contexts per article.
 
     // ==========================================
     // 🚀 PHASE 1: Writer Agent (Agent A - Writer / Gemini)
@@ -125,14 +124,14 @@ ${realCodesContext}
 3. Do not use any Chinese punctuation (，。！？）. Use only English punctuation.
 4. BANNED PHRASES: You MUST NOT use phrases like "As an experienced...", "As a seasoned...", "Listen up", "Dive in", or "In conclusion". Write directly and objectively without roleplaying preambles.
 
-🚨 [WRITING DETAIL REQUIREMENTS - Must include all 4 points]:
-1. Website Operation Guide: When recommending codes, briefly mention specific operation details on the rental company's website (e.g., Hertz's "Pay Later" option, Enterprise's dropdown menus, Avis's AWD input box location) to enhance practical usability.
-2. Counter Check Strictness: In the tone of an experienced driver, evaluate how strictly the counter at [city or airport in the scenario] checks badges/IDs.
-3. Points & Membership Benefits: Clearly tell users that using these recommended codes still allows normal accumulation of rental company loyalty points (like Hertz Gold Plus Rewards, Avis Preferred, etc.) or skip-the-line privileges at the counter.
-4. Unique Scene-Based FAQ: At the end of the article (just before the EEAT module), generate an HTML <h3>Unique Scenarios & FAQs</h3>. Then, write 2 highly specific questions:
-   - Question 1: Compare two different car classes suitable for this specific scenario (do NOT default to SUV vs Minivan - be creative based on the actual travel context).
-   - Question 2: Address a niche logistical nightmare (e.g., toll roads, border crossings, one-way fees, out-of-hours drop-off, or vehicle return complications).
-   - NEVER use the "How to save money" generic template. DO NOT write generic templates like "How to use a CDP code".
+🚨 [WRITING DETAIL REQUIREMENTS - Flexible Structure, NO Fixed Templates]:
+1. Website Operation: Mention specific website details naturally (input box locations, dropdown menus) - vary the depth based on the brand.
+2. Counter Reality: Evaluate badge/ID check strictness at the location - use your own words, vary the tone (cautious vs confident).
+3. Loyalty Perks: Mention points/membership benefits if relevant - don't force it if the scenario doesn't call for it.
+4. Dynamic FAQ: Generate 2 questions based on the ACTUAL scenario you invented:
+   - Question 1: Compare car classes OR pricing quirks OR insurance gotchas (vary this!).
+   - Question 2: Address a logistical nightmare (toll roads, border crossings, one-way fees, after-hours drop-off, weather issues).
+   - NEVER use "SUV vs Minivan" or "late flight" as defaults. Invent fresh problems for each article.
 
 🚨 [DYNAMIC INTENT DETECTION]:
 User's original search query: "${query}".
@@ -140,7 +139,7 @@ User specifically targeted org: "${userTargetedOrg || 'none'}".
 1. 🎯 Expert Pitfall Avoidance Pivot: ONLY if the user SPECIFICALLY mentions a company (like "${userTargetedOrg || 'IBM'}") AND [Real Code Data] doesn't have it, then pivot: "The official ${userTargetedOrg || 'company'} internal code now checks badges extremely strictly..." 
    - ELSE (generic search): Focus entirely on the provided database codes as "Top Picks". Do NOT mention IBM or any specific company unless the user asked for it.
 2. 📍 Location Detection: If the search query contains any specific city name, state name, or airport code (like LAX, Miami, Hawaii, NYC, etc.), you **MUST** use that location as the background for your practical experience!
-3. 🎲 Fallback Scenario: If the search query doesn't mention a location, invent a highly specific, plausible travel scenario based on the brand and code type (e.g., a business trip to a secondary city, a family road trip to a national park, a wedding weekend in a small town). DO NOT reuse common examples like Orlando Disney, Chicago conventions, or Denver skiing - be original and specific.
+3. 🎲 Fallback Scenario: If no location mentioned, invent a fresh travel context based on the brand and code type. DO NOT reuse common examples like Orlando Disney, Chicago conferences, or Denver skiing. Be creative: minor cities, national parks, wedding weekends, coastal drives, mountain retreats, etc.
 
 [🛡️ STRATEGY 4 (EEAT Trust Module): Mandatory Test Record Generation]
 You must generate an exclusive "How I Tested This" module at the end of the article. Wrap it in HTML: <div style="background-color: #f8fafc; padding: 20px; border-left: 4px solid #3b82f6; margin-top: 30px; border-radius: 0 8px 8px 0;">
@@ -239,9 +238,11 @@ Please strictly return JSON format:
 === MANDATORY WORKFLOW ===
 1. [TERMINATE CHINESE]: If any Chinese characters or punctuation (，。！？） exist, translate to sharp, high-level idiomatic English. 0% tolerance for non-English.
 2. [KILL AI FLUFF]: Delete these immediately: "As an experienced...", "As a seasoned...", "Listen up", "Dive in", "In conclusion", "It is important to note", "crucial", "essential", "ultimate". 
-3. [STYLE INJECTION]: Rewrite transitions to be abrupt and punchy like Reddit or FlyerTalk users. Vary your transition words in every article - use diverse options like "Truth is," "Listen," "Pro tip," "Here's the deal," "Straight up," or just jump straight in. Never repeat the same transition style across different articles.
-4. [2026 CONTEXT INJECTION]: 
-   - Randomly insert ONE "2026-specific" warning into the flow about current travel realities (e.g., TSA delays, new rental tech, pricing changes, policy updates). Make it sound natural and specific to the scenario, not generic.
+3. [STYLE INJECTION - CHAOS MODE]: Rewrite transitions to be abrupt and punchy like Reddit or Flyertalk. VARY your transition words in every article. Use diverse options like: 'Truth is', 'Listen', 'Pro tip', 'Heads up', 'Real talk', 'Bottom line', or just jump straight in. NEVER use the same transition style twice.
+4. [2026 CONTEXT INJECTION - CHAOS MODE]:
+   - Randomly insert ONE timely industry warning, but INVENT FRESH EXAMPLES each time. Never reuse the same warning twice.
+   - Vary the topics: TSA delays, new rental fees, insurance changes, fuel policies, app glitches, counter upsells, vehicle shortages, weather disruptions.
+   - Examples of variety (don't copy these exactly): staffing shortages at major hubs, new damage inspection apps, surge pricing algorithms, electric vehicle charging logistics, cross-border documentation changes.
 5. [LSI VERIFICATION]: Ensure [${selectedLSI}] are woven into the story, not just listed at the end.
 6. [HTML SHIELD]: Do NOT modify the CSS/Styles in the <div style="..."> module. Keep the test data intact.
 
