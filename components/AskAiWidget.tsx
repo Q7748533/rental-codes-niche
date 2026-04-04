@@ -28,7 +28,7 @@ export default function AskAiWidget({ companies = [], initialQuery }: AskAiWidge
     if (initialQuery && !isLoading && progress === 0) {
       // 延迟一点确保组件完全挂载
       const timer = setTimeout(() => {
-        handleSubmit(new Event('submit') as React.FormEvent);
+        handleSubmit();
       }, 500);
       return () => clearTimeout(timer);
     }
@@ -51,8 +51,8 @@ export default function AskAiWidget({ companies = [], initialQuery }: AskAiWidge
       ).slice(0, 5)
     : [];
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (e?: React.FormEvent) => {
+    e?.preventDefault();
     if (!query.trim()) return;
 
     // 1. Initialize state
