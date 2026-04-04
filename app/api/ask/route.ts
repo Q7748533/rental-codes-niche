@@ -1,4 +1,6 @@
 // app/api/ask/route.ts
+export const maxDuration = 300; // 🚀 防止 Vercel 10秒超时强杀后台进程
+
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { generateUniqueSlug } from '@/lib/slugify';
@@ -216,13 +218,13 @@ Please strictly return JSON format:
         try {
           draftData = JSON.parse(draftResponseText.match(/\{[\s\S]*\}/)?.[0] || draftResponseText);
         } catch (e) {
-          console.error('Writer Agent failed to output valid JSON.');
-          return;
+          console.error('Writer Agent failed to output valid JSON:', draftResponseText);
+          throw new Error('Writer Agent failed to output valid JSON.'); // ✅ 抛出异常，让外部 catch 捕获
         }
 
-        if (!draftData.isValid) {
+        if (!draftData || !draftData.isValid) {
           console.log('Draft invalid, terminating background task.');
-          return;
+          throw new Error('Draft invalid or missing isValid flag.'); // ✅ 抛出异常
         }
 
         // 🔪 PHASE 2: Editor Agent (Agent B - Editor / Claude)

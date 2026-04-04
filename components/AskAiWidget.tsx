@@ -96,7 +96,7 @@ export default function AskAiWidget({ companies = [], initialQuery }: AskAiWidge
       }, 9000);
 
       let pollCount = 0;
-      const maxPolls = 30;
+      const maxPolls = 60; // 🚀 从 30(60秒) 改为 60(120秒)，给双重 AI 留足写作和排版的时间
 
       const checkStatus = async () => {
         pollCount++;
