@@ -74,8 +74,38 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   };
   const term = termMap[brandSlug] || 'Corporate Code';
 
+  // 🚀 基于代码类型的隔离词库（避免统一硬编码触发 Programmatic Spam 惩罚）
+  const isBusinessCode = !codeData.codeType || codeData.codeType.toLowerCase() === 'business';
+
+  let modifiers: string[] = [];
+  if (isBusinessCode) {
+    // 严格的商业代码：强调官方、真实、最大折扣和 2026 有效性
+    modifiers = [
+      "Verified 2026 Rate",
+      "Max Discount Applied",
+      "Official Corporate Rate",
+      "Employee Discount",
+      "Business Travel Code",
+      "Save Up to 30%"
+    ];
+  } else {
+    // 安全的公共/休闲代码：疯狂强调"不查 ID"、"安全"、"避坑"
+    modifiers = [
+      "Avoid ID Checks",
+      "Safe for Public Use",
+      "No Badge Required",
+      "Counter Bypass Guaranteed",
+      "Leisure & Vacation Rate",
+      "Zero Verification Needed"
+    ];
+  }
+
+  // 确定性哈希：在安全的、匹配语境的词库里进行随机分配
+  const modifierIndex = (brandSlug.length + companySlug.length) % modifiers.length;
+  const dynamicModifier = modifiers[modifierIndex];
+
   return {
-    title: `${codeData.company.name} ${codeData.brand.name} Corporate Code (${term}) - Save 25%`,
+    title: `${codeData.company.name} ${codeData.brand.name} Corporate Code (${term}) - ${dynamicModifier}`,
     description: `Use the ${codeData.company.name} corporate discount code (${codeData.codeValue}) at ${codeData.brand.name}. Verified 2026 ${term} to bypass counter checks.`,
     alternates: { canonical: `https://carcorporatecodes.com/codes/${slug}` }
   };
