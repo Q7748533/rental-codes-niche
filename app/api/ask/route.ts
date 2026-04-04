@@ -152,30 +152,39 @@ User specifically targeted org: "${userTargetedOrg || 'none'}".
 You must generate an exclusive "How I Tested This" module at the end of the article. Wrap it in HTML: <div style="background-color: #f8fafc; padding: 20px; border-left: 4px solid #3b82f6; margin-top: 30px; border-radius: 0 8px 8px 0;">
 The module must include fictional but highly realistic test data: Test Date: ${testMonthContext} (MUST strictly use this date!), Location (MUST strictly match the scenario or location decided above!), Original Price (e.g., $450), Price with Code (e.g., $315), Total Saved.
 
-[TITLE GENERATION STRATEGY - Chaos Variation Method]
-You MUST choose ONE of the following three formats randomly to maintain natural variance across the site. This prevents Google from detecting programmatic spam patterns.
+[TITLE GENERATION STRATEGY - 2-Step Hybrid Method]
+You MUST generate a unique, highly clickable SEO title under 60 chars. Strictly forbidden to use common templates like "Save X% Off".
 
-Format A - Date Anchor (40% chance): Include current month and year for high CTR.
-Examples: "Avis IBM Code (Working April 2026)", "Hertz Deloitte CDP | 2026 Validation Guide"
+STEP 1: Choose the most suitable angle from below based on user search intent:
+1. 🎯 Specific Audience: "IBM Employees", "AAA Members", "Government Workers", "Students"
+2. 🌍 Specific Scenario: "Airport Pickup", "One-Way Rental", "Long-Term Lease", "Last-Minute Booking"
+3. 💎 Unique Selling Point: "Free Upgrade", "Waived Young Driver Fee", "Unlimited Miles", "No Cancellation Fee"
+4. ❓ Question Angle: "How to Get...", "Which Code is Best for...", "What's the Cheapest Way to..."
+5. 📍 Location Focus: "in Los Angeles", "at LAX", "for NYC Business Travel"
+6. 🔥 Urgency: "Limited Time", "This Month Only", "Before Rates Go Up"
 
-Format B - Status Modifier (30% chance): Use strong validation words WITHOUT year. Timeless evergreen titles.
-Examples: "Active Enterprise Codes for AAA Members", "100% Verified National Contract IDs", "Working Budget BCD Rates"
+STEP 2: Apply ONE of the following timeline constraints randomly (Crucial for SEO variance):
+- Format A (40% chance): Include the year ${targetYear} (e.g., 'Working as of April ${targetYear}').
+- Format B (30% chance): Use strong validation words (e.g., 'Verified', 'Active', '100% Safe') WITHOUT the year.
+- Format C (30% chance): Phrase it as a counter-check or how-to question (e.g., 'Does [Brand] check [Company] ID?').
 
-Format C - Pain Point Question (30% chance): Phrase as question focusing on counter ID check. High PAA/Featured Snippet potential.
-Examples: "Does Avis Check IBM Employee Badges?", "How to Bypass Hertz Counter Checks?", "Budget Corporate Codes Without ID?"
+Title Formula (Adapt your chosen Angle to your chosen Format):
+- [Brand] + [Audience/Scenario] + [Year or Validation Word] + [USP]
+- How I Saved [Amount] on [Brand] Rentals ([Location or Year])
+- The [Adjective] Guide to [Brand] [Code Type] Codes
+- [Question Word] [Brand] [Scenario] [Year]?
 
 CRITICAL RULES:
 - Title MUST be under 60 characters
 - NEVER put year in slug/URL - only in <title> tag and content body
 - If query contains location, add it naturally
-- Avoid templates like "Save X% Off" or generic "Guide to..."
 
 [OUTPUT REQUIREMENTS]
 Please strictly return JSON format:
 {
   "isValid": true,
   "summary": "Short reply to user (2 sentences). Point out the best real code in the article.",
-  "seoTitle": "Unique SEO title (under 60 chars). Use Chaos Variation: Format A (date+year 40%), Format B (status words no-year 30%), Format C (question format 30%). No templates.",
+  "seoTitle": "Unique SEO title strictly following the 2-Step Strategy above. If user's search query contains a location, MUST add it to the title.",
   "seoContent": "300-400 word content with HTML tags. Must include <h2>, <p>, <ul> and the EEAT light background trust module required above."
 }
 `;
