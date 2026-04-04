@@ -5,6 +5,7 @@ import Script from 'next/script';
 import type { Metadata } from 'next';
 import { cache } from 'react';
 import MobileNav from '@/components/MobileNav';
+import CopyCodeButton from '@/components/CopyCodeButton';
 
 export const revalidate = 3600;
 
@@ -100,15 +101,19 @@ export default async function CodeSpokePage({ params }: { params: Promise<{ slug
 
   // 动态生成直连预订 URL
   const getDirectBookingUrl = () => {
-    switch(brandSlug) {
-      case 'avis': return `https://www.avis.com/en/home?awd_number=${codeData.codeValue}`;
-      case 'hertz': return `https://www.hertz.com/rentacar/reservation/?id=30000&cdp=${codeData.codeValue}`;
-      case 'budget': return `https://www.budget.com/en/home?bcd_number=${codeData.codeValue}`;
-      case 'enterprise': return `https://www.enterprise.com/en/car-rental.html?ECM=${codeData.codeValue}`;
-      case 'national': return `https://www.nationalcar.com/en/car-rental.html?ContractID=${codeData.codeValue}`;
-      case 'alamo': return `https://www.alamo.com/en/car-rental.html?CorpID=${codeData.codeValue}`;
-      default: return `https://www.${brandSlug}.com`;
-    }
+    const knownBrands: Record<string, string> = {
+      avis: `https://www.avis.com/en/home?awd_number=${codeData.codeValue}`,
+      hertz: `https://www.hertz.com/rentacar/reservation/?id=30000&cdp=${codeData.codeValue}`,
+      budget: `https://www.budget.com/en/home?bcd_number=${codeData.codeValue}`,
+      enterprise: `https://www.enterprise.com/en/car-rental.html?ECM=${codeData.codeValue}`,
+      national: `https://www.nationalcar.com/en/car-rental.html?ContractID=${codeData.codeValue}`,
+      alamo: `https://www.alamo.com/en/car-rental.html?CorpID=${codeData.codeValue}`,
+      dollar: `https://www.dollar.com/`,
+      thrifty: `https://www.thrifty.com/`,
+      payless: `https://www.paylesscar.com/`
+    };
+    // 返回已知品牌的预订链接，未知品牌返回品牌首页
+    return knownBrands[brandSlug] || `/${brandSlug}`;
   };
 
   const jsonLd = {
@@ -210,8 +215,12 @@ export default async function CodeSpokePage({ params }: { params: Promise<{ slug
             <div className="flex flex-col md:flex-row items-center justify-between gap-6 mb-8">
               <div>
                 <p className="text-sm text-gray-500 uppercase tracking-widest font-bold mb-1">{term} Number</p>
-                <div className="text-4xl font-black text-gray-900 font-mono tracking-wider bg-gray-100 px-4 py-2 rounded-lg inline-block">
-                  {codeData.codeValue}
+                <div className="flex items-center gap-3">
+                  <div className="text-4xl font-black text-gray-900 font-mono tracking-wider bg-gray-100 px-4 py-2 rounded-lg inline-block">
+                    {codeData.codeValue}
+                  </div>
+                  {/* Copy Code 按钮 */}
+                  <CopyCodeButton codeValue={codeData.codeValue} />
                 </div>
               </div>
               <a
