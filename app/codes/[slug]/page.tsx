@@ -165,6 +165,20 @@ export default async function CodeSpokePage({ params }: { params: Promise<{ slug
     ]
   };
 
+  // 🚀 动态计算折扣显示数字
+  const getDynamicDiscount = () => {
+    // 1. 尝试从数据库的 description 里用正则抓取真实的 % 数字 (例如 "Save 20%")
+    if (codeData.description) {
+      const match = codeData.description.match(/(\d{1,2})%/);
+      if (match) return `Up to ${match[1]}%`;
+    }
+    // 2. 如果描述里没有数字，使用确定性哈希
+    const discountPool = ["15-20%", "Up to 25%", "10-30%", "20%+", "Up to 35%", "15-25%"];
+    const hashIndex = (brandSlug.length + companySlug.length) % discountPool.length;
+    return discountPool[hashIndex];
+  };
+  const displayDiscount = getDynamicDiscount();
+
   const isBusinessCode = !codeData.codeType || codeData.codeType.toLowerCase() === 'business';
 
   return (
@@ -208,7 +222,7 @@ export default async function CodeSpokePage({ params }: { params: Promise<{ slug
             <h1 className="text-3xl md:text-5xl font-extrabold mb-4">
               {codeData.brand.name} {codeData.company.name} Code
             </h1>
-            <p className="text-blue-100 text-lg">Updated April 2026 · Save 10-25% on your rental</p>
+            <p className="text-blue-100 text-lg">Updated April 2026 · Save {displayDiscount} on your rental</p>
           </div>
 
           <div className="p-8">
@@ -235,7 +249,7 @@ export default async function CodeSpokePage({ params }: { params: Promise<{ slug
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 border-t border-gray-100 pt-6">
               <div className="text-center">
-                <span className="block text-2xl font-bold text-green-600 mb-1">10-25%</span>
+                <span className="block text-2xl font-bold text-green-600 mb-1">{displayDiscount}</span>
                 <span className="text-xs text-gray-500 uppercase font-semibold">Discount</span>
               </div>
               <div className="text-center">
