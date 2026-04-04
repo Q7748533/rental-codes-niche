@@ -101,14 +101,8 @@ export async function POST(req: Request) {
     // Randomly select 3 LSI terms for mandatory injection
     const selectedLSI = lsiVocabulary.sort(() => 0.5 - Math.random()).slice(0, 3).join(", ");
 
-    // Random scenarios and tone
-    const scenarios = [
-      "A stressful family vacation to Disney World in Orlando (MCO)",
-      "A last-minute tech conference at McCormick Place in Chicago (ORD)",
-      "A winter ski trip flying into Denver International (DEN)",
-      "A scenic Pacific Coast Highway road trip starting at SFO"
-    ];
-    const randomScenario = scenarios[Math.floor(Math.random() * scenarios.length)];
+    // 🚀 解放场景：不再使用固定场景数组，让 AI 根据品牌和查询自创独特场景
+    // 场景将由 AI 在 Prompt 中根据 context 动态生成，避免重复
 
     // ==========================================
     // 🚀 PHASE 1: Writer Agent (Agent A - Writer / Gemini)
@@ -136,8 +130,8 @@ ${realCodesContext}
 2. Counter Check Strictness: In the tone of an experienced driver, evaluate how strictly the counter at [city or airport in the scenario] checks badges/IDs.
 3. Points & Membership Benefits: Clearly tell users that using these recommended codes still allows normal accumulation of rental company loyalty points (like Hertz Gold Plus Rewards, Avis Preferred, etc.) or skip-the-line privileges at the counter.
 4. Unique Scene-Based FAQ: At the end of the article (just before the EEAT module), generate an HTML <h3>Unique Scenarios & FAQs</h3>. Then, write 2 highly specific questions:
-   - Question 1: Must be about a specific car class (SUV vs Minivan) at this location.
-   - Question 2: Must be about a "What if" scenario (e.g., late flight, lost badge, or drop-off location).
+   - Question 1: Compare two different car classes suitable for this specific scenario (do NOT default to SUV vs Minivan - be creative based on the actual travel context).
+   - Question 2: Address a niche logistical nightmare (e.g., toll roads, border crossings, one-way fees, out-of-hours drop-off, or vehicle return complications).
    - NEVER use the "How to save money" generic template. DO NOT write generic templates like "How to use a CDP code".
 
 🚨 [DYNAMIC INTENT DETECTION]:
@@ -146,7 +140,7 @@ User specifically targeted org: "${userTargetedOrg || 'none'}".
 1. 🎯 Expert Pitfall Avoidance Pivot: ONLY if the user SPECIFICALLY mentions a company (like "${userTargetedOrg || 'IBM'}") AND [Real Code Data] doesn't have it, then pivot: "The official ${userTargetedOrg || 'company'} internal code now checks badges extremely strictly..." 
    - ELSE (generic search): Focus entirely on the provided database codes as "Top Picks". Do NOT mention IBM or any specific company unless the user asked for it.
 2. 📍 Location Detection: If the search query contains any specific city name, state name, or airport code (like LAX, Miami, Hawaii, NYC, etc.), you **MUST** use that location as the background for your practical experience!
-3. 🎲 Fallback Scenario: If the search query doesn't mention a location, use this random scenario as the background: ${randomScenario}.
+3. 🎲 Fallback Scenario: If the search query doesn't mention a location, invent a highly specific, plausible travel scenario based on the brand and code type (e.g., a business trip to a secondary city, a family road trip to a national park, a wedding weekend in a small town). DO NOT reuse common examples like Orlando Disney, Chicago conventions, or Denver skiing - be original and specific.
 
 [🛡️ STRATEGY 4 (EEAT Trust Module): Mandatory Test Record Generation]
 You must generate an exclusive "How I Tested This" module at the end of the article. Wrap it in HTML: <div style="background-color: #f8fafc; padding: 20px; border-left: 4px solid #3b82f6; margin-top: 30px; border-radius: 0 8px 8px 0;">
@@ -245,11 +239,9 @@ Please strictly return JSON format:
 === MANDATORY WORKFLOW ===
 1. [TERMINATE CHINESE]: If any Chinese characters or punctuation (，。！？） exist, translate to sharp, high-level idiomatic English. 0% tolerance for non-English.
 2. [KILL AI FLUFF]: Delete these immediately: "As an experienced...", "As a seasoned...", "Listen up", "Dive in", "In conclusion", "It is important to note", "crucial", "essential", "ultimate". 
-3. [STYLE INJECTION]: Rewrite transitions to be abrupt. Use "Look," "The reality is," "Here's the play," or just start the sentence. No formal bridge words.
+3. [STYLE INJECTION]: Rewrite transitions to be abrupt and punchy like Reddit or FlyerTalk users. Vary your transition words in every article - use diverse options like "Truth is," "Listen," "Pro tip," "Here's the deal," "Straight up," or just jump straight in. Never repeat the same transition style across different articles.
 4. [2026 CONTEXT INJECTION]: 
-   - Randomly insert ONE "2026-specific" warning into the flow: 
-     - E.g., "With the current 2026 TSA chaos, don't count on a late pickup holding your car."
-     - E.g., "Take a video of the bumper; these 2026 AI-scanners are ruthless on tiny dings."
+   - Randomly insert ONE "2026-specific" warning into the flow about current travel realities (e.g., TSA delays, new rental tech, pricing changes, policy updates). Make it sound natural and specific to the scenario, not generic.
 5. [LSI VERIFICATION]: Ensure [${selectedLSI}] are woven into the story, not just listed at the end.
 6. [HTML SHIELD]: Do NOT modify the CSS/Styles in the <div style="..."> module. Keep the test data intact.
 
