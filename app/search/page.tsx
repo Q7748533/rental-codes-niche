@@ -21,12 +21,15 @@ export default async function SearchPage({
   searchParams: Promise<{ q?: string }>;
 }) {
   const params = await searchParams;
-  const query = params.q || '';
+  const rawQuery = params.q || '';
 
   // 1. 如果没有搜索词，直接返回空状态
-  if (!query.trim()) {
+  if (!rawQuery.trim()) {
     return <EmptySearchState message="Please enter a search term to find corporate codes." />;
   }
+
+  // 限制搜索词长度，防止恶意超长字符串攻击数据库
+  const query = rawQuery.trim().substring(0, 50);
 
   // 2. 并发执行数据库搜索 (品牌、公司、具体代码)
   // 注意：SQLite 的 contains 默认忽略大小写，不需要加 mode: 'insensitive'
@@ -41,18 +44,17 @@ export default async function SearchPage({
       include: { _count: { select: { codes: true } } },
       take: 12,
     }),
+    // 优化：移除昂贵的跨表 contains 查询，避免全表扫描
+    // 用户搜品牌/公司时，上面两个列表已经展示，点击进入详情页即可看到所有代码
     prisma.code.findMany({
       where: {
         OR: [
           { codeValue: { contains: query } },
-          { description: { contains: query } },
-          // 如果用户搜 "IBM"，也匹配关联了 IBM 的代码
-          { company: { name: { contains: query } } },
-          { brand: { name: { contains: query } } }
+          { description: { contains: query } }
         ]
       },
       include: { brand: true, company: true },
-      take: 30, // 限制结果数量防暴击
+      take: 20, // 限制结果数量防暴击
     })
   ]);
 
@@ -134,9 +136,17 @@ export default async function SearchPage({
                         </div>
                         <p className="text-gray-600 text-sm leading-relaxed">{code.description || 'Corporate discount code. Terms apply.'}</p>
                       </div>
-                      <div className="bg-blue-50 px-4 py-3 rounded-lg border border-blue-100 flex items-center justify-between min-w-[140px]">
-                        <span className="font-mono font-bold text-blue-800 tracking-wider text-lg">{code.codeValue}</span>
-                        <span className="text-[10px] uppercase font-bold text-blue-400 ml-3">Copy</span>
+                      {/* 核心内链：指向 Terminal Node 落地页 */}
+                      <div className="flex flex-col sm:flex-row items-center gap-2 mt-3 md:mt-0">
+                        <div className="bg-blue-50/50 border border-blue-100 text-blue-700 font-mono font-bold px-4 py-2 rounded-lg text-center min-w-[120px]">
+                          {code.codeValue}
+                        </div>
+                        <Link
+                          href={`/codes/${code.brand.slug}-${code.company.slug}`}
+                          className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2 rounded-lg shadow-sm text-sm whitespace-nowrap transition-colors"
+                        >
+                          View Details & Book →
+                        </Link>
                       </div>
                     </div>
                   ))}
@@ -213,9 +223,18 @@ function EmptySearchState({ message }: { message: string }) {
           <div className="text-4xl mb-4">🔍</div>
           <h2 className="text-xl font-bold text-gray-900 mb-2">No results found</h2>
           <p className="text-gray-500 mb-6">{message}</p>
-          <Link href="/" className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-2.5 rounded-lg transition-colors inline-block">
-            Return Home
-          </Link>
+          {/* 优化：空搜索时引导用户使用 AI 深度搜索 */}
+          <div className="flex flex-col sm:flex-row justify-center gap-4">
+            <Link
+              href={`/ask?q=${encodeURIComponent(message.replace('Please enter a search term to find corporate codes.', '').replace('No corporate codes found for ', '').replace(/"|\./g, ''))}`}
+              className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-3 rounded-lg shadow-md transition-transform hover:scale-105 inline-block"
+            >
+              Ask AI to Search Deeply 🤖
+            </Link>
+            <Link href="/" className="bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold px-6 py-3 rounded-lg transition-colors inline-block">
+              Return Home
+            </Link>
+          </div>
         </div>
       </main>
 
