@@ -7,4 +7,10 @@ const AskAiWidget = dynamic(() => import('./AskAiWidget'), {
   loading: () => <div className="h-16 bg-gray-100 rounded-lg animate-pulse"></div>
 });
 
-export default AskAiWidget;
+interface AskAiWidgetLazyProps {
+  initialQuery?: string;
+}
+
+export default function AskAiWidgetLazy({ initialQuery }: AskAiWidgetLazyProps) {
+  return <AskAiWidget initialQuery={initialQuery} />;
+}

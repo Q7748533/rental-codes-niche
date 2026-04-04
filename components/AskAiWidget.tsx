@@ -10,17 +10,29 @@ interface Company {
 }
 
 interface AskAiWidgetProps {
-  companies: Company[];
+  companies?: Company[];
+  initialQuery?: string;
 }
 
-export default function AskAiWidget({ companies }: AskAiWidgetProps) {
+export default function AskAiWidget({ companies = [], initialQuery }: AskAiWidgetProps) {
   const router = useRouter();
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState(initialQuery || '');
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [statusText, setStatusText] = useState('Ready');
   const [error, setError] = useState('');
+
+  // 🚀 如果有 initialQuery，自动触发提交
+  useEffect(() => {
+    if (initialQuery && !isLoading && progress === 0) {
+      // 延迟一点确保组件完全挂载
+      const timer = setTimeout(() => {
+        handleSubmit(new Event('submit') as React.FormEvent);
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [initialQuery]);
 
   // Use useRef to save timer, prevent memory leaks and race conditions from multiple clicks
   const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);

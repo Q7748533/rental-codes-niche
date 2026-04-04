@@ -3,6 +3,8 @@ import Link from 'next/link';
 import Script from 'next/script';
 import type { Metadata } from 'next';
 import { unstable_cache } from 'next/cache'; // 🚀 引入缓存 API
+// 🚀 引入 AI 生成器组件
+import AskAiWidgetLazy from '@/components/AskAiWidgetLazy';
 
 // ISR 静态缓存：1小时重新验证（作为没有 searchParams 时的后备）
 export const revalidate = 3600;
@@ -100,9 +102,11 @@ function Pagination({ currentPage, totalPages }: { currentPage: number; totalPag
   );
 }
 
-export default async function AskPage({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
+// 🚀 修改类型定义，增加对 q 参数的捕获
+export default async function AskPage({ searchParams }: { searchParams: Promise<{ page?: string, q?: string }> }) {
   const resolvedParams = await searchParams;
   const currentPage = Number(resolvedParams.page) || 1;
+  const targetQuery = resolvedParams.q; // 🚀 捕获搜索词
   const pageSize = 50; // 每页50篇，保护DOM性能
   const skip = (currentPage - 1) * pageSize;
 
@@ -181,15 +185,32 @@ export default async function AskPage({ searchParams }: { searchParams: Promise<
       </header>
 
       <main className="max-w-6xl mx-auto px-4 py-12">
-        {/* H1 */}
-        <div className="text-center mb-12">
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-            Car Rental Guides & Money-Saving Tips
-          </h1>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Browse our collection of {articles.length} expert guides to help you save money on car rentals with corporate codes and discount strategies.
-          </p>
-        </div>
+        {/* 🚀 核心修复：如果用户带了 q 参数进来，优先渲染 AI 生成引擎！ */}
+        {targetQuery ? (
+          <div className="mb-16">
+            <div className="text-center mb-6">
+              <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
+                Generating your AI Guide...
+              </h1>
+              <p className="text-blue-600">Please wait while we scan the database for &quot;{targetQuery}&quot;</p>
+            </div>
+
+            {/* 将捕获到的 query 传给你的客户端组件，让它自动触发请求 */}
+            <div className="max-w-3xl mx-auto">
+              <AskAiWidgetLazy initialQuery={targetQuery} />
+            </div>
+          </div>
+        ) : (
+          /* H1 */
+          <div className="text-center mb-12">
+            <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+              Car Rental Guides & Money-Saving Tips
+            </h1>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              Browse our collection of {articles.length} expert guides to help you save money on car rentals with corporate codes and discount strategies.
+            </p>
+          </div>
+        )}
 
         {/* Articles Grid */}
         {articles.length > 0 ? (
