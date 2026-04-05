@@ -83,12 +83,14 @@ export default async function OrganizationPage(props: { params: Promise<{ slug: 
 
       <main className="max-w-4xl mx-auto px-4 py-8 md:py-16" role="main" aria-label={`${company.name} corporate codes content`}>
         {/* 面包屑导航 */}
-        <nav className="text-sm text-gray-500 mb-6 flex items-center gap-2" aria-label="Breadcrumb">
-          <Link href="/" className="hover:text-blue-600">Home</Link>
-          <span>/</span>
-          <Link href="/search?q=" className="hover:text-blue-600">Organizations</Link>
-          <span>/</span>
-          <span className="text-gray-900 font-medium">{company.name}</span>
+        <nav className="text-sm text-gray-500 mb-6" aria-label="Breadcrumb">
+          <ol className="flex items-center space-x-2">
+            <li><Link href="/" className="hover:text-blue-600">Home</Link></li>
+            <li className="text-gray-400">/</li>
+            <li><Link href="/search?q=" className="hover:text-blue-600">Organizations</Link></li>
+            <li className="text-gray-400">/</li>
+            <li className="text-gray-900 font-medium">{company.name}</li>
+          </ol>
         </nav>
 
         {/* H1 核心区域 */}
