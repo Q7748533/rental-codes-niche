@@ -310,16 +310,16 @@ export default async function AiGuidePage({ params }: { params: Promise<{ slug: 
       />
 
       {/* 简洁导航栏 */}
-      <header className="border-b border-gray-200">
+      <header className="border-b border-gray-200" role="banner" aria-label="Site header">
         <div className="max-w-3xl mx-auto px-4 py-4">
-          <Link href="/" className="text-blue-600 hover:text-blue-800 font-medium">
+          <Link href="/" className="text-blue-600 hover:text-blue-800 font-medium" aria-label="Back to Car Corporate Codes home">
             &larr; Back to Car Corporate Codes
           </Link>
         </div>
       </header>
 
       {/* 主内容 */}
-      <main className="max-w-3xl mx-auto px-4 py-8 md:py-12">
+      <main className="max-w-3xl mx-auto px-4 py-8 md:py-12" role="main" aria-label="AI generated rental guide article">
         {/* 面包屑 */}
         <nav className="mb-6" aria-label="Breadcrumb">
           <ol className="flex items-center space-x-2 text-sm text-gray-500">

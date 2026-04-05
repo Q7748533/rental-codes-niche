@@ -171,20 +171,20 @@ export default async function AskPage({ searchParams }: { searchParams: Promise<
       />
       
       {/* Header */}
-      <header className="bg-white shadow-sm border-b border-gray-200">
+      <header className="bg-white shadow-sm border-b border-gray-200" role="banner" aria-label="Site header">
         <div className="max-w-6xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            <Link href="/" className="text-xl font-bold text-blue-700">
+            <Link href="/" className="text-xl font-bold text-blue-700" aria-label="Car Corporate Codes - Home">
               Car Corporate Codes
             </Link>
-            <nav className="text-sm text-gray-600">
+            <nav className="text-sm text-gray-600" aria-label="Main navigation">
               <Link href="/" className="hover:text-blue-600">← Back to Home</Link>
             </nav>
           </div>
         </div>
       </header>
 
-      <main className="max-w-6xl mx-auto px-4 py-12">
+      <main className="max-w-6xl mx-auto px-4 py-12" role="main" aria-label="AI rental guides and articles">
         {/* 🚀 核心修复：如果用户带了 q 参数进来，优先渲染 AI 生成引擎！ */}
         {targetQuery ? (
           <div className="mb-16">

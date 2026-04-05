@@ -63,11 +63,11 @@ export default async function SearchPage({
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900">
       {/* 毛玻璃吸顶导航 */}
-      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200/80 shadow-sm transition-all">
+      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200/80 shadow-sm transition-all" role="banner" aria-label="Site header">
         <div className="max-w-6xl mx-auto px-4 py-3 md:py-4 flex justify-between items-center">
-          <Link href="/" className="text-xl md:text-2xl font-bold text-blue-700">Car Corporate Codes</Link>
+          <Link href="/" className="text-xl md:text-2xl font-bold text-blue-700" aria-label="Car Corporate Codes - Home">Car Corporate Codes</Link>
           <div className="flex items-center">
-            <nav className="hidden md:flex items-center space-x-6 text-sm font-medium text-gray-600">
+            <nav className="hidden md:flex items-center space-x-6 text-sm font-medium text-gray-600" aria-label="Main navigation">
               <Link href="/#brands" className="hover:text-blue-600">Brands</Link>
               <Link href="/ask" className="hover:text-blue-600">Ask AI</Link>
             </nav>
@@ -76,7 +76,7 @@ export default async function SearchPage({
         </div>
       </header>
 
-      <main className="max-w-4xl mx-auto px-4 py-8 md:py-12">
+      <main className="max-w-4xl mx-auto px-4 py-8 md:py-12" role="main" aria-label="Search results content">
         {/* 搜索头部 */}
         <div className="mb-10">
           <Link href="/" className="text-blue-600 text-sm font-medium hover:underline mb-4 inline-block">&larr; Back to Home</Link>

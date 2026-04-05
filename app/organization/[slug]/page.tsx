@@ -68,11 +68,11 @@ export default async function OrganizationPage(props: { params: Promise<{ slug: 
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
 
       {/* 头部导航 */}
-      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200/80 shadow-sm transition-all">
+      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200/80 shadow-sm transition-all" role="banner" aria-label="Site header">
         <div className="max-w-6xl mx-auto px-4 py-3 md:py-4 flex justify-between items-center">
-          <Link href="/" className="text-xl md:text-2xl font-bold text-blue-700">Car Corporate Codes</Link>
+          <Link href="/" className="text-xl md:text-2xl font-bold text-blue-700" aria-label="Car Corporate Codes - Home">Car Corporate Codes</Link>
           <div className="flex items-center">
-            <nav className="hidden md:flex items-center space-x-6 text-sm font-medium text-gray-600">
+            <nav className="hidden md:flex items-center space-x-6 text-sm font-medium text-gray-600" aria-label="Main navigation">
               <Link href="/#brands" className="hover:text-blue-600">Brands</Link>
               <Link href="/ask" className="hover:text-blue-600">Ask AI</Link>
             </nav>
@@ -81,9 +81,9 @@ export default async function OrganizationPage(props: { params: Promise<{ slug: 
         </div>
       </header>
 
-      <main className="max-w-4xl mx-auto px-4 py-8 md:py-16">
+      <main className="max-w-4xl mx-auto px-4 py-8 md:py-16" role="main" aria-label={`${company.name} corporate codes content`}>
         {/* 面包屑导航 */}
-        <nav className="text-sm text-gray-500 mb-6 flex items-center gap-2">
+        <nav className="text-sm text-gray-500 mb-6 flex items-center gap-2" aria-label="Breadcrumb">
           <Link href="/" className="hover:text-blue-600">Home</Link>
           <span>/</span>
           <Link href="/search?q=" className="hover:text-blue-600">Organizations</Link>

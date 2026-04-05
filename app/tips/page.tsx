@@ -100,15 +100,15 @@ export default function TipsPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <header className="bg-white border-b border-gray-200">
+      <header className="bg-white border-b border-gray-200" role="banner" aria-label="Site header">
         <div className="max-w-3xl mx-auto px-4 py-4">
-          <Link href="/" className="text-blue-600 hover:text-blue-800 font-medium">
+          <Link href="/" className="text-blue-600 hover:text-blue-800 font-medium" aria-label="Back to Car Corporate Codes home">
             &larr; Back to Car Corporate Codes
           </Link>
         </div>
       </header>
 
-      <main className="max-w-3xl mx-auto px-4 py-12">
+      <main className="max-w-3xl mx-auto px-4 py-12" role="main" aria-label="Car rental tips and guides">
         <h1 className="text-3xl font-bold text-gray-900 mb-4">Car Rental Tips & Guides</h1>
         <p className="text-gray-600 mb-8">
           Expert advice to help you save money and avoid common pitfalls when renting a car.
