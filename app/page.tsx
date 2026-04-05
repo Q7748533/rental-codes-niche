@@ -270,11 +270,11 @@ export default async function Home() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       {/* 🚀 终极优化 2：毛玻璃吸顶导航，移动端压缩高度 */}
-      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200/80 shadow-sm transition-all">
+      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200/80 shadow-sm transition-all" role="banner" aria-label="Site header">
         <div className="max-w-6xl mx-auto px-4 py-3 md:py-4 flex justify-between items-center">
-          <Link href="/" className="text-xl md:text-2xl font-bold text-blue-700">Car Corporate Codes</Link>
+          <Link href="/" className="text-xl md:text-2xl font-bold text-blue-700" aria-label="Car Corporate Codes - Home">Car Corporate Codes</Link>
           <div className="flex items-center">
-            <nav className="hidden md:flex items-center space-x-6 text-sm font-medium text-gray-600">
+            <nav className="hidden md:flex items-center space-x-6 text-sm font-medium text-gray-600" aria-label="Main navigation">
               <Link href="#brands" className="hover:text-blue-600 min-h-[44px] flex items-center px-2">Brands</Link>
               <Link href="#guide" className="hover:text-blue-600 min-h-[44px] flex items-center px-2">How to Use</Link>
               <Link href="#faq" className="hover:text-blue-600 min-h-[44px] flex items-center px-2">FAQ</Link>
@@ -285,7 +285,7 @@ export default async function Home() {
         </div>
       </header>
 
-      <main className="max-w-6xl mx-auto px-4 py-12 md:py-16">
+      <main className="max-w-6xl mx-auto px-4 py-12 md:py-16" role="main" aria-label="Main content">
         <div className="text-center mb-20 mt-4 md:mt-8">
           {/* 🚀 终极优化 3：移动端收缩字体，留出首屏空间 */}
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-gray-900 mb-4 md:mb-6 leading-tight tracking-tight">
@@ -319,8 +319,8 @@ export default async function Home() {
         </div>
 
         {/* 🚀 终极优化 7：品牌列表拟物化设计，增强点击欲 */}
-        <section id="brands" className="mb-24">
-          <h2 className="text-2xl font-bold mb-2 text-gray-900">Browse Codes by Rental Brand</h2>
+        <section id="brands" className="mb-24" aria-labelledby="brands-heading">
+          <h2 id="brands-heading" className="text-2xl font-bold mb-2 text-gray-900">Browse Codes by Rental Brand</h2>
           <p className="text-gray-600 mb-6">Click any brand to view all available corporate and association discount codes.</p>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
             {brands.length > 0 ? (
@@ -350,8 +350,8 @@ export default async function Home() {
         </section>
 
         {/* H2: 使用指南 */}
-        <section id="guide" className="mb-24">
-          <h2 className="text-2xl font-bold mb-6 text-gray-900 border-b border-gray-200 pb-3">How to Use Car Rental Corporate Codes</h2>
+        <section id="guide" className="mb-24" aria-labelledby="guide-heading">
+          <h2 id="guide-heading" className="text-2xl font-bold mb-6 text-gray-900 border-b border-gray-200 pb-3">How to Use Car Rental Corporate Codes</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
               <h3 className="text-lg font-bold text-gray-900 mb-3">1. Find Your Code</h3>
@@ -431,8 +431,8 @@ export default async function Home() {
         </section>
 
         {/* H2: FAQ - 手风琴折叠效果 */}
-        <section id="faq" className="mb-24">
-          <h2 className="text-2xl font-bold mb-6 text-gray-900 border-b border-gray-200 pb-3">Frequently Asked Questions</h2>
+        <section id="faq" className="mb-24" aria-labelledby="faq-heading">
+          <h2 id="faq-heading" className="text-2xl font-bold mb-6 text-gray-900 border-b border-gray-200 pb-3">Frequently Asked Questions</h2>
           <div className="max-w-3xl mx-auto space-y-4">
             {/* FAQ 1 */}
             <details className="group bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden [&_summary::-webkit-details-marker]:hidden">
@@ -548,7 +548,7 @@ export default async function Home() {
       </main>
 
       {/* 页脚 */}
-      <footer className="bg-gray-900 text-gray-300 py-12">
+      <footer className="bg-gray-900 text-gray-300 py-12" role="contentinfo" aria-label="Site footer">
         <div className="max-w-6xl mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
             <div>

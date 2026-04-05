@@ -215,13 +215,13 @@ export default async function CodeSpokePage({ params }: { params: Promise<{ slug
     <div className="min-h-screen bg-gray-50 text-gray-900">
       <Script id="json-ld" type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
 
-      <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50 backdrop-blur-md bg-white/90">
+      <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50 backdrop-blur-md bg-white/90" role="banner" aria-label="Site header">
         <div className="max-w-6xl mx-auto px-4 py-3 md:py-4 flex justify-between items-center">
-          <Link href="/" className="text-xl md:text-2xl font-bold text-blue-700 hover:opacity-80 transition-opacity">
+          <Link href="/" className="text-xl md:text-2xl font-bold text-blue-700 hover:opacity-80 transition-opacity" aria-label="Car Corporate Codes - Home">
             Car Corporate Codes
           </Link>
           <div className="flex items-center">
-            <nav className="hidden md:flex items-center space-x-6 text-sm font-medium text-gray-600">
+            <nav className="hidden md:flex items-center space-x-6 text-sm font-medium text-gray-600" aria-label="Main navigation">
               <Link href={`/${brandSlug}`} className="hover:text-blue-600 capitalize">{codeData.brand.name} Codes</Link>
               <Link href="/ask" className="hover:text-blue-600">Ask AI</Link>
             </nav>
@@ -230,7 +230,7 @@ export default async function CodeSpokePage({ params }: { params: Promise<{ slug
         </div>
       </header>
 
-      <main className="max-w-4xl mx-auto px-4 py-12">
+      <main className="max-w-4xl mx-auto px-4 py-12" role="main" aria-label={`${codeData.company.name} ${codeData.brand.name} corporate code details`}>
         {/* 面包屑 */}
         <nav className="text-sm text-gray-500 mb-6" aria-label="Breadcrumb">
           <ol className="flex items-center space-x-2">
@@ -412,7 +412,7 @@ export default async function CodeSpokePage({ params }: { params: Promise<{ slug
       </main>
 
       {/* 页脚 */}
-      <footer className="bg-white border-t border-gray-200 mt-16">
+      <footer className="bg-white border-t border-gray-200 mt-16" role="contentinfo" aria-label="Site footer">
         <div className="max-w-6xl mx-auto px-4 py-8">
           <div className="flex flex-col md:flex-row justify-between items-center text-sm text-gray-500">
             <p>&copy; 2026 Car Corporate Codes. All rights reserved.</p>
