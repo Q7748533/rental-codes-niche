@@ -250,7 +250,7 @@ export default async function CodeSpokePage({ params }: { params: Promise<{ slug
         <div className="bg-white rounded-3xl shadow-lg border border-gray-100 overflow-hidden mb-12">
           <div className="bg-blue-700 text-white p-8 text-center">
             <h1 className="text-3xl md:text-5xl font-extrabold mb-4">
-              {codeData.brand.name} {codeData.company.name} Code
+              {codeData.company.name} {codeData.brand.name} {term}
             </h1>
             <p className="text-blue-100 text-lg">Updated April 2026 · Save {displayDiscount} on your rental</p>
           </div>
@@ -319,7 +319,7 @@ export default async function CodeSpokePage({ params }: { params: Promise<{ slug
         {/* 替代码推荐 */}
         {alternativeCodes.length > 0 && (
           <section className="mb-12">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">Safer Alternatives for {codeData.brand.name}</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">Public {codeData.brand.name} Codes (No ID)</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {alternativeCodes.map(alt => (
                 <Link
@@ -345,7 +345,7 @@ export default async function CodeSpokePage({ params }: { params: Promise<{ slug
         {/* 横向实体关联网络 */}
         {lateralCodes.length > 0 && (
           <section className="mb-12">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">{codeData.company.name} Codes at Other Rental Chains</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">{codeData.company.name} Codes: Other Brands</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {lateralCodes.map(c => (
                 <Link
@@ -365,7 +365,7 @@ export default async function CodeSpokePage({ params }: { params: Promise<{ slug
 
         {/* 专属 FAQ 内容 */}
         <section className="mb-12">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">Frequently Asked Questions</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">{codeData.company.name} {codeData.brand.name} FAQ</h2>
           <div className="space-y-4">
             <details className="group bg-white border border-gray-200 rounded-lg p-4 cursor-pointer hover:border-blue-300 transition-colors">
               <summary className="font-medium text-gray-900 flex justify-between items-center">

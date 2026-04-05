@@ -290,7 +290,7 @@ export default async function Home() {
           {/* 🚀 终极优化 3：移动端收缩字体，留出首屏空间 */}
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-gray-900 mb-4 md:mb-6 leading-tight tracking-tight">
             Car Rental Corporate Codes 2026:<br className="hidden md:block" />
-            <span className="text-blue-700"> Hertz, Enterprise & Avis CDP Discounts</span>
+            <span className="text-blue-700">Hertz, Enterprise, Avis CDP Discounts</span>
           </h1>
 
           {/* 🚀 终极优化 4：修复错位徽章，使用 flex 居中排列 */}
@@ -320,7 +320,7 @@ export default async function Home() {
 
         {/* 🚀 终极优化 7：品牌列表拟物化设计，增强点击欲 */}
         <section id="brands" className="mb-24" aria-labelledby="brands-heading">
-          <h2 id="brands-heading" className="text-2xl font-bold mb-2 text-gray-900">Browse Codes by Rental Brand</h2>
+          <h2 id="brands-heading" className="text-2xl font-bold mb-2 text-gray-900">Rental Brands with Corporate Codes</h2>
           <p className="text-gray-600 mb-6">Click any brand to view all available corporate and association discount codes.</p>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
             {brands.length > 0 ? (
@@ -351,7 +351,7 @@ export default async function Home() {
 
         {/* H2: 使用指南 */}
         <section id="guide" className="mb-24" aria-labelledby="guide-heading">
-          <h2 id="guide-heading" className="text-2xl font-bold mb-6 text-gray-900 border-b border-gray-200 pb-3">How to Use Car Rental Corporate Codes</h2>
+          <h2 id="guide-heading" className="text-2xl font-bold mb-6 text-gray-900 border-b border-gray-200 pb-3">How Corporate Codes Work</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
               <h3 className="text-lg font-bold text-gray-900 mb-3">1. Find Your Code</h3>
@@ -370,7 +370,7 @@ export default async function Home() {
 
         {/* H2: 风险提示 */}
         <section id="risks" className="mb-24">
-          <h2 className="text-2xl font-bold mb-4 text-gray-900">Corporate Code Risks & Eligibility</h2>
+          <h2 className="text-2xl font-bold mb-4 text-gray-900">Code Risks: ID Checks & Eligibility</h2>
           <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-6">
             <p className="text-gray-800 mb-4">
               <strong>Important:</strong> Corporate rates are negotiated between rental companies and organizations. 
@@ -389,7 +389,7 @@ export default async function Home() {
 
         {/* H2: 公开优惠 */}
         <section className="mb-24">
-          <h2 className="text-2xl font-bold mb-4 text-gray-900">No Corporate Code? Use These Public Deals</h2>
+          <h2 className="text-2xl font-bold mb-4 text-gray-900">Public Deals (No ID Required)</h2>
           <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-3xl p-8 md:p-10 border border-blue-100 shadow-inner">
             <p className="text-blue-800 mb-8 text-lg">No ID required. No eligibility checks. Fully insured rentals.</p>
             {publicDeals.length > 0 ? (

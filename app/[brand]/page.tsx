@@ -165,7 +165,7 @@ export default async function BrandPage({ params }: { params: Promise<{ brand: s
         <section className="mb-12">
           <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
             <h2 className="text-2xl font-bold text-gray-900 mb-4">
-              How to Apply {brandData.name} {term}s in 2026
+              How to Apply {brandData.name} {term}s
             </h2>
             <p className="text-gray-700 mb-4">
               Using a corporate discount code for <strong>{brandData.name}</strong> can significantly reduce your base rate. To apply these codes, navigate to the official {brandData.name} reservation page. Look for the field labeled <strong>{term}</strong> or <strong>Corporate Account</strong> during checkout.
@@ -185,7 +185,7 @@ export default async function BrandPage({ params }: { params: Promise<{ brand: s
 
         {/* 补丁3：FAQ 页面展示 */}
         <section className="mb-16">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">Frequently Asked Questions</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">{brandData.name} Code FAQ</h2>
           <div className="space-y-4">
             <details className="group bg-white border border-gray-200 rounded-lg p-4 cursor-pointer hover:border-blue-300 transition-colors">
               <summary className="font-medium text-gray-900 flex justify-between items-center">
