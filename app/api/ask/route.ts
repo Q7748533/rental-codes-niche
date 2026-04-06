@@ -226,9 +226,10 @@ Please strictly return JSON format:
       return NextResponse.json({ error: 'AI generated invalid content' }, { status: 500 });
     }
 
-    // � 全自动内链收割机 (validInternalLinks)
+    // 🚀 全自动内链收割机 (validInternalLinks)
+    // 修正：代码详情页 URL 结构是 /codes/{brand}-{company}
     const validInternalLinks = realCodesData.map(c => 
-      `Target: "${c.company.name}" -> URL: "/${c.brand.slug}/${c.company.slug}"`
+      `Target: "${c.company.name}" -> URL: "/codes/${c.brand.slug}-${c.company.slug}"`
     ).join('\n');
 
     // � PHASE 2: Editor Agent (Agent B - Editor / Claude)
