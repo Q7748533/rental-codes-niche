@@ -16,14 +16,6 @@ export const metadata: Metadata = {
   title: "Car Rental Corporate Codes 2026 | Hertz, Enterprise, Avis Discounts",
   description: "Verified car rental corporate codes for Hertz, Enterprise, Avis, Budget. Save 10-25% on business travel with CDP and PC codes. Updated daily.",
   keywords: ["car rental corporate codes", "hertz cdp codes", "enterprise discount codes", "avis corporate codes", "rental car discounts"],
-  other: {
-    // 🚀 预连接关键域名，减少DNS和TCP握手时间
-    'link': [
-      { rel: 'preconnect', href: 'https://pagead2.googlesyndication.com' },
-      { rel: 'preconnect', href: 'https://www.googletagmanager.com' },
-      { rel: 'dns-prefetch', href: 'https://pagead2.googlesyndication.com' },
-    ],
-  },
 };
 
 // 获取 AdSense 配置
@@ -63,6 +55,11 @@ export default async function RootLayout({
   return (
     <html lang="en" className={inter.variable}>
       <head>
+        {/* 🚀 预连接关键域名，减少DNS和TCP握手时间 */}
+        <link rel="preconnect" href="https://pagead2.googlesyndication.com" />
+        <link rel="preconnect" href="https://www.googletagmanager.com" />
+        <link rel="dns-prefetch" href="https://pagead2.googlesyndication.com" />
+        
         {/* 🚀 延迟加载 AdSense - 等页面加载完成后再加载 */}
         {shouldLoadAdSense && (
           <Script

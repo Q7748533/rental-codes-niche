@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   // 检查是否为管理员
   const adminSession = request.cookies.get('admin_session')?.value;
   const isAdmin = adminSession === 'true';
