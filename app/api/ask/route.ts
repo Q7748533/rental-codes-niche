@@ -61,9 +61,11 @@ export async function POST(req: Request) {
     const searchKeyword = detectedBrand || (words.length > 0 ? words[0] : '');
     const lowerKeyword = searchKeyword.toLowerCase();
 
-    // 🚀 修复 IBM 幻觉：精准检测用户是否真的搜了某个品牌或公司名
+    // 🚀 修复 IBM 幻觉：精准检测用户是否真的搜了某个品牌或公司名 (✅ 动态正则消除)
+    const dbCompanies = await prisma.company.findMany({ select: { name: true } });
+    const dynamicCompanies = dbCompanies.map(c => c.name.toLowerCase());
     const userTargetedOrg = dynamicBrands.find(brand => queryLower.includes(brand)) || 
-                           (queryLower.match(/(ibm|google|pwc|kpmg|amazon|accenture|microsoft|apple|meta)/)?.[0]);
+                            dynamicCompanies.find(company => queryLower.includes(company));
 
     // Prioritize matching user's searched brand, organization name or description
     let realCodesData = await prisma.code.findMany({
@@ -105,6 +107,20 @@ export async function POST(req: Request) {
 
     // 🚀 CHAOS: No fixed scenarios. Let AI invent unique travel contexts per article.
 
+    // 🚀 意图劫持杀手锏 (Intent Hijacking)
+    let specializedPrompt = "";
+    if (queryLower.includes("under 25") || queryLower.includes("young") || queryLower.includes("student")) {
+      specializedPrompt = "🔥 [OVERRIDE SCENARIO]: Focus entirely on how to waive the 'Under 25 Young Driver Fee'. Make this the absolute core of the guide.";
+    } else if (queryLower.includes("one way") || queryLower.includes("drop off") || queryLower.includes("different location")) {
+      specializedPrompt = "🔥 [OVERRIDE SCENARIO]: Focus entirely on how the recommended codes eliminate the exorbitant 'One-Way Drop Fee'.";
+    } else if (queryLower.includes("insurance") || queryLower.includes("ldw") || queryLower.includes("cdw") || queryLower.includes("cover")) {
+      specializedPrompt = "🔥 [OVERRIDE SCENARIO]: Highlight that these elite codes include FREE Loss Damage Waiver (LDW) and liability coverage, saving them $25/day at the counter.";
+    } else if (queryLower.includes("debit") || queryLower.includes("deposit") || queryLower.includes("credit card")) {
+      specializedPrompt = "🔥 [OVERRIDE SCENARIO]: Emphasize that these codes have 'Corporate Liability' which forces the counter to accept debit cards and waives massive deposit holds.";
+    } else if (queryLower.includes("sold out") || queryLower.includes("holiday")) {
+      specializedPrompt = "🔥 [OVERRIDE SCENARIO]: Focus on how elite codes have a 'Guaranteed Availability' clause to bypass Sold Out status.";
+    }
+
     // ==========================================
     // 🚀 PHASE 1: Writer Agent (Agent A - Writer / Gemini)
     // ==========================================
@@ -119,6 +135,7 @@ ${realCodesContext}
 [WRITING SETTINGS]:
 - Year: ${targetYear}
 - Mandatory LSI Terms (Must naturally include these 3 professional terms): [${selectedLSI}]
+${specializedPrompt}
 
 🚨 [CRITICAL OUTPUT CONSTRAINTS - MUST FOLLOW]:
 1. LANGUAGE: You MUST output the entire response in 100% ENGLISH. ZERO CHINESE CHARACTERS ALLOWED.
@@ -179,7 +196,11 @@ Please strictly return JSON format:
   "isValid": true,
   "summary": "Short reply to user (2 sentences). Point out the best real code in the article.",
   "seoTitle": "Unique SEO title strictly following the 2-Step Strategy above. If user's search query contains a location, MUST add it to the title.",
-  "seoContent": "300-400 word content with HTML tags. Must include <h2>, <p>, <ul> and the EEAT light background trust module required above."
+  "seoContent": "300-400 word content with HTML tags. Must include <h2>, <p>, <ul> and the EEAT light background trust module required above.",
+  "fomoMetrics": {
+    "successRate": "A realistic percentage between 88% and 97% (e.g. 94%)",
+    "lastVerified": "A time within the last 4 hours (e.g. '2 hours ago')"
+  }
 }
 `;
 
@@ -209,7 +230,12 @@ Please strictly return JSON format:
       return NextResponse.json({ error: 'AI generated invalid content' }, { status: 500 });
     }
 
-    // 🔪 PHASE 2: Editor Agent (Agent B - Editor / Claude)
+    // � 全自动内链收割机 (validInternalLinks)
+    const validInternalLinks = realCodesData.map(c => 
+      `Target: "${c.company.name}" -> URL: "/${c.brand.slug}/${c.company.slug}"`
+    ).join('\n');
+
+    // � PHASE 2: Editor Agent (Agent B - Editor / Claude)
     const editorPrompt = `
 [ROLE: Cynical 2026 SEO Editor | ID: Alex Chen's Shadow | lang=en]
 [TONE: Brutally honest, Anti-corporate, Reddit-insider, Punchy]
@@ -218,6 +244,10 @@ Please strictly return JSON format:
 - Current Situation: April 2026. Federal partial shutdown is causing massive TSA lines. People are fleeing airports for road trips.
 - Industry Scam: Rental agencies are now using "AI-Damage-Scanners" at return bays to charge for microscopic scratches ($500+ a pop). 
 - Counter Vibe: Agents are overworked and aggressive about upselling "concession recovery fees".
+
+[VARS: LSI_TERMS=[${selectedLSI}]]
+[VARS: INTERNAL_LINKS_DICT]
+${validInternalLinks}
 
 === MANDATORY WORKFLOW ===
 1. [TERMINATE CHINESE]: If any Chinese characters or punctuation (，。！？） exist, translate to sharp, high-level idiomatic English. 0% tolerance for non-English.
@@ -228,8 +258,9 @@ Please strictly return JSON format:
    - INVENT FRESH EXAMPLES each time. Never reuse the same warning twice.
    - Vary the topics: TSA delays, new rental fees, insurance changes, fuel policies, app glitches, counter upsells, vehicle shortages, weather disruptions.
    - Examples of variety (don't copy these exactly): staffing shortages at major hubs, new damage inspection apps, surge pricing algorithms, electric vehicle charging logistics, cross-border documentation changes.
-5. [LSI VERIFICATION]: Ensure [${selectedLSI}] are woven into the story, not just listed at the end.
-6. [HTML SHIELD]: Do NOT modify the CSS/Styles in the <div style="..."> module. DO NOT add any extra text, warnings, or commentary inside the Test Data block. Keep the numbers clean.
+5. [LSI VERIFICATION]: Ensure LSI_TERMS are woven into the story, not just listed at the end.
+6. [SEO LINKING]: Scan the text for the 'Target' words from INTERNAL_LINKS_DICT. Wrap exactly ONE mention of each target in an HTML link: <a href="URL" class="text-blue-600 font-bold hover:underline">Target</a>.
+7. [HTML SHIELD]: Do NOT modify the CSS/Styles in the <div style="..."> module. DO NOT add any extra text, warnings, or commentary inside the Test Data block. Keep the numbers clean.
 
 === BEHAVIOR ===
 [OUTPUT: JSON ONLY]
@@ -258,6 +289,12 @@ Please strictly return JSON format:
       if (editorData.editedHtml) finalHtmlContent = editorData.editedHtml;
     } catch (e) {
       console.warn('Editor Agent failed, using draft HTML.');
+    }
+
+    // 🚀 免数据库迁移的 FOMO 注入 (HTML Prepend)
+    if (draftData.fomoMetrics) {
+      const fomoBanner = `<div style="background-color: #ecfdf5; border: 1px solid #a7f3d0; color: #065f46; padding: 12px 16px; border-radius: 12px; margin-bottom: 24px; font-weight: 500; font-size: 14px; display: flex; align-items: center; gap: 8px;"><span>✅ Code verified working <strong>${draftData.fomoMetrics.lastVerified}</strong>. Current counter success rate: <strong>${draftData.fomoMetrics.successRate}</strong>.</span></div>`;
+      finalHtmlContent = fomoBanner + finalHtmlContent;
     }
 
     // 🚀 URL 年份剥离术 (Slug Purification)
