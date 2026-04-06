@@ -1,13 +1,16 @@
 import { prisma } from '@/lib/db';
 import Link from 'next/link';
 import Script from 'next/script';
-import MobileNav from '@/components/MobileNav';
-// 🚀 终极优化 1：切断 JS 阻塞，引入极致懒加载
+// 🚀 优化：MobileNav 懒加载，减少首屏JS
 import dynamic from 'next/dynamic';
 import { unstable_cache } from 'next/cache';
 import type { Metadata } from 'next';
 
-// 🚀 终极优化 1 (续)：带骨架屏的异步组件
+// 🚀 优化：懒加载非关键组件
+const MobileNav = dynamic(() => import('@/components/MobileNav'), {
+  ssr: false, // 客户端渲染，不阻塞首屏
+});
+
 const AskAiWidgetLazy = dynamic(() => import('@/components/AskAiWidgetLazy'), {
   ssr: true,
   loading: () => (
