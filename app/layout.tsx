@@ -16,6 +16,14 @@ export const metadata: Metadata = {
   title: "Car Rental Corporate Codes 2026 | Hertz, Enterprise, Avis Discounts",
   description: "Verified car rental corporate codes for Hertz, Enterprise, Avis, Budget. Save 10-25% on business travel with CDP and PC codes. Updated daily.",
   keywords: ["car rental corporate codes", "hertz cdp codes", "enterprise discount codes", "avis corporate codes", "rental car discounts"],
+  other: {
+    // 🚀 预连接关键域名，减少DNS和TCP握手时间
+    'link': [
+      { rel: 'preconnect', href: 'https://pagead2.googlesyndication.com' },
+      { rel: 'preconnect', href: 'https://www.googletagmanager.com' },
+      { rel: 'dns-prefetch', href: 'https://pagead2.googlesyndication.com' },
+    ],
+  },
 };
 
 // 获取 AdSense 配置
@@ -55,33 +63,50 @@ export default async function RootLayout({
   return (
     <html lang="en" className={inter.variable}>
       <head>
+        {/* 🚀 延迟加载 AdSense - 等页面加载完成后再加载 */}
         {shouldLoadAdSense && (
           <Script
-            src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adSenseConfig.publisherId}`}
-            strategy="afterInteractive"
-            crossOrigin="anonymous"
+            id="adsense-delayed"
+            strategy="lazyOnload"
+            dangerouslySetInnerHTML={{
+              __html: `
+                // 延迟3秒加载AdSense，避免阻塞首屏渲染
+                setTimeout(() => {
+                  const script = document.createElement('script');
+                  script.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adSenseConfig.publisherId}';
+                  script.async = true;
+                  script.crossOrigin = 'anonymous';
+                  document.head.appendChild(script);
+                }, 3000);
+              `,
+            }}
           />
         )}
+        {/* 🚀 延迟加载 Google Analytics */}
         {shouldLoadAnalytics && (
           <>
             <Script
-              src={`https://www.googletagmanager.com/gtag/js?id=${analyticsConfig.measurementId}`}
-              strategy="afterInteractive"
-            />
-            <Script
-              id="ga4-config"
-              strategy="afterInteractive"
+              id="ga4-delayed"
+              strategy="lazyOnload"
               dangerouslySetInnerHTML={{
                 __html: `
-                  // 客户端判断：如果是管理员，禁用 GA 追踪
-                  if (${analyticsConfig.excludeAdmin} && document.cookie.indexOf('admin_session=true') > -1) {
-                    window['ga-disable-${analyticsConfig.measurementId}'] = true;
-                  }
-
-                  window.dataLayer = window.dataLayer || [];
-                  function gtag(){dataLayer.push(arguments);}
-                  gtag('js', new Date());
-                  gtag('config', '${analyticsConfig.measurementId}'${analyticsConfig.anonymizeIp ? ", { 'anonymize_ip': true }" : ''});
+                  // 延迟2秒加载GA，优先保证首屏渲染
+                  setTimeout(() => {
+                    // 客户端判断：如果是管理员，禁用 GA 追踪
+                    if (${analyticsConfig.excludeAdmin} && document.cookie.indexOf('admin_session=true') > -1) {
+                      window['ga-disable-${analyticsConfig.measurementId}'] = true;
+                    }
+                    
+                    const script = document.createElement('script');
+                    script.src = 'https://www.googletagmanager.com/gtag/js?id=${analyticsConfig.measurementId}';
+                    script.async = true;
+                    document.head.appendChild(script);
+                    
+                    window.dataLayer = window.dataLayer || [];
+                    function gtag(){dataLayer.push(arguments);}
+                    gtag('js', new Date());
+                    gtag('config', '${analyticsConfig.measurementId}'${analyticsConfig.anonymizeIp ? ", { 'anonymize_ip': true }" : ''});
+                  }, 2000);
                 `,
               }}
             />

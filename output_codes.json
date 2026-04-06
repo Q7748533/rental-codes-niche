@@ -1,1 +1,10 @@
-[]
+[
+  {
+    "brand": "Hertz",
+    "company": "American Express",
+    "codeValue": "70550",
+    "description": "One car class upgrade on rentals of 5 or more consecutive days and fee-waived for one additional driver",
+    "codeType": "leisure",
+    "source": "Member"
+  }
+]

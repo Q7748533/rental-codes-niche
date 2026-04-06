@@ -159,7 +159,7 @@ export default function AskAiWidget({ companies = [], initialQuery }: AskAiWidge
         {/* Title area */}
         <div className="flex items-center gap-2 mb-3">
           <span className="text-xl">🤖</span>
-          <h3 className="text-lg font-bold text-gray-900">AI Rental Code Finder</h3>
+          <h2 className="text-lg font-bold text-gray-900">AI Rental Code Finder</h2>
         </div>
 
         {/* Description */}
