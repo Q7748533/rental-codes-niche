@@ -22,9 +22,14 @@ export const revalidate = 3600;
 // 缓存 brands 查询（1小时）
 const getCachedBrands = unstable_cache(
   async () => {
-    return prisma.brand.findMany({
-      include: { _count: { select: { codes: true } } },
-    });
+    try {
+      return await prisma.brand.findMany({
+        include: { _count: { select: { codes: true } } },
+      });
+    } catch (error) {
+      console.error('Failed to fetch brands:', error);
+      return [];
+    }
   },
   ['brands-list'],
   { revalidate: 3600, tags: ['brands'] }
@@ -33,9 +38,14 @@ const getCachedBrands = unstable_cache(
 // 缓存 companies 查询（1小时）
 const getCachedCompanies = unstable_cache(
   async () => {
-    return prisma.company.findMany({
-      select: { name: true, slug: true },
-    });
+    try {
+      return await prisma.company.findMany({
+        select: { name: true, slug: true },
+      });
+    } catch (error) {
+      console.error('Failed to fetch companies:', error);
+      return [];
+    }
   },
   ['companies-list'],
   { revalidate: 3600, tags: ['companies'] }
@@ -113,7 +123,11 @@ export default async function Home() {
     }),
   ]);
 
-  const totalCodes = brands.reduce((sum, b) => sum + b._count.codes, 0);
+  // 确保 brands 是数组，防止缓存返回 undefined
+  const safeBrands = Array.isArray(brands) ? brands : [];
+  const safeCompanies = Array.isArray(companies) ? companies : [];
+  
+  const totalCodes = safeBrands.reduce((sum, b) => sum + (b._count?.codes || 0), 0);
 
   // 计算真正的全局最后修改时间（取文章和代码中最新的那个）
   const latestArticleDate = latestArticles.length > 0 ? latestArticles[0].createdAt.getTime() : 0;
@@ -191,12 +205,12 @@ export default async function Home() {
       {
         '@type': 'ItemList',
         '@id': 'https://carcorporatecodes.com/#brands-list',
-        itemListElement: brands.map((brand, index) => ({
+        itemListElement: safeBrands.map((brand, index) => ({
           '@type': 'ListItem',
           position: index + 1,
           name: `${brand.name} Corporate Codes`,
           url: `https://carcorporatecodes.com/${brand.slug}`,
-          description: `${brand._count.codes} active discount codes for ${brand.name}`,
+          description: `${brand._count?.codes || 0} active discount codes for ${brand.name}`,
         })),
       },
       // FAQPage
@@ -307,7 +321,7 @@ export default async function Home() {
 
           {/* 🚀 终极优化 5：AI 搜索框置顶！去除多余边距让移动端更宽 */}
           <div className="max-w-3xl mx-auto relative z-10 mb-6 sm:px-4">
-            <AskAiWidgetLazy companies={companies} />
+            <AskAiWidgetLazy companies={safeCompanies} />
           </div>
 
           {/* 🚀 终极优化 6：免责声明下移并弱化，不再喧宾夺主 */}
@@ -324,8 +338,8 @@ export default async function Home() {
           <h2 id="brands-heading" className="text-2xl font-bold mb-2 text-gray-900">Rental Brands with Corporate Codes</h2>
           <p className="text-gray-600 mb-6">Click any brand to view all available corporate and association discount codes.</p>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
-            {brands.length > 0 ? (
-              brands.map((brand) => (
+            {safeBrands.length > 0 ? (
+              safeBrands.map((brand) => (
                 <Link
                   key={brand.id}
                   href={`/${brand.slug}`}
@@ -338,7 +352,7 @@ export default async function Home() {
                     {brand.name}
                   </h3>
                   <span className="inline-block bg-gray-50 text-gray-500 text-[11px] px-2 py-1 rounded-md font-medium">
-                    {brand._count.codes} verified codes
+                    {brand._count?.codes || 0} verified codes
                   </span>
                 </Link>
               ))
