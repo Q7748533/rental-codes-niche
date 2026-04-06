@@ -9,10 +9,21 @@ import type { Metadata } from 'next';
 // 🚀 优化：懒加载非关键组件
 import MobileNavClient from '@/components/MobileNavClient';
 
+// 🚀 修复CLS：骨架屏高度与实际组件一致，避免加载后跳动
 const AskAiWidgetLazy = dynamic(() => import('@/components/AskAiWidgetLazy'), {
   ssr: true,
   loading: () => (
-    <div className="w-full h-[60px] md:h-[68px] bg-gray-100 animate-pulse rounded-xl border border-gray-200"></div>
+    <div className="w-full bg-white rounded-2xl shadow-lg border border-gray-200 p-6">
+      <div className="flex items-center gap-2 mb-3">
+        <div className="w-6 h-6 bg-gray-200 rounded-full animate-pulse"></div>
+        <div className="w-40 h-5 bg-gray-200 rounded animate-pulse"></div>
+      </div>
+      <div className="w-full h-4 bg-gray-200 rounded animate-pulse mb-5"></div>
+      <div className="flex gap-3">
+        <div className="flex-1 h-11 bg-gray-200 rounded-lg animate-pulse"></div>
+        <div className="w-20 h-11 bg-gray-200 rounded-lg animate-pulse"></div>
+      </div>
+    </div>
   ),
 });
 
