@@ -7,9 +7,7 @@ import { unstable_cache } from 'next/cache';
 import type { Metadata } from 'next';
 
 // 🚀 优化：懒加载非关键组件
-const MobileNav = dynamic(() => import('@/components/MobileNav'), {
-  ssr: false, // 客户端渲染，不阻塞首屏
-});
+import MobileNavClient from '@/components/MobileNavClient';
 
 const AskAiWidgetLazy = dynamic(() => import('@/components/AskAiWidgetLazy'), {
   ssr: true,
@@ -283,7 +281,7 @@ export default async function Home() {
               <Link href="#faq" className="hover:text-blue-600 min-h-[44px] flex items-center px-2">FAQ</Link>
               <Link href="/ask" className="hover:text-blue-600 min-h-[44px] flex items-center px-2">Ask AI</Link>
             </nav>
-            <MobileNav />
+            <MobileNavClient />
           </div>
         </div>
       </header>
