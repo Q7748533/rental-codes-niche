@@ -196,11 +196,7 @@ Please strictly return JSON format:
   "isValid": true,
   "summary": "Short reply to user (2 sentences). Point out the best real code in the article.",
   "seoTitle": "Unique SEO title strictly following the 2-Step Strategy above. If user's search query contains a location, MUST add it to the title.",
-  "seoContent": "300-400 word content with HTML tags. Must include <h2>, <p>, <ul> and the EEAT light background trust module required above.",
-  "fomoMetrics": {
-    "successRate": "A realistic percentage between 88% and 97% (e.g. 94%)",
-    "lastVerified": "A time within the last 4 hours (e.g. '2 hours ago')"
-  }
+  "seoContent": "300-400 word content with HTML tags. Must include <h2>, <p>, <ul> and the EEAT light background trust module required above."
 }
 `;
 
@@ -289,12 +285,6 @@ ${validInternalLinks}
       if (editorData.editedHtml) finalHtmlContent = editorData.editedHtml;
     } catch (e) {
       console.warn('Editor Agent failed, using draft HTML.');
-    }
-
-    // 🚀 免数据库迁移的 FOMO 注入 (HTML Prepend)
-    if (draftData.fomoMetrics) {
-      const fomoBanner = `<div style="background-color: #ecfdf5; border: 1px solid #a7f3d0; color: #065f46; padding: 12px 16px; border-radius: 12px; margin-bottom: 24px; font-weight: 500; font-size: 14px; display: flex; align-items: center; gap: 8px;"><span>✅ Code verified working <strong>${draftData.fomoMetrics.lastVerified}</strong>. Current counter success rate: <strong>${draftData.fomoMetrics.successRate}</strong>.</span></div>`;
-      finalHtmlContent = fomoBanner + finalHtmlContent;
     }
 
     // 🚀 URL 年份剥离术 (Slug Purification)
