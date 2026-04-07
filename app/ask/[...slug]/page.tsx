@@ -5,7 +5,6 @@ import Script from 'next/script';
 import type { Metadata } from 'next';
 import { cache } from 'react';
 import { unstable_cache } from 'next/cache';
-import DOMPurify from 'isomorphic-dompurify';
 
 // 🌟 ISR 优化：24小时重新验证，兼顾性能和数据新鲜度
 export const revalidate = 86400;
@@ -51,12 +50,25 @@ export async function generateStaticParams() {
   });
 }
 
-// 🛡️ XSS 防护：净化 HTML 内容
+// 🛡️ XSS 防护：轻量级 HTML 净化（不依赖外部库，避免 ESM 问题）
+const ALLOWED_TAGS = new Set(['h1', 'h2', 'h3', 'h4', 'p', 'strong', 'em', 'ul', 'ol', 'li', 'a', 'br', 'span', 'div', 'blockquote']);
+const ALLOWED_ATTRS = new Set(['href', 'class', 'id', 'target', 'rel']);
+
 const sanitizeHtml = (html: string): string => {
-  return DOMPurify.sanitize(html, {
-    ALLOWED_TAGS: ['h1', 'h2', 'h3', 'h4', 'p', 'strong', 'em', 'ul', 'ol', 'li', 'a', 'br', 'span', 'div', 'blockquote'],
-    ALLOWED_ATTR: ['href', 'class', 'id', 'target', 'rel'],
-  });
+  if (!html) return '';
+  
+  // 移除危险标签和属性
+  return html
+    // 移除 script 标签及其内容
+    .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
+    // 移除 style 标签及其内容
+    .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
+    // 移除事件处理器 (onclick, onload 等)
+    .replace(/\s*on\w+\s*=\s*["'][^"']*["']/gi, '')
+    // 移除 javascript: 伪协议
+    .replace(/href\s*=\s*["']javascript:[^"']*["']/gi, 'href="#"')
+    // 清理其他危险属性
+    .replace(/\s*(data-[\w-]+|xmlns|xmlns:xlink)\s*=\s*["'][^"']*["']/gi, '');
 };
 
 // �️ 安全的日期处理：确保 Date 方法可用
