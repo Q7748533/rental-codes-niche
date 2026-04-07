@@ -4,6 +4,8 @@ import Link from 'next/link';
 import Script from 'next/script';
 import type { Metadata } from 'next';
 import { cache } from 'react';
+import { unstable_cache } from 'next/cache';
+import DOMPurify from 'isomorphic-dompurify';
 
 // 🌟 ISR 优化：24小时重新验证，兼顾性能和数据新鲜度
 export const revalidate = 86400;
@@ -48,6 +50,44 @@ export async function generateStaticParams() {
     };
   });
 }
+
+// 🛡️ XSS 防护：净化 HTML 内容
+const sanitizeHtml = (html: string): string => {
+  return DOMPurify.sanitize(html, {
+    ALLOWED_TAGS: ['h1', 'h2', 'h3', 'h4', 'p', 'strong', 'em', 'ul', 'ol', 'li', 'a', 'br', 'span', 'div', 'blockquote'],
+    ALLOWED_ATTR: ['href', 'class', 'id', 'target', 'rel'],
+  });
+};
+
+// �️ 安全的日期处理：确保 Date 方法可用
+const safeDate = (date: Date | string | any): Date => {
+  if (date instanceof Date) return date;
+  try {
+    const parsed = new Date(date);
+    return isNaN(parsed.getTime()) ? new Date() : parsed;
+  } catch {
+    return new Date();
+  }
+};
+
+// � 缓存相关文章查询（1小时）
+const getRelatedArticles = unstable_cache(
+  async (currentSlug: string) => {
+    try {
+      return await prisma.aiQuery.findMany({
+        where: { slug: { not: currentSlug } },
+        orderBy: { createdAt: 'desc' },
+        take: 4,
+        select: { slug: true, seoTitle: true, aiSummary: true, createdAt: true },
+      });
+    } catch (error) {
+      console.error('Failed to fetch related articles:', error);
+      return [];
+    }
+  },
+  ['related-articles'],
+  { revalidate: 3600, tags: ['related-articles'] }
+);
 
 // 提取品牌和地点用于动态 FAQ
 const extractEntities = (prompt: string, title: string) => {
@@ -127,6 +167,10 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
   const dynamicKeywords = generateKeywords(aiQuery.seoTitle, aiQuery.userPrompt);
 
+  // 🛡️ 安全处理日期
+  const createdAt = safeDate(aiQuery.createdAt);
+  const updatedAt = safeDate(aiQuery.updatedAt || aiQuery.createdAt);
+
   return {
     title: aiQuery.seoTitle,
     description: aiQuery.aiSummary,
@@ -150,19 +194,19 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
       title: aiQuery.seoTitle,
       description: aiQuery.aiSummary,
       type: 'article',
-      publishedTime: aiQuery.createdAt.toISOString(),
-      modifiedTime: aiQuery.createdAt.toISOString(),
+      publishedTime: createdAt.toISOString(),
+      modifiedTime: createdAt.toISOString(),
       authors: [SITE_AUTHOR.name],
       url: canonicalUrl,
       siteName: 'Car Corporate Codes',
       images: [
-        {
-          url: 'https://carcorporatecodes.com/og-image.svg',
-          width: 1200,
-          height: 630,
-          alt: aiQuery.seoTitle,
-        },
-      ],
+          {
+            url: 'https://carcorporatecodes.com/og-image.svg',
+            width: 1200,
+            height: 630,
+            alt: `${aiQuery.seoTitle} - Car Corporate Codes`,
+          },
+        ],
     },
     twitter: {
       card: 'summary_large_image',
@@ -181,23 +225,15 @@ export default async function AiGuidePage({ params }: { params: Promise<{ slug: 
     notFound();
   }
 
-  // 获取相关文章
-  const relatedArticles = await prisma.aiQuery.findMany({
-    where: {
-      slug: { not: aiQuery.slug },
-    },
-    orderBy: { createdAt: 'desc' },
-    take: 4,
-    select: {
-      slug: true,
-      seoTitle: true,
-      aiSummary: true,
-      createdAt: true,
-    },
-  });
+  // 获取相关文章（带缓存和错误处理）
+const relatedArticles = await getRelatedArticles(aiQuery.slug);
 
   const cleanSlug = aiQuery.slug.replace(/\.html$/, '');
   const canonicalUrl = `https://carcorporatecodes.com/ask/${cleanSlug}.html`;
+  
+  // 🛡️ 安全处理日期
+  const createdAt = safeDate(aiQuery.createdAt);
+  const updatedAt = safeDate(aiQuery.updatedAt || aiQuery.createdAt);
   
   // 提取实体用于动态 FAQ
   const { detectedBrand, detectedLocation } = extractEntities(aiQuery.userPrompt, aiQuery.seoTitle);
@@ -230,8 +266,8 @@ export default async function AiGuidePage({ params }: { params: Promise<{ slug: 
         headline: aiQuery.seoTitle,
         description: aiQuery.aiSummary,
         url: canonicalUrl,
-        datePublished: aiQuery.createdAt.toISOString(),
-        dateModified: (aiQuery.updatedAt || aiQuery.createdAt).toISOString(),
+        datePublished: createdAt.toISOString(),
+        dateModified: updatedAt.toISOString(),
         author: {
           '@type': 'Person',
           name: SITE_AUTHOR.name,
@@ -265,8 +301,8 @@ export default async function AiGuidePage({ params }: { params: Promise<{ slug: 
         breadcrumb: {
           '@id': `${canonicalUrl}#breadcrumb`,
         },
-        datePublished: aiQuery.createdAt.toISOString(),
-        dateModified: (aiQuery.updatedAt || aiQuery.createdAt).toISOString(),
+        datePublished: createdAt.toISOString(),
+        dateModified: updatedAt.toISOString(),
       },
       {
         '@type': 'BreadcrumbList',
@@ -302,6 +338,14 @@ export default async function AiGuidePage({ params }: { params: Promise<{ slug: 
 
   return (
     <div className="min-h-screen bg-white text-gray-900">
+      {/* 🚀 跳过链接 - 提升可访问性 */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:bg-blue-600 focus:text-white focus:px-4 focus:py-2 focus:rounded-lg"
+      >
+        Skip to main content
+      </a>
+
       {/* JSON-LD 结构化数据 */}
       <Script
         id="json-ld"
@@ -319,7 +363,7 @@ export default async function AiGuidePage({ params }: { params: Promise<{ slug: 
       </header>
 
       {/* 主内容 */}
-      <main className="max-w-3xl mx-auto px-4 py-8 md:py-12" role="main" aria-label="AI generated rental guide article">
+      <main id="main-content" className="max-w-3xl mx-auto px-4 py-8 md:py-12" role="main" aria-label="AI generated rental guide article">
         {/* 面包屑 */}
         <nav className="mb-6" aria-label="Breadcrumb">
           <ol className="flex items-center space-x-2 text-sm text-gray-500">
@@ -340,15 +384,15 @@ export default async function AiGuidePage({ params }: { params: Promise<{ slug: 
 
           {/* 元信息行 - 添加作者信息 */}
           <div className="text-sm text-gray-500 mb-6 pb-4 border-b border-gray-200 flex items-center gap-2">
-            <time dateTime={aiQuery.createdAt.toISOString()}>
-              {aiQuery.createdAt.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+            <time dateTime={createdAt.toISOString()}>
+              {createdAt.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
             </time>
             <span>·</span>
             {/* 明确告诉爬虫这是作者 */}
             <span rel="author">By {SITE_AUTHOR.name}</span>
           </div>
 
-          {/* 文章正文 */}
+          {/* 文章正文 - 🛡️ XSS 防护 */}
           <div
             className="prose prose-base max-w-none
               prose-headings:text-gray-900 prose-headings:font-bold prose-headings:mt-6 prose-headings:mb-3
@@ -359,7 +403,7 @@ export default async function AiGuidePage({ params }: { params: Promise<{ slug: 
               prose-li:text-gray-700 prose-li:mb-1 prose-li:leading-7
               prose-ul:my-4 prose-ul:list-disc prose-ul:pl-5
               prose-ol:my-4 prose-ol:list-decimal prose-ol:pl-5"
-            dangerouslySetInnerHTML={{ __html: aiQuery.seoContent }}
+            dangerouslySetInnerHTML={{ __html: sanitizeHtml(aiQuery.seoContent) }}
           />
 
           {/* 作者简介 - EEAT 信号 - 语义化包裹 */}
@@ -406,7 +450,7 @@ export default async function AiGuidePage({ params }: { params: Promise<{ slug: 
                     </p>
                   </div>
                   <span className="text-xs text-gray-400 mt-auto">
-                    {article.createdAt.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                      {safeDate(article.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                   </span>
                 </Link>
               ))}

@@ -1,9 +1,33 @@
 [
   {
-    "brand": "Hertz",
-    "company": "American Express",
-    "codeValue": "70550",
-    "description": "One car class upgrade on rentals of 5 or more consecutive days and fee-waived for one additional driver",
+    "brand": "Budget",
+    "company": "my Better Benefits",
+    "codeValue": "B002500",
+    "description": "Save up to 35% with Pay Now plus additional 10% on weekly rentals and promotional rates.",
+    "codeType": "leisure",
+    "source": "Member"
+  },
+  {
+    "brand": "Budget",
+    "company": "my Better Benefits",
+    "codeValue": "MUWZ057",
+    "description": "SUV Rentals Starting at $59/Day - Limited Time Offer through June 7, 2026.",
+    "codeType": "leisure",
+    "source": "Member"
+  },
+  {
+    "brand": "Budget",
+    "company": "my Better Benefits",
+    "codeValue": "UUGZ039",
+    "description": "Free upgrade through December 31, 2026 (requires BCD B002500).",
+    "codeType": "leisure",
+    "source": "Member"
+  },
+  {
+    "brand": "Budget",
+    "company": "my Better Benefits",
+    "codeValue": "MUGZ036",
+    "description": "$10 off base rates when you spend $175 or more with a minimum three consecutive day rental.",
     "codeType": "leisure",
     "source": "Member"
   }
