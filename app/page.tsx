@@ -159,7 +159,7 @@ export default async function Home() {
         url: 'https://carcorporatecodes.com',
         logo: {
           '@type': 'ImageObject',
-          url: 'https://carcorporatecodes.com/og-image.svg',
+          url: 'https://carcorporatecodes.com/og-image.jpg',
         },
         description: 'Database of verified car rental corporate codes and discounts',
       },
