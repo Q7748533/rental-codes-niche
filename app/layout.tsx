@@ -60,23 +60,13 @@ export default async function RootLayout({
         <link rel="preconnect" href="https://www.googletagmanager.com" />
         <link rel="dns-prefetch" href="https://pagead2.googlesyndication.com" />
         
-        {/* 🚀 延迟加载 AdSense - 等页面加载完成后再加载 */}
+        {/* 🚀 AdSense 广告代码 */}
         {shouldLoadAdSense && (
           <Script
-            id="adsense-delayed"
-            strategy="lazyOnload"
-            dangerouslySetInnerHTML={{
-              __html: `
-                // 延迟3秒加载AdSense，避免阻塞首屏渲染
-                setTimeout(() => {
-                  const script = document.createElement('script');
-                  script.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adSenseConfig.publisherId}';
-                  script.async = true;
-                  script.crossOrigin = 'anonymous';
-                  document.head.appendChild(script);
-                }, 3000);
-              `,
-            }}
+            async
+            src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adSenseConfig.publisherId}`}
+            crossOrigin="anonymous"
+            strategy="afterInteractive"
           />
         )}
         {/* 🚀 延迟加载 Google Analytics */}
