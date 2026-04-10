@@ -30,6 +30,20 @@ const nextConfig = {
   
   // 🚀  powered by header
   poweredByHeader: false,
+  
+  // 🚀 重写规则 - 支持 Ads.txt 大小写变体
+  async rewrites() {
+    return [
+      {
+        source: '/Ads.txt',
+        destination: '/ads.txt',
+      },
+      {
+        source: '/ADS.TXT',
+        destination: '/ads.txt',
+      },
+    ];
+  },
 };
 
 module.exports = nextConfig;

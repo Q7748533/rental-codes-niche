@@ -2,7 +2,7 @@ import { prisma } from '@/lib/db';
 import { NextResponse } from 'next/server';
 
 // 生成 ads.txt 文件内容
-export async function GET() {
+export async function GET(request: Request) {
   try {
     const config = await prisma.adSenseConfig.findFirst();
     
