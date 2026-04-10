@@ -107,7 +107,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   return {
     title: `${codeData.company.name} ${codeData.brand.name} Corporate Code (${term}) - ${dynamicModifier}`,
     description: `Use the ${codeData.company.name} corporate discount code (${codeData.codeValue}) at ${codeData.brand.name}. Verified 2026 ${term} to bypass counter checks.`,
-    alternates: { canonical: `https://carcorporatecodes.com/codes/${slug}` }
+    alternates: { canonical: `https://www.carcorporatecodes.com/codes/${slug}` }
   };
 }
 
@@ -153,14 +153,14 @@ export default async function CodeSpokePage({ params }: { params: Promise<{ slug
         '@type': 'WebPage',
         name: `${codeData.company.name} ${codeData.brand.name} Corporate Code`,
         description: `Use ${codeData.codeValue} for ${codeData.company.name} discounts at ${codeData.brand.name}.`,
-        url: `https://carcorporatecodes.com/codes/${slug}`,
+        url: `https://www.carcorporatecodes.com/codes/${slug}`,
       },
       {
         '@type': 'BreadcrumbList',
         itemListElement: [
-          { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://carcorporatecodes.com' },
-          { '@type': 'ListItem', position: 2, name: codeData.brand.name, item: `https://carcorporatecodes.com/${brandSlug}` },
-          { '@type': 'ListItem', position: 3, name: `${codeData.company.name} Code`, item: `https://carcorporatecodes.com/codes/${slug}` }
+          { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://www.carcorporatecodes.com' },
+          { '@type': 'ListItem', position: 2, name: codeData.brand.name, item: `https://www.carcorporatecodes.com/${brandSlug}` },
+          { '@type': 'ListItem', position: 3, name: `${codeData.company.name} Code`, item: `https://www.carcorporatecodes.com/codes/${slug}` }
         ]
       },
       {
