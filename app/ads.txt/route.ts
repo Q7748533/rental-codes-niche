@@ -10,8 +10,9 @@ export async function GET(request: Request) {
       return new NextResponse('', { status: 404 });
     }
 
-    // 提取纯数字 ID (去掉 ca-pub- 前缀)
-    const publisherId = config.publisherId.replace('ca-pub-', '');
+    // 使用完整的 publisher ID (保留 pub- 前缀)
+    // AdSense 要求格式: google.com, pub-XXXXXXXXXXXXXXXX, DIRECT, f08c47fec0942fa0
+    const publisherId = config.publisherId.replace('ca-', '');
     
     // ads.txt 标准格式
     const adsTxtContent = `google.com, ${publisherId}, DIRECT, f08c47fec0942fa0`;
