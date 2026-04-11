@@ -38,15 +38,29 @@ async function getAnalyticsConfig() {
   }
 }
 
+// 获取 Meta 标签配置
+async function getMetaTags() {
+  try {
+    const tags = await prisma.metaTag.findMany({
+      where: { isEnabled: true },
+      select: { name: true, content: true }
+    });
+    return tags;
+  } catch {
+    return [];
+  }
+}
+
 export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   // 仅查询基础配置，不再有任何 Dynamic API 阻碍静态化
-  const [adSenseConfig, analyticsConfig] = await Promise.all([
+  const [adSenseConfig, analyticsConfig, metaTags] = await Promise.all([
     getAdSenseConfig(),
     getAnalyticsConfig(),
+    getMetaTags(),
   ]);
 
   const shouldLoadAdSense = adSenseConfig?.isEnabled && adSenseConfig?.publisherId;
@@ -55,6 +69,11 @@ export default async function RootLayout({
   return (
     <html lang="en" className={inter.variable}>
       <head>
+        {/* 🚀 动态 Meta 标签（网站验证等）*/}
+        {metaTags.map((tag) => (
+          <meta key={tag.name} name={tag.name} content={tag.content} />
+        ))}
+        
         {/* 🚀 预连接关键域名，减少DNS和TCP握手时间 */}
         <link rel="preconnect" href="https://pagead2.googlesyndication.com" />
         <link rel="preconnect" href="https://www.googletagmanager.com" />

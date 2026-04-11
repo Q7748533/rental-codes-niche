@@ -89,3 +89,16 @@ model GoogleAnalyticsConfig {
   createdAt       DateTime @default(now())
   updatedAt       DateTime @default(now()) @updatedAt
 }
+
+// Meta 标签配置（用于网站验证等）
+model MetaTag {
+  id          String   @id @default(cuid())
+  name        String   // meta name (如: verify-admitad, google-site-verification)
+  content     String   // meta content (如: 155fd40ba8)
+  isEnabled   Boolean  @default(true) // 是否启用
+  description String?  // 备注说明
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now()) @updatedAt
+  
+  @@unique([name]) // 每个 name 只能有一个
+}
