@@ -1,4 +1,10 @@
 import { prisma } from './db';
+import OpenAI from 'openai';
+
+const openai = new OpenAI({
+  apiKey: process.env.VECTOR_ENGINE_API_KEY || "YOUR_API_KEY_HERE",
+  baseURL: "https://api.vectorengine.ai/v1"
+});
 
 // 学习配置
 const LEARNING_CONFIG = {
@@ -209,17 +215,77 @@ export async function learnFromHighPerformers() {
     };
   }
 
-  // 2. 提取特征模式
+  // 2. 提取特征模式（代码分析）
   const patterns = extractPatterns(highPerformers);
 
-  // 3. 基于模式生成搜索词建议
-  const suggestions = generateSearchSuggestions(patterns);
+  // 3. 使用 AI 进行深度分析
+  const aiAnalysis = await analyzeWithAI(highPerformers);
+
+  // 4. 基于 AI 分析生成搜索词建议
+  const suggestions = aiAnalysis?.suggestions || generateSearchSuggestions(patterns);
 
   return {
     patterns,
+    aiAnalysis,
     suggestions,
     highPerformerCount: highPerformers.length,
   };
+}
+
+// 🤖 使用 AI 分析高表现文章
+async function analyzeWithAI(articles: any[]) {
+  try {
+    const prompt = `
+You are an SEO expert analyzing high-performing car rental articles.
+
+Here are the top-performing articles:
+${articles.map((a, i) => `
+${i + 1}. Title: "${a.seoTitle}"
+   Search Query: "${a.userPrompt}"
+   Views: ${a.ga4PageViews}
+   Bounce Rate: ${a.ga4BounceRate ? (a.ga4BounceRate * 100).toFixed(1) + '%' : 'N/A'}
+`).join('\n')}
+
+Analyze these articles and provide:
+1. What makes these titles successful? (style, keywords, structure)
+2. What user intents are being captured?
+3. What content patterns work best?
+
+Then generate 10 NEW search query suggestions that:
+- Follow the successful patterns
+- Target similar user intents
+- Are natural and diverse
+- Include location-specific and scenario-specific variations
+
+Return JSON format:
+{
+  "titleAnalysis": "What makes titles successful...",
+  "userIntentAnalysis": "What intents are captured...",
+  "contentPatterns": "What content patterns work...",
+  "suggestions": ["query 1", "query 2", ...]
+}
+`;
+
+    const completion = await openai.chat.completions.create({
+      model: "gemini-2.0-flash",
+      messages: [{ role: "user", content: prompt }],
+      temperature: 0.7,
+      max_tokens: 2000,
+    });
+
+    const responseText = completion.choices[0].message.content || '{}';
+    
+    // 提取 JSON
+    const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      return JSON.parse(jsonMatch[0]);
+    }
+    
+    return null;
+  } catch (error) {
+    console.error('❌ AI analysis failed:', error);
+    return null;
+  }
 }
 
 // 提取高表现文章的特征模式

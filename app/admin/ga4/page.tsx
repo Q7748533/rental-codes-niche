@@ -23,6 +23,12 @@ interface SearchQuery {
   isActive: boolean;
 }
 
+interface AIAnalysis {
+  titleAnalysis: string;
+  userIntentAnalysis: string;
+  contentPatterns: string;
+}
+
 interface LearnResult {
   patterns: {
     titlePatterns: {
@@ -42,6 +48,7 @@ interface LearnResult {
       avgDuration: number;
     };
   } | null;
+  aiAnalysis: AIAnalysis | null;
   suggestions: string[];
   highPerformerCount: number;
   message?: string;
@@ -370,10 +377,34 @@ export default function GA4Dashboard() {
                   <div className="text-center text-purple-600 py-8">{learnResult.message}</div>
                 ) : (
                   <>
+                    {/* AI 深度分析 */}
+                    {learnResult.aiAnalysis && (
+                      <div className="mb-6 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-4 border border-blue-200">
+                        <h3 className="text-lg font-semibold text-blue-900 mb-3">🤖 AI 深度分析</h3>
+                        
+                        <div className="space-y-3">
+                          <div>
+                            <h4 className="font-medium text-blue-800 text-sm mb-1">标题成功要素</h4>
+                            <p className="text-sm text-gray-700 bg-white/70 rounded p-2">{learnResult.aiAnalysis.titleAnalysis}</p>
+                          </div>
+                          
+                          <div>
+                            <h4 className="font-medium text-blue-800 text-sm mb-1">用户意图分析</h4>
+                            <p className="text-sm text-gray-700 bg-white/70 rounded p-2">{learnResult.aiAnalysis.userIntentAnalysis}</p>
+                          </div>
+                          
+                          <div>
+                            <h4 className="font-medium text-blue-800 text-sm mb-1">内容模式</h4>
+                            <p className="text-sm text-gray-700 bg-white/70 rounded p-2">{learnResult.aiAnalysis.contentPatterns}</p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
                     {/* 学习到的模式 */}
                     {learnResult.patterns && (
                       <div className="mb-6">
-                        <h3 className="text-lg font-semibold text-purple-900 mb-4">📊 成功模式分析</h3>
+                        <h3 className="text-lg font-semibold text-purple-900 mb-4">📊 数据统计</h3>
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
                           <div className="bg-white rounded-lg p-3 text-center">
                             <p className="text-2xl font-bold text-purple-600">{learnResult.patterns.titlePatterns.hasYear}</p>
