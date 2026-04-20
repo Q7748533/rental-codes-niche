@@ -162,7 +162,7 @@ export function selectStyleByWeight(styles: WritingStyle[]): WritingStyle {
 }
 
 // 🧠 获取适合当前场景的风格
-export async function getStyleForQuery(query: string): Promise<WritingStyle> {
+export async function getStyleForQuery(query: string): Promise<any> {
   const sceneType = detectSceneType(query);
   
   // 从数据库获取该场景的风格
@@ -178,7 +178,12 @@ export async function getStyleForQuery(query: string): Promise<WritingStyle> {
     for (const style of defaultSceneStyles) {
       await prisma.writingStyle.create({
         data: {
-          ...style,
+          name: style.name,
+          sceneType: style.sceneType,
+          titleFormula: style.titleFormula,
+          contentStructure: JSON.stringify(style.contentStructure), // 数组转JSON字符串
+          toneDescription: style.toneDescription,
+          weight: style.weight,
           successCount: 0,
           failCount: 0,
         },
@@ -232,7 +237,17 @@ export async function updateStylePerformance(
 }
 
 // 📝 构建风格提示词
-export function buildStylePrompt(style: WritingStyle): string {
+export function buildStylePrompt(style: any): string {
+  // 处理数据库返回的 JSON 字符串
+  let contentStructure: string[];
+  try {
+    contentStructure = typeof style.contentStructure === 'string' 
+      ? JSON.parse(style.contentStructure)
+      : style.contentStructure;
+  } catch {
+    contentStructure = ['introduction', 'main_content', 'conclusion']; // 默认结构
+  }
+  
   return `
 [WRITING STYLE GUIDE - FOLLOW STRICTLY]:
 Style Name: ${style.name}
@@ -245,7 +260,7 @@ Example Titles:
 - "Hertz vs Enterprise: Which Corporate Code Wins?"
 
 Content Structure (Follow this order):
-${style.contentStructure.map((section, i) => `${i + 1}. ${section}`).join('\n')}
+${contentStructure.map((section: string, i: number) => `${i + 1}. ${section}`).join('\n')}
 
 Tone & Voice: ${style.toneDescription}
 
