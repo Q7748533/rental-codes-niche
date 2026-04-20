@@ -45,10 +45,50 @@ CREATE TABLE IF NOT EXISTS "AiQuery" (
     "seoTitle" TEXT NOT NULL,
     "seoContent" TEXT NOT NULL,
     "viewCount" INTEGER NOT NULL DEFAULT 0,
+    "ga4PageViews" INTEGER NOT NULL DEFAULT 0,
+    "ga4BounceRate" REAL,
+    "ga4AvgDuration" INTEGER,
+    "lastAnalyzed" DATETIME,
+    "isHighPerformer" BOOLEAN NOT NULL DEFAULT 0,
+    "searchQueryId" TEXT,
+    "writingStyleId" TEXT,
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY ("searchQueryId") REFERENCES "SearchQuery"("id") ON DELETE SET NULL ON UPDATE CASCADE
+);
+CREATE UNIQUE INDEX IF NOT EXISTS "AiQuery_slug_key" ON "AiQuery"("slug");
+
+-- SearchQuery 表（用于 AI 自学习）
+CREATE TABLE IF NOT EXISTS "SearchQuery" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "query" TEXT NOT NULL,
+    "weight" REAL NOT NULL DEFAULT 1.0,
+    "successCount" INTEGER NOT NULL DEFAULT 0,
+    "failCount" INTEGER NOT NULL DEFAULT 0,
+    "totalTraffic" INTEGER NOT NULL DEFAULT 0,
+    "avgBounceRate" REAL,
+    "lastUsed" DATETIME,
+    "isActive" BOOLEAN NOT NULL DEFAULT 1,
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
-CREATE UNIQUE INDEX IF NOT EXISTS "AiQuery_slug_key" ON "AiQuery"("slug");
+CREATE UNIQUE INDEX IF NOT EXISTS "SearchQuery_query_key" ON "SearchQuery"("query");
+
+-- WritingStyle 表（用于 AI 写作风格学习）
+CREATE TABLE IF NOT EXISTS "WritingStyle" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "name" TEXT NOT NULL,
+    "sceneType" TEXT NOT NULL,
+    "titleFormula" TEXT NOT NULL,
+    "contentStructure" TEXT NOT NULL,
+    "toneDescription" TEXT NOT NULL,
+    "weight" REAL NOT NULL DEFAULT 1.0,
+    "successCount" INTEGER NOT NULL DEFAULT 0,
+    "failCount" INTEGER NOT NULL DEFAULT 0,
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS "WritingStyle_sceneType_idx" ON "WritingStyle"("sceneType");
 
 CREATE TABLE IF NOT EXISTS "PublicDeal" (
     "id" TEXT NOT NULL PRIMARY KEY,
