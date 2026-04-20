@@ -9,9 +9,9 @@ const openai = new OpenAI({
 // 学习配置
 const LEARNING_CONFIG = {
   // 成功阈值：7天内超过这个浏览量算成功（低流量网站调低）
-  SUCCESS_THRESHOLD: 5,
+  SUCCESS_THRESHOLD: 3,
   // 高表现阈值：超过这个算高表现文章（低流量网站调低）
-  HIGH_PERFORMER_THRESHOLD: 10,
+  HIGH_PERFORMER_THRESHOLD: 5,
   // 权重调整系数
   SUCCESS_WEIGHT_MULTIPLIER: 1.1,
   FAILURE_WEIGHT_MULTIPLIER: 0.95,
