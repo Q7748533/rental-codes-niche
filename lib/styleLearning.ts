@@ -1,16 +1,18 @@
 import { prisma } from './db';
 
-// 🎨 写作风格定义
+// 🎨 写作风格定义（数据库返回类型）
 interface WritingStyle {
   id: string;
   name: string;
-  sceneType: SceneType;
+  sceneType: string; // 数据库返回 string
   titleFormula: string;
-  contentStructure: string[];
+  contentStructure: string; // 数据库返回 JSON 字符串
   toneDescription: string;
   weight: number;
   successCount: number;
   failCount: number;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 // 🎯 场景类型
@@ -147,7 +149,7 @@ export function detectSceneType(query: string): SceneType {
 }
 
 // 🎲 加权随机选择风格
-export function selectStyleByWeight(styles: WritingStyle[]): WritingStyle {
+export function selectStyleByWeight(styles: any[]): any {
   const totalWeight = styles.reduce((sum, s) => sum + s.weight, 0);
   let random = Math.random() * totalWeight;
   
