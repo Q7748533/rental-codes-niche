@@ -34,8 +34,15 @@ const SCENE_KEYWORDS: Record<SceneType, string[]> = {
   brand_loyal: ['hertz vs', 'avis vs', 'enterprise vs', 'better than', 'compare'],
 };
 
-// 默认风格库
-const DEFAULT_STYLES: Omit<WritingStyle, 'id' | 'successCount' | 'failCount'>[] = [
+// 默认风格库（创建数据用，contentStructure 是数组）
+const DEFAULT_STYLES: {
+  name: string;
+  sceneType: SceneType;
+  titleFormula: string;
+  contentStructure: string[];
+  toneDescription: string;
+  weight: number;
+}[] = [
   // 价格敏感 - 直接型
   {
     name: 'price_direct',
