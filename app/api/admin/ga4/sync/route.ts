@@ -26,14 +26,18 @@ export async function POST() {
 
     let updatedCount = 0;
     let errorCount = 0;
+    let skippedCount = 0;
     const results: any[] = [];
 
     // 更新每篇文章的数据
     for (const item of analytics) {
       try {
         // 从路径提取 slug: /ask/slug.html -> slug
-        const match = item.pagePath.match(/\/ask\/(.+?)\.html$/);
-        if (!match) continue;
+        const match = item.pagePath.match(/\/ask\/(.+)$/);
+        if (!match) {
+          skippedCount++;
+          continue;
+        }
 
         const slug = match[1];
         
@@ -52,6 +56,9 @@ export async function POST() {
             bounceRate: item.bounceRate,
             isHighPerformer: updated.isHighPerformer,
           });
+        } else {
+          console.log(`⚠️ [Admin GA4 Sync] 文章不存在: ${slug}`);
+          skippedCount++;
         }
       } catch (err) {
         console.error(`❌ [Admin GA4 Sync] 更新失败: ${item.pagePath}`, err);
@@ -69,6 +76,7 @@ export async function POST() {
       success: true,
       message: `Synced ${updatedCount} articles`,
       errors: errorCount,
+      skipped: skippedCount,
       total: analytics.length,
       updated: results,
       highPerformers: highPerformers.map(h => ({
