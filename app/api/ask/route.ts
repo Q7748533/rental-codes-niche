@@ -317,7 +317,8 @@ ${validInternalLinks}
         seoContent: finalHtmlContent,
         seoTitle: draftData.seoTitle || `${query} - Car Rental Guide`,
         searchQueryId: searchQuery.id, // 关联搜索词
-        writingStyleId: selectedStyle.id, // 关联写作风格（用于学习）
+        // TODO: 等 Turso 数据库更新后恢复
+        // writingStyleId: selectedStyle.id, // 关联写作风格（用于学习）
       }
     });
 

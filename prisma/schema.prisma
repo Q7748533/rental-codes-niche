@@ -62,9 +62,10 @@ model AiQuery {
   // 关联搜索词
   searchQueryId     String?
   searchQuery       SearchQuery? @relation(fields: [searchQueryId], references: [id])
+  // TODO: 等 Turso 数据库更新后恢复
   // 关联写作风格（用于学习）
-  writingStyleId    String?
-  writingStyle      WritingStyle? @relation(fields: [writingStyleId], references: [id])
+  // writingStyleId    String?
+  // writingStyle      WritingStyle? @relation(fields: [writingStyleId], references: [id])
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @default(now()) @updatedAt
 }
@@ -144,8 +145,9 @@ model WritingStyle {
   failCount       Int      @default(0) // 失败次数
   createdAt       DateTime @default(now())
   updatedAt       DateTime @default(now()) @updatedAt
+  // TODO: 等 Turso 数据库更新后恢复
   // 关联生成的文章
-  articles        AiQuery[]
+  // articles        AiQuery[]
   
   @@index([sceneType])
 }
