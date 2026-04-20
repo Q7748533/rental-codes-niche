@@ -5,6 +5,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { generateUniqueSlug } from '@/lib/slugify';
 import { upsertSearchQuery } from '@/lib/learning';
+import { getStyleForQuery, buildStylePrompt } from '@/lib/styleLearning';
 import OpenAI from 'openai';
 import { revalidatePath } from 'next/cache';
 
@@ -123,11 +124,21 @@ export async function POST(req: Request) {
     }
 
     // ==========================================
+    // 🎨 PHASE 0: Smart Style Selection (GA4 Learning Integration)
+    // ==========================================
+    console.log("🎨 [Style Selector] Analyzing query scene type...");
+    const selectedStyle = await getStyleForQuery(query);
+    const stylePrompt = buildStylePrompt(selectedStyle);
+    console.log(`✅ Selected style: ${selectedStyle.name} (weight: ${selectedStyle.weight.toFixed(2)})`);
+
+    // ==========================================
     // 🚀 PHASE 1: Writer Agent (Agent A - Writer / Gemini)
     // ==========================================
     const writerPrompt = `
 You are a seasoned US travel expert and car rental strategist.
 Your task is to write a high-conversion, firsthand experience guide based on the provided [Real Database Codes].
+
+${stylePrompt}
 
 [REAL CODE DATA - DO NOT FABRICATE]:
 ${realCodesContext}
@@ -306,6 +317,7 @@ ${validInternalLinks}
         seoContent: finalHtmlContent,
         seoTitle: draftData.seoTitle || `${query} - Car Rental Guide`,
         searchQueryId: searchQuery.id, // 关联搜索词
+        writingStyleId: selectedStyle.id, // 关联写作风格（用于学习）
       }
     });
 

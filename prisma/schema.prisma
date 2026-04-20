@@ -62,6 +62,9 @@ model AiQuery {
   // 关联搜索词
   searchQueryId     String?
   searchQuery       SearchQuery? @relation(fields: [searchQueryId], references: [id])
+  // 关联写作风格（用于学习）
+  writingStyleId    String?
+  writingStyle      WritingStyle? @relation(fields: [writingStyleId], references: [id])
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @default(now()) @updatedAt
 }
@@ -126,4 +129,23 @@ model MetaTag {
   updatedAt   DateTime @default(now()) @updatedAt
   
   @@unique([name]) // 每个 name 只能有一个
+}
+
+// AI 写作风格（用于场景化学习）
+model WritingStyle {
+  id              String   @id @default(cuid())
+  name            String   // 风格名称
+  sceneType       String   // 场景类型: price_sensitive, location_specific, etc.
+  titleFormula    String   // 标题公式
+  contentStructure String  // 内容结构（JSON 数组）
+  toneDescription String   // 语气描述
+  weight          Float    @default(1.0) // 权重（用于选择）
+  successCount    Int      @default(0) // 成功次数
+  failCount       Int      @default(0) // 失败次数
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @default(now()) @updatedAt
+  // 关联生成的文章
+  articles        AiQuery[]
+  
+  @@index([sceneType])
 }
