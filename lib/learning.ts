@@ -267,7 +267,7 @@ Return JSON format:
 `;
 
     const completion = await openai.chat.completions.create({
-      model: "gemini-2.0-flash",
+      model: "gemini-3.1-pro-preview",
       messages: [{ role: "user", content: prompt }],
       temperature: 0.7,
       max_tokens: 2000,
