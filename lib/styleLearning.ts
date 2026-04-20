@@ -277,4 +277,4 @@ CRITICAL: Use this structure but INVENT fresh content. Do NOT copy phrases from 
 `;
 }
 
-export { SceneType, WritingStyle };
+export type { SceneType, WritingStyle };
