@@ -4,6 +4,7 @@ export const maxDuration = 300; // 🚀 防止 Vercel 10秒超时强杀后台进
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { generateUniqueSlug } from '@/lib/slugify';
+import { upsertSearchQuery } from '@/lib/learning';
 import OpenAI from 'openai';
 import { revalidatePath } from 'next/cache';
 
@@ -293,6 +294,9 @@ ${validInternalLinks}
     const cleanTitleForSlug = rawTitleForSlug.replace(/\b202[0-9]\b/g, '').replace(/\s+/g, ' ').trim();
     const finalSlug = await generateUniqueSlug(prisma, cleanTitleForSlug, 60);
 
+    // 🚀 创建或获取搜索词记录
+    const searchQuery = await upsertSearchQuery(query);
+
     // 🚀 直接保存最终文章，不再创建 pending 占位
     const savedQuery = await prisma.aiQuery.create({
       data: {
@@ -301,6 +305,7 @@ ${validInternalLinks}
         aiSummary: draftData.summary || 'Here is what I found for you.',
         seoContent: finalHtmlContent,
         seoTitle: draftData.seoTitle || `${query} - Car Rental Guide`,
+        searchQueryId: searchQuery.id, // 关联搜索词
       }
     });
 
