@@ -1,34 +1,562 @@
 [
   {
-    "brand": "Budget",
-    "company": "my Better Benefits",
-    "codeValue": "B002500",
-    "description": "Save up to 35% with Pay Now plus additional 10% on weekly rentals and promotional rates.",
+    "brand": "ACE Rent A Car",
+    "company": "General Public",
+    "codeValue": "AWESOME24",
+    "description": "10% off all rates",
+    "codeType": "leisure",
+    "source": "Public"
+  },
+  {
+    "brand": "Avis",
+    "company": "General Public",
+    "codeValue": "MUWA014",
+    "description": "Take $50 off when you spend $600 on your car rental of 28+ days",
+    "codeType": "leisure",
+    "source": "Public"
+  },
+  {
+    "brand": "Avis",
+    "company": "General Public",
+    "codeValue": "A425857",
+    "description": "Take $50 off when you spend $600 on your car rental of 28+ days / Rent an SUV for as low as $65/day",
+    "codeType": "leisure",
+    "source": "Public"
+  },
+  {
+    "brand": "Avis",
+    "company": "General Public",
+    "codeValue": "MUXA003",
+    "description": "Take $15 off when you spend $175 or more on a minimum of 3 day rental",
+    "codeType": "leisure",
+    "source": "Public"
+  },
+  {
+    "brand": "Avis",
+    "company": "General Public",
+    "codeValue": "A519319",
+    "description": "Up to 30% off pay now rates and up to 25% off pay later rates",
+    "codeType": "leisure",
+    "source": "Public"
+  },
+  {
+    "brand": "Avis",
+    "company": "General Public",
+    "codeValue": "J046300",
+    "description": "10% off car rentals in Laos",
+    "codeType": "leisure",
+    "source": "Public"
+  },
+  {
+    "brand": "Avis",
+    "company": "General Public",
+    "codeValue": "A519300",
+    "description": "Get 25% off base rates",
+    "codeType": "leisure",
+    "source": "Public"
+  },
+  {
+    "brand": "Avis",
+    "company": "Make a Wish",
+    "codeValue": "H749900",
+    "description": "Up to 35% off base rates with 20% donated to Make a Wish®",
+    "codeType": "leisure",
+    "source": "Association"
+  },
+  {
+    "brand": "Avis",
+    "company": "Susan G. Komen",
+    "codeValue": "A349300",
+    "description": "Up to 25% off base rates with 5% donated to Susan G. Komen®",
+    "codeType": "leisure",
+    "source": "Association"
+  },
+  {
+    "brand": "Avis",
+    "company": "USAA",
+    "codeValue": "A177204",
+    "description": "5% off for USAA members",
     "codeType": "leisure",
     "source": "Member"
   },
   {
-    "brand": "Budget",
-    "company": "my Better Benefits",
-    "codeValue": "MUWZ057",
-    "description": "SUV Rentals Starting at $59/Day - Limited Time Offer through June 7, 2026.",
+    "brand": "Avis",
+    "company": "General Public",
+    "codeValue": "K348200",
+    "description": "Save 10% on rentals in your city, town or neighborhood",
+    "codeType": "leisure",
+    "source": "Public"
+  },
+  {
+    "brand": "Avis",
+    "company": "Amazon",
+    "codeValue": "F539600",
+    "description": "Save up to 30% off and 10% back in Amazon.com gift cards for rentals in Mexico",
     "codeType": "leisure",
     "source": "Member"
   },
   {
+    "brand": "Avis",
+    "company": "Southwest RapidRewards",
+    "codeValue": "K024700",
+    "description": "Southwest RapidRewards Members save up to 30%",
+    "codeType": "leisure",
+    "source": "Member"
+  },
+  {
+    "brand": "Avis",
+    "company": "JetBlue",
+    "codeValue": "H798518",
+    "description": "JetBlue customers get up to 30% off",
+    "codeType": "leisure",
+    "source": "Member"
+  },
+  {
+    "brand": "Avis",
+    "company": "General Public",
+    "codeValue": "D499000",
+    "description": "Save up to 30%",
+    "codeType": "leisure",
+    "source": "Public"
+  },
+  {
+    "brand": "Avis",
+    "company": "General Public",
+    "codeValue": "MUWA146",
+    "description": "Save $10 on a rental of $100 or more",
+    "codeType": "leisure",
+    "source": "Public"
+  },
+  {
+    "brand": "Avis",
+    "company": "General Public",
+    "codeValue": "MUWA147",
+    "description": "Save $15 on a rental of $125 or more",
+    "codeType": "leisure",
+    "source": "Public"
+  },
+  {
+    "brand": "Avis",
+    "company": "General Public",
+    "codeValue": "MUWA024",
+    "description": "Save $25 on a rental of $175 or more",
+    "codeType": "leisure",
+    "source": "Public"
+  },
+  {
+    "brand": "Avis",
+    "company": "General Public",
+    "codeValue": "MPDA001",
+    "description": "Save $20 on a 3+ day rental in Australia",
+    "codeType": "leisure",
+    "source": "Public"
+  },
+  {
+    "brand": "Avis",
+    "company": "General Public",
+    "codeValue": "MUWA001",
+    "description": "Get $15 off base rate of $175 and up",
+    "codeType": "leisure",
+    "source": "Public"
+  },
+  {
+    "brand": "Avis",
+    "company": "US and Canada residents",
+    "codeValue": "D490000",
+    "description": "30% off base rates",
+    "codeType": "leisure",
+    "source": "Public"
+  },
+  {
+    "brand": "Avis",
+    "company": "General Public",
+    "codeValue": "MUWA003",
+    "description": "Rent an SUV for as low as $65/day at participating Avis airport locations",
+    "codeType": "leisure",
+    "source": "Public"
+  },
+  {
     "brand": "Budget",
-    "company": "my Better Benefits",
+    "company": "General Public",
+    "codeValue": "D822119",
+    "description": "Save up to 35% off Budget pay now rates and up to 25% off pay later rates",
+    "codeType": "leisure",
+    "source": "Public"
+  },
+  {
+    "brand": "Budget",
+    "company": "General Public",
+    "codeValue": "UUWZ042",
+    "description": "Book an intermediate, standard, or full-size car and pick up an upgraded vehicle",
+    "codeType": "leisure",
+    "source": "Public"
+  },
+  {
+    "brand": "Budget",
+    "company": "General Public",
+    "codeValue": "MUWZ952",
+    "description": "Get $10 off your base rate when you spend $100 or more",
+    "codeType": "leisure",
+    "source": "Public"
+  },
+  {
+    "brand": "Budget",
+    "company": "General Public",
+    "codeValue": "MUWZ759",
+    "description": "Get $25 off your base rate when you spend $175 or more",
+    "codeType": "leisure",
+    "source": "Public"
+  },
+  {
+    "brand": "Budget",
+    "company": "General Public",
+    "codeValue": "B121000",
+    "description": "One-Way Base rates as low as $49.99 per day",
+    "codeType": "leisure",
+    "source": "Public"
+  },
+  {
+    "brand": "Budget",
+    "company": "General Public",
+    "codeValue": "D726100",
+    "description": "Rent an SUV for as low as $37",
+    "codeType": "leisure",
+    "source": "Public"
+  },
+  {
+    "brand": "Budget",
+    "company": "General Public",
+    "codeValue": "MUWZ224",
+    "description": "Coupon to rent an SUV for as low as $37",
+    "codeType": "leisure",
+    "source": "Public"
+  },
+  {
+    "brand": "Budget",
+    "company": "General Public",
     "codeValue": "UUGZ039",
-    "description": "Free upgrade through December 31, 2026 (requires BCD B002500).",
+    "description": "Save up to 10% on already low rates",
+    "codeType": "leisure",
+    "source": "Public"
+  },
+  {
+    "brand": "Budget",
+    "company": "General Public",
+    "codeValue": "B129500",
+    "description": "Save up to 10% on the base rate of your 28+ day rental",
+    "codeType": "leisure",
+    "source": "Public"
+  },
+  {
+    "brand": "Budget",
+    "company": "Susan G Komen",
+    "codeValue": "R899700",
+    "description": "Save up to 25% on your car rental base rate and 5% donated to Susan G Komen®",
+    "codeType": "leisure",
+    "source": "Association"
+  },
+  {
+    "brand": "Budget",
+    "company": "General Public",
+    "codeValue": "UUWA036",
+    "description": "Get a free upgrade + up to 25% off base rates",
+    "codeType": "leisure",
+    "source": "Public"
+  },
+  {
+    "brand": "Budget",
+    "company": "General Public",
+    "codeValue": "A740300",
+    "description": "Get a free upgrade + up to 25% off base rates",
+    "codeType": "leisure",
+    "source": "Public"
+  },
+  {
+    "brand": "Dollar",
+    "company": "AAA",
+    "codeValue": "3000084",
+    "description": "10% off (AAA, West and Central NY)",
     "codeType": "leisure",
     "source": "Member"
   },
   {
-    "brand": "Budget",
-    "company": "my Better Benefits",
-    "codeValue": "MUGZ036",
-    "description": "$10 off base rates when you spend $175 or more with a minimum three consecutive day rental.",
+    "brand": "Dollar",
+    "company": "Union Plus",
+    "codeValue": "3042236",
+    "description": "5% off (Union Plus)",
     "codeType": "leisure",
     "source": "Member"
+  },
+  {
+    "brand": "Dollar",
+    "company": "Corporate Shopping Channel",
+    "codeValue": "3063953",
+    "description": "5% off (Corporate Shopping Channel)",
+    "codeType": "leisure",
+    "source": "Member"
+  },
+  {
+    "brand": "Dollar",
+    "company": "AICPA",
+    "codeValue": "3041065",
+    "description": "7% off (AICPA)",
+    "codeType": "business",
+    "source": "Association"
+  },
+  {
+    "brand": "Hertz",
+    "company": "AAA",
+    "codeValue": "240",
+    "description": "20% off base rates at the airport and local edition locations",
+    "codeType": "leisure",
+    "source": "Member"
+  },
+  {
+    "brand": "Hertz",
+    "company": "CAA",
+    "codeValue": "282",
+    "description": "20% off base rates at the airport and local edition locations",
+    "codeType": "leisure",
+    "source": "Member"
+  },
+  {
+    "brand": "Hertz",
+    "company": "RentalPerks.com",
+    "codeValue": "1742729",
+    "description": "25% off base rates",
+    "codeType": "leisure",
+    "source": "Member"
+  },
+  {
+    "brand": "Hertz",
+    "company": "RBC",
+    "codeValue": "2240691",
+    "description": "20% off base rate for eligible RBC credit cards",
+    "codeType": "leisure",
+    "source": "Member"
+  },
+  {
+    "brand": "Dollar",
+    "company": "Pvtistes Canada",
+    "codeValue": "3063724",
+    "description": "70% off, Unlimited mileage, additional driver",
+    "codeType": "business",
+    "source": "Employee"
+  },
+  {
+    "brand": "Dollar",
+    "company": "Unknown Corporate",
+    "codeValue": "100182",
+    "description": "7% off, Unlimited mileage",
+    "codeType": "business",
+    "source": "Employee"
+  },
+  {
+    "brand": "Dollar",
+    "company": "Schluchin/Chabad",
+    "codeValue": "3028721",
+    "description": "6% off, Unlimited mileage, additional driver",
+    "codeType": "business",
+    "source": "Employee"
+  },
+  {
+    "brand": "Dollar",
+    "company": "NSA BPA Apparel Company",
+    "codeValue": "3021063",
+    "description": "6% off, Unlimited mileage, additional driver",
+    "codeType": "business",
+    "source": "Employee"
+  },
+  {
+    "brand": "Dollar",
+    "company": "Colorado Titans",
+    "codeValue": "3027724",
+    "description": "6% off, Unlimited mileage, additional driver",
+    "codeType": "business",
+    "source": "Employee"
+  },
+  {
+    "brand": "Dollar",
+    "company": "US Government",
+    "codeValue": "3031396",
+    "description": "5% off (US Government Leisure), Unlimited mileage",
+    "codeType": "leisure",
+    "source": "Employee"
+  },
+  {
+    "brand": "Dollar",
+    "company": "Sun Kiss Villas",
+    "codeValue": "3030646",
+    "description": "5% off, Unlimited mileage",
+    "codeType": "business",
+    "source": "Employee"
+  },
+  {
+    "brand": "Dollar",
+    "company": "E&I Cooperative Services",
+    "codeValue": "3046847",
+    "description": "5% off, Unlimited mileage",
+    "codeType": "business",
+    "source": "Employee"
+  },
+  {
+    "brand": "Dollar",
+    "company": "Department of Defense",
+    "codeValue": "3024650",
+    "description": "5% off, Unlimited mileage",
+    "codeType": "business",
+    "source": "Employee"
+  },
+  {
+    "brand": "Dollar",
+    "company": "Dave Ramsey",
+    "codeValue": "100172",
+    "description": "5% off, Unlimited mileage",
+    "codeType": "business",
+    "source": "Employee"
+  },
+  {
+    "brand": "Dollar",
+    "company": "Military and government",
+    "codeValue": "100371",
+    "description": "29% off, Unlimited mileage, one class upgrade",
+    "codeType": "business",
+    "source": "Employee"
+  },
+  {
+    "brand": "Europcar",
+    "company": "Accor",
+    "codeValue": "45450563",
+    "description": "20% off, Unlimited mileage",
+    "codeType": "business",
+    "source": "Employee"
+  },
+  {
+    "brand": "Europcar",
+    "company": "Carte Ibis",
+    "codeValue": "40509211",
+    "description": "20% off, Unlimited mileage",
+    "codeType": "business",
+    "source": "Employee"
+  },
+  {
+    "brand": "Europcar",
+    "company": "Sofitel",
+    "codeValue": "43986181",
+    "description": "20% off, Unlimited mileage",
+    "codeType": "business",
+    "source": "Employee"
+  },
+  {
+    "brand": "Europcar",
+    "company": "Sofitel",
+    "codeValue": "45539121",
+    "description": "20% off, Unlimited mileage",
+    "codeType": "business",
+    "source": "Employee"
+  },
+  {
+    "brand": "Europcar",
+    "company": "Sofitel",
+    "codeValue": "45539116",
+    "description": "20% off, Unlimited mileage",
+    "codeType": "business",
+    "source": "Employee"
+  },
+  {
+    "brand": "Hertz",
+    "company": "Car & Driver",
+    "codeValue": "1757580",
+    "description": "16% off, Unlimited mileage",
+    "codeType": "business",
+    "source": "Employee"
+  },
+  {
+    "brand": "Hertz",
+    "company": "Maple Infotek",
+    "codeValue": "1955226",
+    "description": "20% off, Unlimited mileage",
+    "codeType": "business",
+    "source": "Employee"
+  },
+  {
+    "brand": "Hertz",
+    "company": "Woodforest",
+    "codeValue": "2006142",
+    "description": "7% off, Unlimited mileage",
+    "codeType": "business",
+    "source": "Employee"
+  },
+  {
+    "brand": "Hertz",
+    "company": "IBM",
+    "codeValue": "40000",
+    "description": "41% off, Unlimited mileage (Does not work but for reference)",
+    "codeType": "business",
+    "source": "Employee"
+  },
+  {
+    "brand": "Hertz",
+    "company": "IBM",
+    "codeValue": "1859849",
+    "description": "64% off, Unlimited mileage",
+    "codeType": "business",
+    "source": "Employee"
+  },
+  {
+    "brand": "Hertz",
+    "company": "AT&T",
+    "codeValue": "1851913",
+    "description": "43% off, Unlimited mileage and Loss Damage Waiver",
+    "codeType": "business",
+    "source": "Employee"
+  },
+  {
+    "brand": "Hertz",
+    "company": "Desjardins",
+    "codeValue": "1629632",
+    "description": "37% off (Desjardins Prestige credit card), Unlimited mileage",
+    "codeType": "leisure",
+    "source": "Member"
+  },
+  {
+    "brand": "Hertz",
+    "company": "Mastercard",
+    "codeValue": "795092",
+    "description": "15% off (Mastercard SMB), Unlimited mileage",
+    "codeType": "business",
+    "source": "Employee"
+  },
+  {
+    "brand": "Hertz",
+    "company": "Perkopolis",
+    "codeValue": "2008225",
+    "description": "20% off, Book 5+ days and get 1 FREE day",
+    "codeType": "leisure",
+    "source": "Member"
+  },
+  {
+    "brand": "Thrifty",
+    "company": "AAA Southern New England",
+    "codeValue": "3300240",
+    "description": "8% off, Unlimited mileage",
+    "codeType": "leisure",
+    "source": "Member"
+  },
+  {
+    "brand": "Thrifty",
+    "company": "Perkopolis",
+    "codeValue": "2293754",
+    "description": "2.9% off, Unlimited mileage",
+    "codeType": "leisure",
+    "source": "Member"
+  },
+  {
+    "brand": "Thrifty",
+    "company": "Sirsidynix",
+    "codeValue": "3023636",
+    "description": "55% off, Unlimited mileage",
+    "codeType": "business",
+    "source": "Employee"
   }
 ]

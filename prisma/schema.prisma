@@ -46,15 +46,40 @@ model Code {
 }
 
 model AiQuery {
-  id          String   @id @default(cuid())
-  slug        String   @unique 
-  userPrompt  String   
-  aiSummary   String   
-  seoTitle    String   
-  seoContent  String   
-  viewCount   Int      @default(0)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @default(now()) @updatedAt
+  id                String    @id @default(cuid())
+  slug              String    @unique
+  userPrompt        String
+  aiSummary         String
+  seoTitle          String
+  seoContent        String
+  viewCount         Int       @default(0)
+  // GA4 数据字段
+  ga4PageViews      Int       @default(0)
+  ga4BounceRate     Float?
+  ga4AvgDuration    Int?      // 平均停留时间（秒）
+  lastAnalyzed      DateTime?
+  isHighPerformer   Boolean   @default(false)
+  // 关联搜索词
+  searchQueryId     String?
+  searchQuery       SearchQuery? @relation(fields: [searchQueryId], references: [id])
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @default(now()) @updatedAt
+}
+
+// 搜索词权重表（用于 AI 自学习）
+model SearchQuery {
+  id              String    @id @default(cuid())
+  query           String    @unique // 搜索词
+  weight          Float     @default(1.0) // 权重
+  successCount    Int       @default(0) // 成功次数
+  failCount       Int       @default(0) // 失败次数
+  totalTraffic    Int       @default(0) // 总流量
+  avgBounceRate   Float?    // 平均跳出率
+  lastUsed        DateTime? // 最后使用时间
+  articles        AiQuery[] // 关联的文章
+  isActive        Boolean   @default(true) // 是否启用
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @default(now()) @updatedAt
 }
 
 model PublicDeal {

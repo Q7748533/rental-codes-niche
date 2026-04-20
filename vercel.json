@@ -12,6 +12,12 @@
       "maxDuration": 60
     }
   },
+  "crons": [
+    {
+      "path": "/api/cron/sync-ga4",
+      "schedule": "0 2 * * *"
+    }
+  ],
   "headers": [
     {
       "source": "/(.*)",
