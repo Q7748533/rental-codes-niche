@@ -216,8 +216,10 @@ export default async function Home() {
       {
         '@type': 'ItemList',
         '@id': 'https://carcorporatecodes.com/#brands-list',
+        name: 'Car Rental Brands with Corporate Codes',
         itemListElement: safeBrands.map((brand, index) => ({
           '@type': 'ListItem',
+          '@id': `https://carcorporatecodes.com/${brand.slug}#listitem`,
           position: index + 1,
           name: `${brand.name} Corporate Codes`,
           url: `https://carcorporatecodes.com/${brand.slug}`,
@@ -278,6 +280,7 @@ export default async function Home() {
         name: 'Latest Car Rental Corporate Code Guides',
         itemListElement: latestArticles.map((article, index) => ({
           '@type': 'ListItem',
+          '@id': `https://carcorporatecodes.com/ask/${article.slug}#listitem`,
           position: index + 1,
           name: article.seoTitle,
           url: `https://carcorporatecodes.com/ask/${article.slug}`,
