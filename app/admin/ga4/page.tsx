@@ -23,6 +23,30 @@ interface SearchQuery {
   isActive: boolean;
 }
 
+interface LearnResult {
+  patterns: {
+    titlePatterns: {
+      hasYear: number;
+      hasVerified: number;
+      hasBrand: number;
+      hasLocation: number;
+      avgLength: number;
+    };
+    queryPatterns: {
+      commonWords: string[];
+      avgLength: number;
+    };
+    performance: {
+      avgPageViews: number;
+      avgBounceRate: number;
+      avgDuration: number;
+    };
+  } | null;
+  suggestions: string[];
+  highPerformerCount: number;
+  message?: string;
+}
+
 interface Stats {
   overview: {
     totalArticles: number;
@@ -43,12 +67,15 @@ interface Stats {
 
 export default function GA4Dashboard() {
   const [stats, setStats] = useState<Stats | null>(null);
+  const [learnResult, setLearnResult] = useState<LearnResult | null>(null);
   const [loading, setLoading] = useState(true);
+  const [learning, setLearning] = useState(false);
   const [syncing, setSyncing] = useState(false);
   const [message, setMessage] = useState('');
 
   useEffect(() => {
     fetchStats();
+    fetchLearnResult();
   }, []);
 
   const fetchStats = async () => {
@@ -65,6 +92,26 @@ export default function GA4Dashboard() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const fetchLearnResult = async () => {
+    try {
+      const res = await fetch('/api/admin/ga4/learn');
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success) {
+          setLearnResult(data);
+        }
+      }
+    } catch (error) {
+      console.error('Failed to fetch learn result:', error);
+    }
+  };
+
+  const handleLearn = async () => {
+    setLearning(true);
+    await fetchLearnResult();
+    setLearning(false);
   };
 
   const handleSync = async () => {
@@ -285,6 +332,105 @@ export default function GA4Dashboard() {
               </div>
             </div>
           )}
+
+          {/* 🧠 模式学习 */}
+          <div className="mt-8 bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl shadow-sm border border-purple-200 overflow-hidden">
+            <div className="px-6 py-4 border-b border-purple-200 flex justify-between items-center">
+              <div>
+                <h2 className="text-xl font-semibold text-purple-900">🧠 AI 模式学习</h2>
+                <p className="text-sm text-purple-600 mt-1">分析高表现文章，生成推荐搜索词</p>
+              </div>
+              <button
+                onClick={handleLearn}
+                disabled={learning}
+                className="bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded-lg transition-colors disabled:opacity-50 flex items-center gap-2"
+              >
+                {learning ? (
+                  <>
+                    <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+                    </svg>
+                    学习中...
+                  </>
+                ) : (
+                  <>
+                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                    开始分析
+                  </>
+                )}
+              </button>
+            </div>
+
+            {learnResult && (
+              <div className="p-6">
+                {learnResult.message ? (
+                  <div className="text-center text-purple-600 py-8">{learnResult.message}</div>
+                ) : (
+                  <>
+                    {/* 学习到的模式 */}
+                    {learnResult.patterns && (
+                      <div className="mb-6">
+                        <h3 className="text-lg font-semibold text-purple-900 mb-4">📊 成功模式分析</h3>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                          <div className="bg-white rounded-lg p-3 text-center">
+                            <p className="text-2xl font-bold text-purple-600">{learnResult.patterns.titlePatterns.hasYear}</p>
+                            <p className="text-xs text-gray-600">含年份标题</p>
+                          </div>
+                          <div className="bg-white rounded-lg p-3 text-center">
+                            <p className="text-2xl font-bold text-purple-600">{learnResult.patterns.titlePatterns.hasVerified}</p>
+                            <p className="text-xs text-gray-600">含Verified/Active</p>
+                          </div>
+                          <div className="bg-white rounded-lg p-3 text-center">
+                            <p className="text-2xl font-bold text-purple-600">{learnResult.patterns.titlePatterns.hasBrand}</p>
+                            <p className="text-xs text-gray-600">含品牌名</p>
+                          </div>
+                          <div className="bg-white rounded-lg p-3 text-center">
+                            <p className="text-2xl font-bold text-purple-600">{learnResult.patterns.titlePatterns.hasLocation}</p>
+                            <p className="text-xs text-gray-600">含地点</p>
+                          </div>
+                        </div>
+                        <div className="bg-white rounded-lg p-4">
+                          <p className="text-sm text-gray-600 mb-2">常用关键词：</p>
+                          <div className="flex flex-wrap gap-2">
+                            {learnResult.patterns.queryPatterns.commonWords.map((word, i) => (
+                              <span key={i} className="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm">
+                                {word}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* 推荐搜索词 */}
+                    {learnResult.suggestions.length > 0 && (
+                      <div>
+                        <h3 className="text-lg font-semibold text-purple-900 mb-4">💡 推荐生成搜索词</h3>
+                        <div className="bg-white rounded-lg p-4">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                            {learnResult.suggestions.map((suggestion, i) => (
+                              <div key={i} className="flex items-center justify-between bg-gray-50 rounded p-2">
+                                <span className="text-sm text-gray-700">{suggestion}</span>
+                                <Link
+                                  href={`/admin/ai-articles?query=${encodeURIComponent(suggestion)}`}
+                                  className="text-xs bg-purple-600 text-white px-2 py-1 rounded hover:bg-purple-700"
+                                >
+                                  生成
+                                </Link>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+            )}
+          </div>
         </>
       )}
     </div>

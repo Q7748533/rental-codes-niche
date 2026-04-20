@@ -2,10 +2,10 @@ import { prisma } from './db';
 
 // 学习配置
 const LEARNING_CONFIG = {
-  // 成功阈值：7天内超过这个浏览量算成功
-  SUCCESS_THRESHOLD: 10,
-  // 高表现阈值：超过这个算高表现文章
-  HIGH_PERFORMER_THRESHOLD: 100,
+  // 成功阈值：7天内超过这个浏览量算成功（低流量网站调低）
+  SUCCESS_THRESHOLD: 5,
+  // 高表现阈值：超过这个算高表现文章（低流量网站调低）
+  HIGH_PERFORMER_THRESHOLD: 10,
   // 权重调整系数
   SUCCESS_WEIGHT_MULTIPLIER: 1.1,
   FAILURE_WEIGHT_MULTIPLIER: 0.95,
@@ -178,6 +178,126 @@ export async function markSearchQueryUsed(queryId: string) {
       lastUsed: new Date(),
     },
   });
+}
+
+// 🧠 模式学习：分析高表现文章特征，生成推荐搜索词
+export async function learnFromHighPerformers() {
+  // 1. 获取高表现文章
+  const highPerformers = await prisma.aiQuery.findMany({
+    where: {
+      isHighPerformer: true,
+    },
+    select: {
+      userPrompt: true,
+      seoTitle: true,
+      aiSummary: true,
+      ga4PageViews: true,
+      ga4BounceRate: true,
+      ga4AvgDuration: true,
+    },
+    orderBy: {
+      ga4PageViews: 'desc',
+    },
+    take: 5,
+  });
+
+  if (highPerformers.length === 0) {
+    return {
+      patterns: null,
+      suggestions: [],
+      message: '暂无高表现文章，无法学习模式',
+    };
+  }
+
+  // 2. 提取特征模式
+  const patterns = extractPatterns(highPerformers);
+
+  // 3. 基于模式生成搜索词建议
+  const suggestions = generateSearchSuggestions(patterns);
+
+  return {
+    patterns,
+    suggestions,
+    highPerformerCount: highPerformers.length,
+  };
+}
+
+// 提取高表现文章的特征模式
+function extractPatterns(articles: any[]) {
+  const patterns = {
+    // 标题特征
+    titlePatterns: {
+      hasYear: articles.filter(a => /\b202[0-9]\b/.test(a.seoTitle)).length,
+      hasVerified: articles.filter(a => /verified|active|best/i.test(a.seoTitle)).length,
+      hasBrand: articles.filter(a => /hertz|avis|enterprise|alamo|national/i.test(a.seoTitle)).length,
+      hasLocation: articles.filter(a => /lax|miami|chicago|california|florida/i.test(a.seoTitle)).length,
+      avgLength: Math.round(articles.reduce((sum, a) => sum + a.seoTitle.length, 0) / articles.length),
+    },
+    // 内容特征
+    contentPatterns: {
+      avgWordCount: articles.map(a => a.aiSummary?.split(' ').length || 0),
+    },
+    // 搜索词特征
+    queryPatterns: {
+      commonWords: extractCommonWords(articles.map(a => a.userPrompt)),
+      avgLength: Math.round(articles.reduce((sum, a) => sum + a.userPrompt.length, 0) / articles.length),
+    },
+    // 表现数据
+    performance: {
+      avgPageViews: Math.round(articles.reduce((sum, a) => sum + a.ga4PageViews, 0) / articles.length),
+      avgBounceRate: articles.filter(a => a.ga4BounceRate).reduce((sum, a) => sum + (a.ga4BounceRate || 0), 0) / articles.filter(a => a.ga4BounceRate).length,
+      avgDuration: Math.round(articles.filter(a => a.ga4AvgDuration).reduce((sum, a) => sum + (a.ga4AvgDuration || 0), 0) / articles.filter(a => a.ga4AvgDuration).length),
+    },
+  };
+
+  return patterns;
+}
+
+// 提取常用词
+function extractCommonWords(queries: string[]): string[] {
+  const words = queries.join(' ').toLowerCase().split(/\s+/);
+  const wordCount: Record<string, number> = {};
+  
+  words.forEach(word => {
+    if (word.length > 3 && !['code', 'rental', 'car', 'with', 'for', 'the', 'and'].includes(word)) {
+      wordCount[word] = (wordCount[word] || 0) + 1;
+    }
+  });
+
+  return Object.entries(wordCount)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5)
+    .map(([word]) => word);
+}
+
+// 基于模式生成搜索词建议
+function generateSearchSuggestions(patterns: any): string[] {
+  const suggestions: string[] = [];
+  const brands = ['Hertz', 'Avis', 'Enterprise', 'Alamo', 'National'];
+  const locations = ['LAX', 'Miami', 'Chicago', 'NYC', 'Orlando', 'Las Vegas'];
+  const scenarios = ['corporate', 'discount', 'promo', 'coupon', 'savings'];
+  
+  // 基于成功模式生成变体
+  brands.forEach(brand => {
+    scenarios.forEach(scenario => {
+      suggestions.push(`${brand} ${scenario} code 2026`);
+      suggestions.push(`best ${brand} ${scenario}`);
+    });
+    
+    locations.forEach(location => {
+      suggestions.push(`${brand} ${location} rental`);
+      suggestions.push(`${brand} ${location} corporate code`);
+    });
+  });
+
+  // 基于常用词扩展
+  patterns.queryPatterns.commonWords.forEach((word: string) => {
+    brands.forEach(brand => {
+      suggestions.push(`${brand} ${word} code`);
+    });
+  });
+
+  return [...new Set(suggestions)].slice(0, 20);
 }
 
 export { LEARNING_CONFIG };
