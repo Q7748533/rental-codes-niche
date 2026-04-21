@@ -50,16 +50,22 @@ export async function updateArticleAnalytics(
     },
   });
 
-  // 如果有关联搜索词，且文章是首次被分析（之前没有ga4数据），才更新搜索词表现
-  // 避免每次GA4同步都重复调整权重
-  if (article.searchQueryId && article.ga4PageViews === 0) {
+  // 更新搜索词表现（如果有关联搜索词）
+  if (article.searchQueryId) {
     const isSuccess = pageViews >= LEARNING_CONFIG.SUCCESS_THRESHOLD;
-    await updateSearchQueryPerformance(
-      article.searchQueryId,
-      pageViews,
-      bounceRate,
-      isSuccess
-    );
+    const wasSuccess = article.ga4PageViews >= LEARNING_CONFIG.SUCCESS_THRESHOLD;
+    
+    // 情况1：首次评估（之前没有数据）
+    // 情况2：从失败变为成功（之前<3，现在≥3）
+    if (article.ga4PageViews === 0 || (!wasSuccess && isSuccess)) {
+      await updateSearchQueryPerformance(
+        article.searchQueryId,
+        pageViews,
+        bounceRate,
+        isSuccess,
+        article.ga4PageViews === 0 // 是否是首次评估
+      );
+    }
   }
 
   return updated;
@@ -70,7 +76,8 @@ async function updateSearchQueryPerformance(
   searchQueryId: string,
   pageViews: number,
   bounceRate: number,
-  isSuccess: boolean
+  isSuccess: boolean,
+  isFirstEvaluation: boolean = true
 ) {
   const searchQuery = await prisma.searchQuery.findUnique({
     where: { id: searchQueryId },
@@ -93,13 +100,27 @@ async function updateSearchQueryPerformance(
     );
   }
 
+  // 计算成功/失败计数变化
+  let successIncrement = 0;
+  let failIncrement = 0;
+  
+  if (isFirstEvaluation) {
+    // 首次评估：直接根据结果计数
+    successIncrement = isSuccess ? 1 : 0;
+    failIncrement = isSuccess ? 0 : 1;
+  } else {
+    // 从失败变为成功：成功+1，失败-1
+    successIncrement = 1;
+    failIncrement = -1;
+  }
+
   // 更新搜索词
   await prisma.searchQuery.update({
     where: { id: searchQueryId },
     data: {
       weight: newWeight,
-      successCount: isSuccess ? { increment: 1 } : searchQuery.successCount,
-      failCount: !isSuccess ? { increment: 1 } : searchQuery.failCount,
+      successCount: { increment: successIncrement },
+      failCount: { increment: failIncrement },
       totalTraffic: { increment: pageViews },
       avgBounceRate: bounceRate,
     },
