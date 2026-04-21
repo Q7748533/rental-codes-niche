@@ -50,13 +50,15 @@ export async function updateArticleAnalytics(
     },
   });
 
-  // 如果有关联搜索词，更新搜索词数据
-  if (article.searchQueryId) {
+  // 如果有关联搜索词，且文章是首次被分析（之前没有ga4数据），才更新搜索词表现
+  // 避免每次GA4同步都重复调整权重
+  if (article.searchQueryId && article.ga4PageViews === 0) {
+    const isSuccess = pageViews >= LEARNING_CONFIG.SUCCESS_THRESHOLD;
     await updateSearchQueryPerformance(
       article.searchQueryId,
       pageViews,
       bounceRate,
-      isHighPerformer
+      isSuccess
     );
   }
 
